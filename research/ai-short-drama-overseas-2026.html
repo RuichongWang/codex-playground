@@ -1,0 +1,982 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="AI 微短剧出海的决策报告：市场盘子、地区选择、三条分发路线、单位经济模型、风险清单与 90 天行动清单。">
+<title>AI 短剧出海调研 · 决策报告</title>
+<style>
+  :root{
+    --ground:#EDEFF3; --surface:#FFFFFF; --surface-2:#F5F6F9;
+    --ink:#141821; --ink-2:#3A4252; --muted:#606A7C; --faint:#8C95A6;
+    --line:#D8DCE4; --line-soft:#E6E9EF;
+    --accent:#C42A55; --accent-soft:#FBEBEF;
+    --go:#127055; --go-soft:#E4F2ED;
+    --stop:#B02A2C; --stop-soft:#FBE9E9;
+    --warn:#8A5808; --warn-soft:#FAF0DD;
+    --shadow:0 1px 2px rgba(20,24,33,.05), 0 8px 24px -12px rgba(20,24,33,.18);
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --ground:#0E1117; --surface:#161A22; --surface-2:#1C212B;
+      --ink:#E6EAF1; --ink-2:#C2C9D6; --muted:#8F99AB; --faint:#6B7488;
+      --line:#2A303C; --line-soft:#232936;
+      --accent:#F2678D; --accent-soft:#2A1620;
+      --go:#4FBF9B; --go-soft:#0F241F;
+      --stop:#F0787A; --stop-soft:#2A1516;
+      --warn:#D9A544; --warn-soft:#241C0D;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0E1117; --surface:#161A22; --surface-2:#1C212B;
+    --ink:#E6EAF1; --ink-2:#C2C9D6; --muted:#8F99AB; --faint:#6B7488;
+    --line:#2A303C; --line-soft:#232936;
+    --accent:#F2678D; --accent-soft:#2A1620;
+    --go:#4FBF9B; --go-soft:#0F241F;
+    --stop:#F0787A; --stop-soft:#2A1516;
+    --warn:#D9A544; --warn-soft:#241C0D;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+  :root[data-theme="light"]{
+    --ground:#EDEFF3; --surface:#FFFFFF; --surface-2:#F5F6F9;
+    --ink:#141821; --ink-2:#3A4252; --muted:#606A7C; --faint:#8C95A6;
+    --line:#D8DCE4; --line-soft:#E6E9EF;
+    --accent:#C42A55; --accent-soft:#FBEBEF;
+    --go:#127055; --go-soft:#E4F2ED;
+    --stop:#B02A2C; --stop-soft:#FBE9E9;
+    --warn:#8A5808; --warn-soft:#FAF0DD;
+    --shadow:0 1px 2px rgba(20,24,33,.05), 0 8px 24px -12px rgba(20,24,33,.18);
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Source Han Sans SC","Noto Sans CJK SC","Noto Sans SC",system-ui,sans-serif;
+    font-size:16px; line-height:1.75; letter-spacing:.01em;
+    font-feature-settings:"kern" 1;
+  }
+  .num{font-family:ui-monospace,"SF Mono","JetBrains Mono","Roboto Mono",Menlo,Consolas,monospace; font-variant-numeric:tabular-nums; letter-spacing:-.01em}
+
+  .wrap{max-width:1120px; margin:0 auto; padding:0 20px}
+  .prose{max-width:70ch}
+
+  /* ---------- masthead ---------- */
+  header.mast{
+    border-bottom:1px solid var(--line);
+    background:var(--surface);
+    padding:56px 0 40px;
+  }
+  .kicker{
+    font-size:11.5px; font-weight:700; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--accent); margin:0 0 18px;
+  }
+  h1{
+    font-size:clamp(30px,5.4vw,48px); line-height:1.18; margin:0 0 20px;
+    font-weight:800; letter-spacing:-.02em; text-wrap:balance; max-width:19ch;
+  }
+  .standfirst{font-size:clamp(16px,2.2vw,19px); color:var(--ink-2); line-height:1.7; max-width:60ch; margin:0}
+  .standfirst b{color:var(--ink); font-weight:700}
+  .mast-meta{
+    display:flex; flex-wrap:wrap; gap:8px 26px; margin-top:28px; padding-top:20px;
+    border-top:1px solid var(--line-soft);
+    font-size:12.5px; color:var(--muted);
+  }
+  .mast-meta span{display:inline-flex; gap:7px; align-items:baseline}
+  .mast-meta i{font-style:normal; color:var(--faint); font-size:11px; letter-spacing:.08em; text-transform:uppercase}
+
+  /* ---------- verdict strip ---------- */
+  .verdict{padding:40px 0 8px}
+  .vgrid{display:grid; gap:14px; grid-template-columns:1fr}
+  @media(min-width:780px){.vgrid{grid-template-columns:repeat(3,1fr)}}
+  .vcard{
+    background:var(--surface); border:1px solid var(--line); border-radius:4px;
+    padding:20px 22px 22px; position:relative; overflow:hidden; box-shadow:var(--shadow);
+  }
+  .vcard::before{content:""; position:absolute; inset:0 auto 0 0; width:4px}
+  .vcard.go::before{background:var(--go)}
+  .vcard.stop::before{background:var(--stop)}
+  .vcard.warn::before{background:var(--warn)}
+  .vtag{
+    display:inline-block; font-size:10.5px; font-weight:800; letter-spacing:.14em;
+    text-transform:uppercase; padding:3px 9px; border-radius:2px; margin-bottom:12px;
+  }
+  .go .vtag{background:var(--go-soft); color:var(--go)}
+  .stop .vtag{background:var(--stop-soft); color:var(--stop)}
+  .warn .vtag{background:var(--warn-soft); color:var(--warn)}
+  .vcard h3{margin:0 0 8px; font-size:17px; font-weight:750; letter-spacing:-.01em}
+  .vcard p{margin:0; font-size:14px; color:var(--muted); line-height:1.65}
+  .vcard .vnum{display:block; margin-top:14px; padding-top:12px; border-top:1px solid var(--line-soft); font-size:12.5px; color:var(--ink-2)}
+
+  /* ---------- sections ---------- */
+  section{padding:52px 0 8px; scroll-margin-top:20px}
+  .sechead{display:flex; gap:16px; align-items:baseline; margin-bottom:24px; padding-bottom:14px; border-bottom:2px solid var(--ink)}
+  .secno{
+    font-family:ui-monospace,monospace; font-size:12px; font-weight:700; color:var(--accent);
+    letter-spacing:.06em; flex:none; padding-top:4px;
+  }
+  h2{font-size:clamp(22px,3.4vw,30px); margin:0; font-weight:800; letter-spacing:-.02em; line-height:1.25; text-wrap:balance}
+  h3.sub{font-size:18px; font-weight:750; margin:36px 0 12px; letter-spacing:-.01em}
+  h4.sub{font-size:15px; font-weight:750; margin:26px 0 10px; color:var(--ink)}
+  p{margin:0 0 16px}
+  .lede{font-size:17px; color:var(--ink-2); line-height:1.7}
+  a{color:var(--accent); text-decoration:none; border-bottom:1px solid color-mix(in srgb, var(--accent) 35%, transparent)}
+  a:hover{border-bottom-color:var(--accent)}
+  a:focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:2px}
+  strong{font-weight:750; color:var(--ink)}
+  ul,ol{margin:0 0 18px; padding-left:1.25em}
+  li{margin-bottom:9px}
+  li::marker{color:var(--faint)}
+
+  /* ---------- claim vs fact ---------- */
+  .claim{
+    background:var(--surface); border:1px solid var(--line); border-radius:4px;
+    margin:0 0 14px; overflow:hidden; box-shadow:var(--shadow);
+  }
+  .claim-q{
+    padding:16px 20px; background:var(--surface-2); border-bottom:1px solid var(--line);
+    display:flex; gap:12px; align-items:flex-start;
+  }
+  .claim-q .who{
+    flex:none; font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--faint); padding-top:5px; width:52px;
+  }
+  .claim-q .said{margin:0; font-size:15.5px; color:var(--ink); font-weight:600; line-height:1.6}
+  .claim-a{padding:18px 20px 6px}
+  .claim-a .ruling{
+    display:inline-block; font-size:10.5px; font-weight:800; letter-spacing:.13em; text-transform:uppercase;
+    padding:3px 9px; border-radius:2px; margin-bottom:12px;
+  }
+  .r-false{background:var(--stop-soft); color:var(--stop)}
+  .r-true{background:var(--go-soft); color:var(--go)}
+  .r-part{background:var(--warn-soft); color:var(--warn)}
+  .claim-a p{font-size:14.5px; color:var(--ink-2); line-height:1.7}
+
+  /* ---------- tables ---------- */
+  .tscroll{overflow-x:auto; margin:0 0 22px; border:1px solid var(--line); border-radius:4px; background:var(--surface); box-shadow:var(--shadow)}
+  table{border-collapse:collapse; width:100%; min-width:520px; font-size:14px}
+  caption{
+    text-align:left; padding:14px 18px 0; font-size:12px; color:var(--muted);
+    letter-spacing:.04em; caption-side:top;
+  }
+  th,td{padding:11px 16px; text-align:left; border-bottom:1px solid var(--line-soft); vertical-align:top}
+  thead th{
+    font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--faint);
+    border-bottom:1px solid var(--line); white-space:nowrap; background:var(--surface-2);
+  }
+  tbody tr:last-child td{border-bottom:none}
+  td.n{font-family:ui-monospace,"SF Mono",Menlo,monospace; font-variant-numeric:tabular-nums; white-space:nowrap; font-size:13.5px}
+  .hl{color:var(--accent); font-weight:750}
+  .dim{color:var(--muted); font-size:13px}
+  .up{color:var(--go); font-weight:700}
+  .dn{color:var(--stop); font-weight:700}
+
+  /* ---------- callout ---------- */
+  .callout{
+    border:1px solid var(--line); border-left:4px solid var(--accent); background:var(--surface);
+    padding:18px 22px; margin:0 0 22px; border-radius:0 4px 4px 0; box-shadow:var(--shadow);
+  }
+  .callout.stopc{border-left-color:var(--stop)}
+  .callout.goc{border-left-color:var(--go)}
+  .callout.warnc{border-left-color:var(--warn)}
+  .callout h4{margin:0 0 8px; font-size:14px; font-weight:800; letter-spacing:.02em}
+  .callout p:last-child{margin-bottom:0}
+  .callout p{font-size:14.5px; line-height:1.7; color:var(--ink-2)}
+
+  /* ---------- stat row ---------- */
+  .stats{display:grid; gap:12px; grid-template-columns:repeat(2,1fr); margin:0 0 24px}
+  @media(min-width:760px){.stats{grid-template-columns:repeat(4,1fr)}}
+  .stat{background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:16px 18px; box-shadow:var(--shadow)}
+  .stat .k{display:block; font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--faint); margin-bottom:8px; line-height:1.4}
+  .stat .v{display:block; font-family:ui-monospace,"SF Mono",Menlo,monospace; font-variant-numeric:tabular-nums; font-size:24px; font-weight:700; letter-spacing:-.03em; line-height:1.1}
+  .stat .d{display:block; font-size:12px; color:var(--muted); margin-top:7px; line-height:1.5}
+
+  /* ---------- tier cards ---------- */
+  .tier{background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:22px 24px; margin:0 0 14px; box-shadow:var(--shadow)}
+  .tier-h{display:flex; flex-wrap:wrap; gap:10px 14px; align-items:baseline; margin-bottom:6px}
+  .tier-h h3{margin:0; font-size:18px; font-weight:800; letter-spacing:-.01em}
+  .budget{font-family:ui-monospace,monospace; font-size:13px; font-weight:700; color:var(--accent); background:var(--accent-soft); padding:3px 10px; border-radius:2px}
+  .tier .goal{font-size:14px; color:var(--muted); margin:0 0 16px}
+  .tier ul{margin-bottom:14px; font-size:14.5px}
+  .tier .out{border-top:1px solid var(--line-soft); padding-top:13px; font-size:14px; color:var(--ink-2); margin:0}
+
+  /* ---------- risk table ---------- */
+  .sev{display:inline-block; font-size:10px; font-weight:800; letter-spacing:.1em; padding:2px 7px; border-radius:2px; white-space:nowrap}
+  .s3{background:var(--stop-soft); color:var(--stop)}
+  .s2{background:var(--warn-soft); color:var(--warn)}
+  .s1{background:var(--surface-2); color:var(--muted); border:1px solid var(--line)}
+
+  /* ---------- checklist ---------- */
+  .phase{margin:0 0 26px}
+  .phase-h{display:flex; gap:12px; align-items:baseline; margin-bottom:12px}
+  .phase-h .wk{font-family:ui-monospace,monospace; font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:var(--ink); padding:4px 10px; border-radius:2px}
+  :root[data-theme="dark"] .phase-h .wk{background:var(--accent); color:#14171d}
+  @media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .phase-h .wk{background:var(--accent); color:#14171d}}
+  .phase-h h3{margin:0; font-size:16.5px; font-weight:750}
+  .todo{list-style:none; padding:0; margin:0}
+  .todo li{
+    position:relative; padding-left:30px; margin-bottom:11px; font-size:14.5px; line-height:1.65; color:var(--ink-2);
+  }
+  .todo li::before{
+    content:""; position:absolute; left:0; top:6px; width:14px; height:14px;
+    border:1.5px solid var(--faint); border-radius:2px;
+  }
+  .todo li.key::before{border-color:var(--accent); background:var(--accent-soft)}
+  .todo li strong{color:var(--ink)}
+
+  /* ---------- footnotes / sources ---------- */
+  .src{font-size:12.5px; color:var(--muted); line-height:1.75}
+  .src a{word-break:break-word}
+  .gap{background:var(--surface-2); border:1px dashed var(--line); border-radius:4px; padding:18px 20px; margin:0 0 20px}
+  .gap h4{margin:0 0 10px; font-size:13px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+  .gap ol{margin:0; font-size:14px; color:var(--ink-2)}
+
+  footer{border-top:1px solid var(--line); margin-top:56px; padding:32px 0 64px; font-size:12.5px; color:var(--muted)}
+  footer p{margin:0 0 8px; max-width:75ch}
+
+  @media (prefers-reduced-motion:no-preference){
+    .vcard,.stat,.tier{transition:transform .18s ease, box-shadow .18s ease}
+    .vcard:hover,.tier:hover{transform:translateY(-1px)}
+  }
+</style>
+</head>
+<body>
+
+
+<header class="mast">
+  <div class="wrap">
+    <p class="kicker">决策报告 · 内部 · 2026 年 8 月 4 日</p>
+    <h1>AI 短剧出海：这门生意还剩多少空位</h1>
+    <p class="standfirst">
+      结论先说：<b>「海外没人做」是错的</b>，「AI 做短剧是新点子」也已经不成立——2026 年 Q1 全行业上线的微短剧里
+      <b>超过 95% 已经是 AI 生成</b>。但你俩「去海外」的直觉是对的，只是理由跟你们想的不一样。
+      真正还开着的窗口有两个，都不在你们最初设想的位置上。
+    </p>
+    <div class="mast-meta">
+      <span><i>议题来源</i> 微信群聊 · Jack &amp; Alex</span>
+      <span><i>调研方式</i> 6 路并行 · 313 次检索</span>
+      <span><i>数据截止</i> 2026-08</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ============ VERDICT ============ -->
+  <div class="verdict">
+    <div class="vgrid">
+      <div class="vcard stop">
+        <span class="vtag">不要做</span>
+        <h3>自建 App + 买量</h3>
+        <p>ReelShort / DramaBox 那套。结构性不成立——不是难，是算不过来。</p>
+        <span class="vnum">最低启动 <b class="num">$20–30 万</b> · <b class="num">80–90%</b> 项目不回本</span>
+      </div>
+      <div class="vcard go">
+        <span class="vtag">立刻做</span>
+        <h3>给平台供片 / 卖剧本</h3>
+        <p>平台正用现金抢内容供给。保底是先付的钱，不担投流风险。</p>
+        <span class="vnum">S+ 剧本保底 <b class="num">$1–2 万</b> + 20% 分成 · 边际成本≈0</span>
+      </div>
+      <div class="vcard warn">
+        <span class="vtag">窗口期</span>
+        <h3>TikTok 短剧分账</h3>
+        <p>2026 H1 已实付 <b class="num">$8,200 万</b>。补贴抢供给的典型窗口，通常持续 12–24 个月。</p>
+        <span class="vnum">条款未公开 · <b>必须走 BD 拿真实合同</b></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 1 ============ -->
+  <section id="s1">
+    <div class="sechead"><span class="secno">01</span><h2>你俩的四个前提，逐条核对</h2></div>
+
+    <div class="claim">
+      <div class="claim-q"><span class="who">Jack</span><p class="said">「我想的不是在国内卷，是在国外似乎还没什么人做」</p></div>
+      <div class="claim-a">
+        <span class="ruling r-false">证伪</span>
+        <p>海外短剧 App 内购收入 2025 全年 <b class="num">$23.3 亿</b>，同比 +133%。ReelShort 单季近 <b class="num">$1.4 亿</b>。
+        海外在架短剧 App 从 2025 年 1 月的 200 款涨到 12 月的 <b class="num">1,100+</b> 款，2026 Q2 起<b>月均新增超 100 款</b>。
+        这是一个跑了三年、有明确头部、正在进入淘汰赛的成熟赛道。</p>
+      </div>
+    </div>
+
+    <div class="claim">
+      <div class="claim-q"><span class="who">Jack</span><p class="said">「成本很低……这算下来费用比 Netflix 赚多了」</p></div>
+      <div class="claim-a">
+        <span class="ruling r-part">部分成立，但推论错了</span>
+        <p>成本确实塌了：AI 短剧每分钟成片成本从 2024 年的 <b class="num">¥15,000</b> 掉到 2026 年的 <b class="num">¥1,000</b> 左右（漫剧可到 ¥400）。
+        但<b>制作只占全链路成本的 30%，投流占 70%</b>。降本 90% 的收益被平台、算力方和买量渠道吃掉了——
+        千次播放收益从 2025 下半年的 ¥60 跌到 2026 年的 <b class="num">¥15–30</b>，成熟投流团队 <b>ROI 只有 1.03–1.07</b>。
+        点众（DramaBox 母公司）短剧业务<b>净利率不足 1%</b>；中文在线 2025 年收入 +97%，<b>净亏超 ¥8,500 万</b>。</p>
+      </div>
+    </div>
+
+    <div class="claim">
+      <div class="claim-q"><span class="who">Jack</span><p class="said">「ai 生成剧本，seedance 生成视频……应该就用 seeddance」</p></div>
+      <div class="claim-a">
+        <span class="ruling r-false">已经不是优势</span>
+        <p>2026 Q1 全行业上线微短剧约 <b class="num">12.8 万</b>部，其中 AI 微短剧约 <b class="num">12.2 万</b>部，
+        <b>占比超 95%</b>。抖音单月峰值近 5 万部，<b>日均超 1,300 部</b>。AI 生成已经是行业默认产能方式。
+        代价是爆款率崩塌：整体 <b class="num">0.47%</b>，<b>AI 漫剧不足 0.1%</b>（1000 部出 1 部），99% 作品播放量低于 100 万。
+        并且 <b>API 只占综合成本的 5–6%</b>——1 分钟纯生成 ¥50–60，成片却要 ¥1,000。真正的钱花在抽卡返工和人工校准上。</p>
+      </div>
+    </div>
+
+    <div class="claim">
+      <div class="claim-q"><span class="who">Jack</span><p class="said">「搞那些傻逼剧情给那些厂妹看」</p></div>
+      <div class="claim-a">
+        <span class="ruling r-false">画像完全反了</span>
+        <p>北美短剧的核心付费用户是 <b>35–54 岁、有可支配收入的城市中产女性</b>：美区女性占 66–70%，45 岁以上约 48%。
+        她们在 YouTube 短剧频道的消费强度是其大盘占比的 <b class="num">1.8–2.0 倍</b>。
+        <b>Top 10% 付费者贡献 40–60% 收入</b>——这是鲸鱼，不是流量。
+        所以海外收入榜前 30 全部是纯充值、<b>广告指数为 0</b>；国内才是流量分账生意。
+        <b>照搬国内「免费 + 广告」打法在北美会直接失效。</b></p>
+      </div>
+    </div>
+
+    <div class="claim">
+      <div class="claim-q"><span class="who">Alex</span><p class="said">「难点可能是 distribution 然后剧本」</p></div>
+      <div class="claim-a">
+        <span class="ruling r-true">完全正确，且是全场唯一被说中的</span>
+        <p>这条判断跟所有调研数据一致。2026 上半年行业素材投放量同比 <b class="up">+324%</b>，
+        同期 Q1 内购收入同比只 <b class="dn">+20%</b>——<b>你要用 4 倍的素材去换 1.2 倍的收入</b>。
+        增量下载的 70–80% 依赖付费投流，自然量占比极低。整个赛道的瓶颈已经完全转移到分发端。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 2 ============ -->
+  <section id="s2">
+    <div class="sechead"><span class="secno">02</span><h2>市场现实：用户在爆炸，钱在变少</h2></div>
+
+    <p class="lede prose">这是理解 2026 年这个赛道最重要的一组对照。增长没有停止，但增长的<b>质量</b>塌了。</p>
+
+    <div class="stats">
+      <div class="stat"><span class="k">全球 MAU 同比</span><span class="v up">+216%</span><span class="d">2.45 亿 → 7.75 亿（Q1&#39;25→Q1&#39;26）</span></div>
+      <div class="stat"><span class="k">下载量同比</span><span class="v up">+140%</span><span class="d">Q1&#39;26 全球 8.5 亿次</span></div>
+      <div class="stat"><span class="k">内购收入同比</span><span class="v dn">+20%</span><span class="d">Q1&#39;26 约 $7.5 亿</span></div>
+      <div class="stat"><span class="k">美国 ARPDAU</span><span class="v dn">&lt;$0.50</span><span class="d">从峰值 &gt;$2.50 跌落</span></div>
+    </div>
+
+    <div class="callout stopc">
+      <h4>一句话概括这个赛道的 2026</h4>
+      <p>供给端（AI）的成本崩塌了，需求端（用户注意力与付费习惯）没有同步扩张，中间的差价被买量渠道吃走了。
+      <b>这个品类已经解决了获客，没有解决留存和变现。</b></p>
+    </div>
+
+    <div class="tscroll">
+      <table>
+        <caption>海外微短剧大盘（注意区分「App 内购」和「全产业链」两个口径，媒体经常混用）</caption>
+        <thead><tr><th>口径</th><th>2024</th><th>2025</th><th>2026</th><th>来源</th></tr></thead>
+        <tbody>
+          <tr><td>海外 App 内购收入</td><td class="n">$5.7 亿</td><td class="n">$23.3 亿 <span class="up">+133%</span></td><td class="n">H1 $12.7 亿 <span class="dn">+13%</span></td><td class="dim">DataEye</td></tr>
+          <tr><td>海外全产业链产值</td><td class="n">—</td><td class="n">$36–40 亿</td><td class="n">预测 &gt;$60 亿</td><td class="dim">Google / DataEye</td></tr>
+          <tr><td>中国国内市场</td><td class="n">≈¥500 亿</td><td class="n">&gt;¥1,000 亿</td><td class="n">预测 ¥1,200 亿 <span class="dn">+20%</span></td><td class="dim">网络视听报告</td></tr>
+          <tr><td>国内微短剧备案数</td><td class="n">—</td><td class="n">H1 1,519 部</td><td class="n">H1 827 部 <span class="dn">−45.6%</span></td><td class="dim">广电总局</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sub">集中度：TOP20 拿走八成</h3>
+    <p class="prose">2026 H1 海外市场 <b>CR3 ≈ 40%，CR20 ≈ 80%</b>。1,100+ 款在架 App 里，只有 TOP20 分走八成钱。
+    并且——<b>头部自己都不赚钱</b>。这是整份报告里最需要被认真对待的一个事实。</p>
+
+    <div class="tscroll">
+      <table>
+        <caption>头部玩家财务实况（2025 年报 / 半年报口径）</caption>
+        <thead><tr><th>公司</th><th>产品</th><th>收入</th><th>利润</th></tr></thead>
+        <tbody>
+          <tr><td>中文在线</td><td>ReelShort</td><td class="n">¥57.21 亿 <span class="up">+97%</span></td><td class="n dn">净亏 &gt;¥8,500 万</td></tr>
+          <tr><td>枫叶互动（ReelShort 主体）</td><td>ReelShort</td><td class="n">2025 H1</td><td class="n dn">由盈利 ¥2,293 万转为净亏 ¥4,651 万</td></tr>
+          <tr><td>点众科技</td><td>DramaBox</td><td class="n">2024 &gt;¥20 亿</td><td class="n dn">短剧业务净利率 &lt;1%</td></tr>
+          <tr><td>掌阅科技</td><td>—</td><td class="n"><span class="up">+14.58%</span></td><td class="n dn">亏损扩大 226%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <h4>但有一个缺口是真实的：本土原创严重供不应求</h4>
+      <p>海外市场 <b>80–90% 的内容仍是中国译制剧</b>，而海外本土短剧<b>月产量不足 200 部</b>，头部 App 年上新约 300 部，
+      市场需求是数千部。这个缺口的价值由下面这张表决定——它的差距<b>大于绝大多数地区之间的差距</b>。</p>
+    </div>
+
+    <div class="tscroll">
+      <table>
+        <caption>本土自制剧 vs 中国译制剧（多源交叉，2025–2026）</caption>
+        <thead><tr><th>指标</th><th>中国译制剧</th><th>本土自制剧</th><th>倍数</th></tr></thead>
+        <tbody>
+          <tr><td>完播率</td><td class="n">25–35%</td><td class="n hl">45–60%</td><td class="n">≈1.7×</td></tr>
+          <tr><td>付费转化率</td><td class="n">3–5%</td><td class="n hl">8–12%</td><td class="n">≈2.5×</td></tr>
+          <tr><td>7 日留存</td><td class="n">15–25%</td><td class="n hl">35–45%</td><td class="n">≈2×</td></tr>
+          <tr><td>ARPU</td><td class="n">$10–20</td><td class="n hl">$25–40</td><td class="n">≈2×</td></tr>
+          <tr><td>ROI</td><td class="n">基准</td><td class="n hl">2.5×</td><td class="n">2.5×</td></tr>
+          <tr><td>回本门槛</td><td class="n">ROI 0.5–0.8 即可</td><td class="n">ROI 1.5–2.0</td><td class="dim">本土剧门槛高 3 倍</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 3 ============ -->
+  <section id="s3">
+    <div class="sechead"><span class="secno">03</span><h2>去哪个市场：用历史剧集出海反推</h2></div>
+
+    <p class="lede prose">Alex 提的「用历史上中剧、韩剧、日剧在各国的流行度来辅助猜」——这个方法命中了全场最有价值的发现。</p>
+
+    <h3 class="sub">先看硬约束：收入榜和下载榜几乎不重叠</h3>
+
+    <div class="tscroll">
+      <table>
+        <caption>2025 全年，出海 App 口径</caption>
+        <thead><tr><th>排名</th><th>收入榜</th><th>下载榜</th></tr></thead>
+        <tbody>
+          <tr><td class="n">1–4</td><td>美国 · 日本 · 英国 · 巴西</td><td>印度 · 印尼 · 巴西 · 美国</td></tr>
+          <tr><td class="n">5–8</td><td>德国 · 韩国 · 澳大利亚 · 泰国</td><td>墨西哥 · 菲律宾 · 哥伦比亚 · 泰国</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="prose">只有<b>美国和泰国</b>同时进两榜前八。单次下载收入（RPD）：日本 <b class="num">$7.0</b> vs 拉美 <b class="num">$0.27</b>——<b>差 26 倍</b>。
+    任何「哪个市场好」的问题，必须先问「你靠内购还是靠广告赚钱」。</p>
+
+    <div class="tscroll">
+      <table>
+        <caption>买量成本与广告单价的地区剪刀差（2025–2026）</caption>
+        <thead><tr><th>地区</th><th>CPI（获客）</th><th>激励视频 eCPM（变现）</th><th>结构判断</th></tr></thead>
+        <tbody>
+          <tr><td>北美</td><td class="n dn">$5.28</td><td class="n">$16–20</td><td class="dim">两头都高，纯资本游戏</td></tr>
+          <tr><td><b>中东（沙特/阿联酋）</b></td><td class="n hl">$1.03</td><td class="n hl">$12+（全球最高）</td><td class="hl">唯一「低买量 + 高变现」组合</td></tr>
+          <tr><td>亚太</td><td class="n">$0.93</td><td class="n">$3–6</td><td class="dim">成本低，天花板中等</td></tr>
+          <tr><td>拉美</td><td class="n up">$0.34</td><td class="n dn">&lt;$4</td><td class="dim">两头都低，量大钱少</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout goc">
+      <h4>中东是全球唯一四项同时成立的市场</h4>
+      <p><b>最低买量成本之一（CPI $1.03）+ 全球最高广告单价（eCPM $12+）+ 全球最快增速 + 最强付费意愿。</b>
+      2025 年前 11 月 MENA 下载 <b class="up">+988%</b>、收入 <b class="up">+586%</b>；土耳其 <b class="up">+1018%</b>、沙特 <b class="up">+884%</b>。
+      付费能力有旁证：沙特手游 ARPU <b class="num">$290–300，全球第一</b>，68%+ 用户有付费意愿。</p>
+    </div>
+
+    <h3 class="sub">代理指标：土耳其剧（dizi）才是该抄的作业</h3>
+
+    <p class="prose">Alex 那个思路直接命中的就是这个。土耳其剧年出口 <b class="num">$5 亿</b>——是中国电视剧出口额（约 $7,000 万）的
+    <b>6–7 倍</b>，10 亿独立观众，覆盖近 200 国，<b>世界第二大剧集出口国（仅次于美国）</b>。
+    <b>而且它在拉美直接取代了本土 telenovela</b>：曾经土耳其从拉美进口肥皂剧，现在反向占领市场。</p>
+
+    <p class="prose">学术界总结的四条成功原因，<b>每一条都能平移到微短剧</b>：</p>
+
+    <div class="tscroll">
+      <table>
+        <caption>dizi 的成功公式 → 微短剧映射</caption>
+        <thead><tr><th>土耳其剧的做法</th><th>为什么有效</th><th>微短剧对应</th></tr></thead>
+        <tbody>
+          <tr><td>体裁邻近性</td><td>用「爱情 / 家族 / 复仇」经典情节剧公式，拉美观众被 telenovela 训练几十年，零学习成本</td><td>爽点密集、三秒一钩</td></tr>
+          <tr><td>价值邻近性</td><td>紧密家族结构、敬老、传统性别角色，观众觉得「熟悉得不可思议」</td><td>豪门家斗、认亲流、专制父权</td></tr>
+          <tr><td><b>比本土更保守</b></td><td>不拍性爱场面、不美化毒枭，反而成为「全家能一起看」的优势</td><td class="hl">这条对中东是决定性的</td></tr>
+          <tr><td>更高制作水准</td><td>把本土肥皂剧丢失的「纯粹情感 melodrama」用更好的制作做了回来</td><td>AI 恰好解决产能与成本</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <h4>闭环验证：B 推 A 成立</h4>
+      <p>土耳其本身是 dizi 的生产国，观众对情节剧的耐受度全球最高——结果<b>它成了 2025 年全球短剧收入增速最快的市场之一（+1018%）</b>。
+      「文化上吃不吃这套」是可以用历史数据前验的，不必赌。</p>
+    </div>
+
+    <h3 class="sub">三条独立证据链，同时指向拉美 / 东南亚 / 中东</h3>
+    <ul class="prose">
+      <li><b>telenovela</b> 全球 20 亿观众，是拉美最受欢迎的节目类型，在巴拿马、乌拉圭、巴西、巴拉圭排名第一。</li>
+      <li><b>dizi</b> 在拉美取代了 telenovela，在中东是核心出口市场。</li>
+      <li><b>华语剧</b>在东南亚免费内容领域以 <b>40% 用户份额成为第一大类，已反超韩剧</b>；60.78% 的中国出海剧集流向东南亚；网文出海<b>东南亚已超越北美成为第一目的地</b>。</li>
+    </ul>
+
+    <p class="prose">反过来看：<b>美国和西欧没有大规模进口情节剧的历史传统。</b>
+    ReelShort 在美国的成功，靠的是 Wattpad / Dreame / Galatea 这批英文网文平台早已用「按章付费解锁」训练好的付费读者土壤，
+    加上巨额投流硬砸出来的——<b>小团队复制不了</b>。</p>
+
+    <div class="tscroll">
+      <table>
+        <caption>市场优先级建议（小团队视角）</caption>
+        <thead><tr><th>优先级</th><th>市场</th><th>核心理由</th><th>主要门槛</th></tr></thead>
+        <tbody>
+          <tr><td><span class="sev s3" style="background:var(--go-soft);color:var(--go)">第一</span></td><td><b>沙特 / 阿联酋 + 土耳其</b></td><td>CPI $1.03 × eCPM $12+ 剪刀差；增速全球第一；沙特 60%+ 在投仍是译制剧；dizi 背书文化契合</td><td>宗教文化审查最严；本土影视工业基础薄弱</td></tr>
+          <tr><td><span class="sev s2">第二</span></td><td><b>泰国 + 马来西亚</b></td><td>泰国 16% 下载贡献 31% 收入（转化效率是印尼的 3.9 倍）；华语剧基本盘最强；亚太 CPI $0.93</td><td>绝对盘子小；必须接本地电子钱包</td></tr>
+          <tr><td><span class="sev s1">第三</span></td><td>巴西 / 墨西哥</td><td>全球最大用户池；CPI $0.34；telenovela 土壤</td><td>RPD 仅 $0.27；<b>必须走 IAA + 低价订阅，不能纯内购</b></td></tr>
+          <tr><td><span class="sev s3">不进</span></td><td>美国</td><td class="dim">占近一半收入，但 CPI $5.28、投流占收入 80%、在投 App 一年 +287%、融资 −70%</td><td><b>小团队期望回报为负</b></td></tr>
+          <tr><td><span class="sev s1">二阶段</span></td><td>日本</td><td>RPD $7.0 全球最高，本土真人剧出海能力弱＝竞品少</td><td>审美门槛高；需日语母语团队；需接便利店支付</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 4 ============ -->
+  <section id="s4">
+    <div class="sechead"><span class="secno">04</span><h2>三条分发路线：一条不能走，一条在发钱</h2></div>
+
+    <h3 class="sub">路线一 · 自建 App：结构性不成立</h3>
+
+    <p class="prose">不是「难」，是算不过来。按行业实操判据自下而上倒推最低启动资金：</p>
+
+    <div class="tscroll">
+      <table>
+        <caption>两人团队自建 App 的最低启动资金推算</caption>
+        <thead><tr><th>项目</th><th>金额</th><th>依据</th></tr></thead>
+        <tbody>
+          <tr><td>内容（AI 路径，3–5 部起测）</td><td class="n">$6,000–25,000</td><td class="dim">单部 10 集 AI 剧 $2,000–5,000，废片率 60%</td></tr>
+          <tr><td>单剧投放测试门槛</td><td class="n">$20,000</td><td class="dim">首投 3 天消耗 ≥$2 万才有判据（行业「黄金公式」）</td></tr>
+          <tr><td>测 3–5 部才可能出 1 个能跑的</td><td class="n">$60,000–100,000</td><td class="dim">爆款率 0.47%，AI 漫剧 &lt;0.1%</td></tr>
+          <tr><td>App 开发 + 服务器/CDN</td><td class="n">$15,000–50,000</td><td class="dim">区间估计，无权威公开数据</td></tr>
+          <tr><td>支付 / 合规 / 主体 / 版权授权</td><td class="n">$5,000–20,000</td><td class="dim">译制剧海外发行授权是硬要求</td></tr>
+          <tr><td>放量期滚动垫资</td><td class="n">$100,000+</td><td class="dim">投流占收入 80%+，现金流持续净流出</td></tr>
+          <tr><td><b>合计</b></td><td class="n hl">$200,000–300,000</td><td class="dim">≈ ¥150–220 万</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout stopc">
+      <h4>而且钱不是唯一门槛</h4>
+      <p><b>人力不够</b>——素材单条生命周期约 <b>2 天</b>，单剧 5–7 天判生死，单部剧整体生命周期已从 90 天骤降至 <b>35 天</b>；
+      行业日均素材投放约 <b class="num">10.8 万组</b>。两个人做不到「每 2 天换一批素材 + 多国多渠道账户维护」，还要腾出手做内容。<br><br>
+      <b>对手不对等</b>——你和拿着 1.5 亿美元预算的点众、5 亿美元的昆仑万维、10 亿人民币的听花岛，在同一个 Meta / TikTok 竞价池里出价。</p>
+    </div>
+
+    <h3 class="sub">路线二 · 平台原生：TikTok 正在发钱，YouTube 有条硬红线</h3>
+
+    <div class="stats">
+      <div class="stat"><span class="k">TikTok 2026 H1 累计分账</span><span class="v hl">$8,200万</span><span class="d">4 月单月 $1,500 万</span></div>
+      <div class="stat"><span class="k">Q1 单家版权方最高</span><span class="v">$300万</span><span class="d">6 家机构分账 &gt;$50 万</span></div>
+      <div class="stat"><span class="k">AI 短剧分账环比</span><span class="v up">+300%</span><span class="d">平台短剧消费时长 40% 来自 AI</span></div>
+      <div class="stat"><span class="k">免费模式 7 日留存</span><span class="v up">42%</span><span class="d">独立 App 仅 35%</span></div>
+    </div>
+
+    <p class="prose">TikTok 2026 年 1 月把短剧升级为主站<b>一级内容品类</b>，上线 TikTok Minis 板块（聚合 5 万+ 剧集）和独立 App
+    <b>PineDrama</b>（美国、巴西），给出<b>最高 20 倍流量激励</b>。中小内容方入驻量环比 <b class="up">+120%</b>，PineDrama 一个月吸引 500+ 机构。
+    这是平台用现金补贴抢内容供给的典型窗口期，历史上通常持续 12–24 个月。</p>
+
+    <div class="callout warnc">
+      <h4>全份报告最重要的一个待办</h4>
+      <p><b>TikTok 短剧分账计划的官方分成比例、准入门槛、结算规则没有任何公开文档。</b>
+      行业媒体口径是「平台通常抽 20–50%」，但这不是官方说法，不能据此做财务模型。
+      这件事靠公开检索解决不了，<b>必须走 BD / MCN 渠道拿到真实合同条款</b>——这应该是你俩下一步的第一优先动作。</p>
+    </div>
+
+    <h4 class="sub">YouTube：切片搬运这条路在政策文本层面已经死了</h4>
+
+    <p class="prose">YouTube 官方帮助中心「频道变现政策」列出的<b>不可变现</b>内容里，有两条精确命中短剧玩法：</p>
+
+    <ul class="prose">
+      <li><b>Reused content</b>：<i>“Clips of moments from your favorite show edited together with little or no narrative”</i>
+      ——这就是短剧切片搬运，官方文本里明确列为不可变现。</li>
+      <li><b>Inauthentic content</b>：<i>“AI-generated content made with generic or unoriginal templates giving the impression of mass production”</i>
+      ——用通用模板生成、给人以量产印象的 AI 内容，不可变现。</li>
+    </ul>
+
+    <p class="prose">这不是理论风险。<b>2026 年 1 月 YouTube 一次性终止 16 个频道</b>，合计 3,500 万订阅 / 47 亿播放 / 估算年广告收入 $1,000 万。
+    其中 <b>Imperiodejesus（587 万订阅）就是「AI 叙事的连载故事、每天发多集」</b>——跟 AI 短剧频道形态完全同构。
+    2026 年 4 月 Shorts 分成规则改版，Watch Time 加权权重从 30% 提到 <b>70%</b>，并对非原创内容识别降权。</p>
+
+    <div class="tscroll">
+      <table>
+        <caption>YouTube 变现效率：Shorts 只能当漏斗</caption>
+        <thead><tr><th>形态</th><th>RPM（每千次观看）</th><th>换算</th></tr></thead>
+        <tbody>
+          <tr><td>Shorts（竖屏短剧）</td><td class="n dn">$0.02–0.07</td><td class="dim">1,000 万播放 = <b>$200–700</b></td></tr>
+          <tr><td>长视频（drama 细分）</td><td class="n hl">$3–14</td><td class="dim">100 万播放 ≈ <b>$2,000</b></td></tr>
+          <tr><td colspan="3" class="dim">差 <b>30–100 倍</b>。分成率：长视频 55% / Shorts 45% / 频道会员 70%。YouTube <b>没有</b>按集付费解锁产品，最接近的是频道会员（$0.99–49.99/月），但会员专属视频会拉低频道整体分发。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="prose">已被验证的正确打法是三段式：<b>Shorts 高频测试钩子 → 转长视频冲 YPP 与广告收入 → 混合变现</b>。
+    有报道称深耕 YouTube 渠道的短剧运营厂商<b>年利润已达千万美元级别</b>，单部 AI 短剧在 YouTube 的单次上线收益<b>可达 $2 万</b>，
+    部分优质垂类频道<b>回本周期缩至 1 天</b>。<b>AI 本身不违规，「模板化量产」才违规</b>——这条界线可以在产品阶段就设计进去。</p>
+
+    <h3 class="sub">路线三 · 给平台供片：唯一「先收钱」的路</h3>
+
+    <p class="prose">2026 年平台补贴条款罕见地清晰、慷慨，而且<b>全部明确单列 AI 赛道给更高保底</b>。</p>
+
+    <div class="tscroll">
+      <table>
+        <caption>2026 年主要平台的内容采购条款（公开发布）</caption>
+        <thead><tr><th>平台</th><th>计划</th><th>条款</th></tr></thead>
+        <tbody>
+          <tr><td><b>点众 / DramaBox</b></td><td>「双十亿」全球 AIGC 共创（国内 ¥10 亿 + 海外 $1.5 亿）</td><td>海外 S+ 级剧本 <b class="hl">保底 $1–2 万 + 20% 分成</b>；S+ 级 AI 仿真人剧承制 <b class="hl">保底最高 $5 万</b>（+$5 万奖励）；整体 5:5；开放 <b>8 万部小说 IP 授权</b></td></tr>
+          <tr><td><b>听花岛</b></td><td>10 亿元加码海外 AI 短剧</td><td>原创海外 AI 剧本 <b class="hl">最高 ¥10 万保底 + 最高 30% 分成</b>；改编剧本 ¥3 万起；深度合作可拿 50%+ 毛利分成</td></tr>
+          <tr><td>FlickReels（卓晚）</td><td>10 亿元「下一代 Netflix」，覆盖 200+ 国</td><td>保底 + 分成；<b>明确重点扶持海外原创和 AI 仿真人剧</b></td></tr>
+          <tr><td>昆仑万维</td><td>「百万美金 · 剧启 AI」（短剧总投入 $5 亿）</td><td class="dim">具体条款未公开</td></tr>
+          <tr><td>ReelShort</td><td>「种太阳」竖屏出海激励；2026 开设 AI 漫剧板块</td><td class="dim">投稿流程与分成比例未公开</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout goc">
+      <h4>对两人团队，最优解是先卖剧本而不是卖成片</h4>
+      <p><b>剧本保底的边际成本几乎为零</b>（AI 出大纲 + 人工润色，只花时间），而承制保底要背制作成本和 60% 废片率。
+      点众 S+ 剧本 $1–2 万 + 20% 永久分成、听花岛原创剧本最高 ¥10 万 + 30% 分成——这是<b>风险最低、验证最快的入场方式</b>。
+      先用剧本证明选题和钩子能力，拿到平台评级和关系，再谈承制。</p>
+    </div>
+
+    <div class="callout warnc">
+      <h4>但要清楚这条路的天花板</h4>
+      <p>产业链的结构性事实：<b>下游分发平台毛利 60%，占整个产业链收入分成的 80–85%，内容方长期只在 15–20% 的池子里分。</b>
+      而且 S+ 评级由平台单方面判定，分成基数（净收入 vs 毛收入）的定义未公开，补贴是窗口期政策——2026 年的慷慨条款不代表 2027 年还在。
+      <b>这条路做不成大生意，但能养活团队并积累内容能力和平台关系。</b></p>
+    </div>
+  </section>
+
+  <!-- ============ 5 ============ -->
+  <section id="s5">
+    <div class="sechead"><span class="secno">05</span><h2>单位经济：钱到底怎么算</h2></div>
+
+    <h3 class="sub">成本侧</h3>
+
+    <div class="tscroll">
+      <table>
+        <caption>AI 短剧制作成本（一部标准剧 = 80 集 × 90 秒 ≈ 120 分钟成片）</caption>
+        <thead><tr><th>项目</th><th>单价</th><th>一部剧</th><th>备注</th></tr></thead>
+        <tbody>
+          <tr><td>纯 API 生成成本</td><td class="n">¥50–60/分钟</td><td class="n">¥6,000–7,200</td><td class="dim">只占综合成本 5–6%</td></tr>
+          <tr><td><b>AI 仿真人成片综合成本</b></td><td class="n">≈¥1,000/分钟</td><td class="n hl">≈¥120,000（$17k）</td><td class="dim">含抽卡返工、人工校准、配音剪辑</td></tr>
+          <tr><td><b>AI 漫剧成片综合成本</b></td><td class="n">¥400–1,300/分钟</td><td class="n hl">¥48,000–156,000</td><td class="dim">单集可压到 ¥500 以内</td></tr>
+          <tr><td>小规模试点（10–20 集）</td><td class="n">—</td><td class="n">$2,000–5,000</td><td class="dim">一般团队废片率 60%，头部 &lt;20%</td></tr>
+          <tr><td>多语种本地化</td><td class="n">≈¥50/分钟</td><td class="n">≈¥5,000/语种</td><td class="dim">翻译 + AI 配音 + 口型同步</td></tr>
+          <tr><td>5 语种本地化合计</td><td class="n">—</td><td class="n up">≈¥25,000（$3.5k）</td><td class="dim"><b>仅占制作成本 25%，ROI 最高的一环</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <h4>成本模型的两条纪律</h4>
+      <p><b>① 不要只算 API 账。</b>1 分钟纯生成 ¥50–60，成片却要 ¥1,000——API 只占 5–6%，
+      任何只算 API 的模型都会低估一个数量级。<br>
+      <b>② 按「每条可用素材」建模，不要按「每秒 API 价」。</b>Seedance 2.0 单价比 1.5-pro 贵 3–6 倍，
+      但抽卡比从 1:20 降到 1:2（废片率降 10 倍），<b>单位可用素材成本净降约一半</b>。</p>
+    </div>
+
+    <h3 class="sub">收入侧的硬约束：D7 留存只有 8.6%</h3>
+
+    <div class="tscroll">
+      <table>
+        <caption>短剧 App 留存与变现基准</caption>
+        <thead><tr><th>指标</th><th>数值</th><th>口径</th></tr></thead>
+        <tbody>
+          <tr><td>D1 留存</td><td class="n">26.9%</td><td class="dim">Sensor Tower，全球 Top 200 均值</td></tr>
+          <tr><td>D7 留存</td><td class="n dn">8.6%</td><td class="dim">同上（另一口径 &lt;10%）</td></tr>
+          <tr><td>D14 / D30 留存</td><td class="n dn">5.6% / ≈2%</td><td class="dim">D30 为第三方面板口径</td></tr>
+          <tr><td>免费→付费转化</td><td class="n">3–8%</td><td class="dim">另一口径 2–5%</td></tr>
+          <tr><td>单集价格</td><td class="n">$0.10–0.50</td><td class="dim">ReelShort 约 $0.18/集（59 金币）</td></tr>
+          <tr><td>看完一部剧总花费</td><td class="n">$15–50</td><td class="dim">跨 4 个独立来源一致</td></tr>
+          <tr><td>鲸鱼集中度</td><td class="n">Top 10% 付费者贡献 40–60% 收入</td><td class="dim">—</td></tr>
+          <tr><td>内容速度生存线</td><td class="n">&gt;20 部新剧 / 月</td><td class="dim">对自建 App 而言</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="prose">D7 留存 8.6% 意味着<b>所有变现设计必须假设用户只有 3 天生命周期</b>。
+    这解释了为什么行业普遍用 $4.99–9.99 的冲动型首充档位而不是订阅，也解释了为什么付费墙必须在 D1 就出现。</p>
+
+    <h3 class="sub">三档预算的最小可行路径</h3>
+
+    <div class="tier">
+      <div class="tier-h"><h3>档位 A · 验证</h3><span class="budget">&lt; $5,000</span></div>
+      <p class="goal">目标不是赚钱，是用最小代价买三个答案：我们能不能写出过评级的剧本、TikTok 分账的真实条款是什么、AI 剧本到底比人写的差多少。</p>
+      <ul>
+        <li><b>投 3–5 个剧本</b>给点众「双十亿」和听花岛（边际成本≈0，只花时间）</li>
+        <li>做 <b>1 部 10–20 集的完整原创短剧</b>（$2,000–4,000），发 YouTube <b>长视频</b>冲 YPP——不搬运、不做纯 Shorts</li>
+        <li>通过 MCN / BD 渠道拿 <b>TikTok Minis 真实合同条款</b>；申请 TikTok × Sundance 免费微短剧编剧课（全球开放，官方关系入口）</li>
+        <li>做一组 <b>AI 剧本 vs 人工剧本的 A/B 对照</b>——全行业没人公开做过，这是最便宜的信息优势</li>
+      </ul>
+      <p class="out"><b>合理预期：</b>3–6 个月内拿到 $1–3 万剧本保底是可达成的。<b>不要</b>预期 App 级收入。</p>
+    </div>
+
+    <div class="tier">
+      <div class="tier-h"><h3>档位 B · 跑通一条产线</h3><span class="budget">$5,000 – $50,000</span></div>
+      <p class="goal">把「选题 → 剧本 → 生成 → 本地化 → 分发」做成可重复的流水线，收入引擎切到 TikTok 分账。</p>
+      <ul>
+        <li>3–5 部完整剧（$20,000–40,000），每部做 <b>5 语种本地化</b>（$3,500/部）</li>
+        <li>主引擎：<b>TikTok Minis / PineDrama 分账</b>；第二曲线：YouTube 长视频（RPM 高 30–100 倍）</li>
+        <li>持续供片拿保底做现金流底盘</li>
+        <li>Shorts 只用于测试钩子和导流，<b>不作为收入项</b></li>
+      </ul>
+      <p class="out"><b>合理预期：</b>两人年收入 <b class="num">$50,000–150,000</b>。仍然<b>不买量、不建 App</b>。</p>
+    </div>
+
+    <div class="tier">
+      <div class="tier-h"><h3>档位 C · 做成内容工作室</h3><span class="budget">$50,000+</span></div>
+      <p class="goal">仍然不建 App、不买量。把自己做成「本土原创产能」的供给方，并押注一个被忽略的语言市场。</p>
+      <ul>
+        <li>10–20 部 / 年，建立角色 LoRA 资产库和数据反馈机制（按题材 × 钩子类型归档完播率与付费率，反哺 prompt）</li>
+        <li><b>押注阿语（沙特 / 阿联酋）本土原创</b>——见下一节</li>
+        <li>用平台保底和分账养产能，用本土原创换更高分成比例和主控出品权</li>
+      </ul>
+      <p class="out"><b>合理预期：</b>年收入 <b class="num">$100,000–500,000</b>。上限受产业链结构限制（内容方只占 15–20%），
+      要突破必须自己掌握分发——而那要回到路线一的资本门槛。</p>
+    </div>
+  </section>
+
+  <!-- ============ 6 ============ -->
+  <section id="s6">
+    <div class="sechead"><span class="secno">06</span><h2>唯一值得押的差异化：AI × 中东</h2></div>
+
+    <p class="lede prose">如果只从这份报告里带走一条判断，是这条。</p>
+
+    <div class="callout goc">
+      <h4>中东本土剧最大的障碍，恰好是 AI 唯一真正解决的问题</h4>
+      <p>行业报告对中东的原话是：<b>「当地影视工业基础薄弱，寻找合适的本土演员与合作伙伴面临不小挑战」</b>，
+      因此在沙特投放的短剧中 <b>六成以上仍为译制作品</b>，文化隔膜严重削弱内容吸引力。<br><br>
+      <b>而 AI 生成不需要演员，不需要影视工业基础。</b>
+      这是 AI × 中东的真实交集——不是 AI × 北美（北美不缺演员，缺的是买量预算，而买量预算恰恰是 AI 解决不了的）。</p>
+    </div>
+
+    <h3 class="sub">这个押注的五根支柱</h3>
+    <ol class="prose">
+      <li><b>经济结构</b>：全球唯一「CPI $1.03 + eCPM $12+」的剪刀差市场；沙特手游 ARPU $290–300 全球第一。</li>
+      <li><b>增速</b>：MENA 下载 +988%、收入 +586%；全球收入增速 TOP10 市场中中东独占 4 席。</li>
+      <li><b>供给真空</b>：沙特 60%+ 在投是译制剧，而本土剧付费率是译制剧的 2–3 倍、ROI 2.5 倍。</li>
+      <li><b>文化前验</b>：dizi 年出口 $5 亿，中东是核心市场；情节剧语法与微短剧同源，已被 5 亿美元/年验证。</li>
+      <li><b>合规套利</b>：做风格化 / 漫剧而非 AI 仿真人，同时规避 EU AI Act 第 50 条的 deepfake 标注义务和「AI 脸生理性厌恶」的恐怖谷。</li>
+    </ol>
+
+    <h3 class="sub">题材策略：直接抄 dizi 的「比本土更保守」</h3>
+    <p class="prose">避开情欲、不伦、婚外情、复仇虐杀。走 <b>「草根逆袭 + 家族荣誉 + 保守浪漫」</b>——
+    这正是 dizi 在中东和拉美打赢本土内容的原因，也是唯一能同时通过沙特文化审查和 Meta / TikTok 广告审核的路径。</p>
+
+    <div class="callout warnc">
+      <h4>诚实地说清这个押注的弱点</h4>
+      <p>MENA 全年盘子只有约 <b>$7,700 万</b>（2025 前 11 月），是美国的零头。宗教文化审查最严，题材开发受限。
+      你们大概率不懂阿拉伯语和当地文化——<b>这是必须用人换的门槛，不是用钱或用 AI 能换的</b>。
+      如果找不到一个靠谱的当地内容合伙人，这个押注不成立，退回档位 A/B 的供片路线。</p>
+    </div>
+  </section>
+
+  <!-- ============ 7 ============ -->
+  <section id="s7">
+    <div class="sechead"><span class="secno">07</span><h2>剧本工程：已经标准化，可以直接抄</h2></div>
+
+    <div class="tscroll">
+      <table>
+        <caption>单集节拍引擎（英文市场已收敛的四段式）</caption>
+        <thead><tr><th>时间</th><th>环节</th><th>要求</th></tr></thead>
+        <tbody>
+          <tr><td class="n">0–15 秒</td><td><b>HOOK</b></td><td>前 3 秒是硬红线：<b>第 3 秒定格，若陌生人需要背景信息才看得懂，就不合格</b>。必须同时给出世界观语境 + 与我何干 + 视觉清晰度</td></tr>
+          <tr><td class="n">15–60 秒</td><td><b>FRICTION</b></td><td>必须是<b>可拍摄的物理障碍</b>，不能靠对白制造张力</td></tr>
+          <tr><td class="n">60–90 秒</td><td><b>SPIKE</b></td><td>一次重新定义前情的大跳变</td></tr>
+          <tr><td class="n">最后 5–10 秒</td><td><b>BUTTON</b></td><td>比「感觉安全」的位置<b>早剪 2 秒</b>；60 秒集在第 <b>55–58 秒</b>定格时留存最优</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tscroll">
+      <table>
+        <caption>整季架构与付费卡点</caption>
+        <thead><tr><th>参数</th><th>规格</th></tr></thead>
+        <tbody>
+          <tr><td>规模</td><td><b>60–100 集 × 60–120 秒</b>（多数落在 90 秒），单集剧本 1–2 页，全剧 70–140 页，总时长 90–150 分钟</td></tr>
+          <tr><td>Ep 1–10</td><td><b>承担不成比例的留存权重，要反复重写</b>。Ep 5 重新定价核心前提，Ep 10 两大秘密第一次碰撞</td></tr>
+          <tr><td>Ep 41–70</td><td>「黑暗中段」，离解决最远——<b>这段可以放养</b>（业内证词：后面的集数几乎无人审核）</td></tr>
+          <tr><td>最强 beat 位置</td><td><b>花在第 2–3 集，不要留到季末</b></td></tr>
+          <tr><td>付费墙</td><td>通常<b>第 10 集</b>（前 3–5 集免费是另一口径）。<b>必须卡在悬崖上——转化率是卡在场景中段的 2–4 倍</b>。大揭示放在付费墙<b>之后</b> 1–2 集</td></tr>
+          <tr><td>五种高转化场景</td><td>① 当众反打脸（需要被困住的目击者）② 身份揭示 ③ 强制亲密 ④ 家庭危机（财务+道德双重赌注）⑤ 权力错位（靠精通规则而非破坏规则取胜）</td></tr>
+          <tr><td>爽感强度公式</td><td><b>Release 强度 ≈ 累积的不公 × 反转的公开程度</b></td></tr>
+          <tr><td>投放可行性门槛</td><td>第 1 集完播率 <b>≥75%</b> 才算买量经济模型成立</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sub">选骨架，不要选皮</h3>
+    <p class="prose">狼人在北美之所以灵，不是「西方元素本地化做得好」，而是<b>中式爽文语法找到了一套已被英语读者验证过的皮肤</b>：
+    fated mates（70%+ 狼人言情标配）＝ 契约婚姻的超自然版；rejected mate ＝ 虐恋 + 打脸逆袭；Alpha/Luna 等级制 ＝ 豪门等级 + 身份差。几乎 1:1 映射。</p>
+
+    <p class="prose">而<b>狼人 2026 年已经过顶</b>——6 月海外百强榜主标签是情感 72%、逆袭 26%、都市 18%、复仇 11%，狼人只在长尾。
+    真正的护城河是骨架：<b>强制绑定 + 等级压迫 + 当众打脸</b>。同一套骨架可以套 Mafia、套年龄差禁忌恋、套 Lycan Queen。
+    立项时按骨架选题，不要按皮选题。</p>
+
+    <div class="callout">
+      <h4>AI 写剧本的现状：能出量，不能出品味</h4>
+      <p>LLM 现在能可靠替代的是：小说→剧本的结构化转换、大纲批量生成、多语言本地化重写。
+      <b>不能替代的是</b>：「这一秒的钩子够不够狠」的判断、爽点强度的校准、「这个反转是不是已经被用烂了」的品味判断。<br><br>
+      当下最优工作流：<b>AI 出 3–5 版大纲 → 人选方向 → AI 铺全剧 → 人工把前 10 集单独重写 → 按「题材 × 钩子类型」归档数据反哺 prompt</b>。
+      注意反噬已经出现：12 万部 AI 漫剧爆款率仅 0.12%，2026 年春节后大量同质 AI 剧导致完播率下滑、平台收紧自然流量、审核成本翻数倍。
+      <b>AI 降低了制作门槛，没有降低创作门槛。</b></p>
+    </div>
+  </section>
+
+  <!-- ============ 8 ============ -->
+  <section id="s8">
+    <div class="sechead"><span class="secno">08</span><h2>风险清单</h2></div>
+
+    <div class="tscroll">
+      <table>
+        <caption>按严重度排序，含时间窗</caption>
+        <thead><tr><th>严重度</th><th>风险</th><th>时间窗</th><th>说明与缓解</th></tr></thead>
+        <tbody>
+          <tr><td><span class="sev s3">极高</span></td><td>抽成套利窗口关闭</td><td><b>Google 2026-10-01</b>；Apple 待地院定价（≈2027）</td><td>当前 iOS 美区外链 <b>0 佣金</b>，Android 美区 10 月起外链 24h 内成单收 20%。若模型建立在「web 支付省 30%」上，窗口关闭即崩塌</td></tr>
+          <tr><td><span class="sev s3">极高</span></td><td>支付通道被封</td><td>持续</td><td><b>Stripe 拒付率超 1% 永久关停</b>；Visa 监控线 0.9% / MC 1.5%。短剧是结构性高拒付类目。缓解：3DS、清晰账单描述符、订阅二次确认、<b>主动退款优于被动拒付</b>、Day 1 就备份 PSP</td></tr>
+          <tr><td><span class="sev s3">极高</span></td><td>内容触红线 → App 下架 / 广告账户永封</td><td>持续</td><td>某悬疑短剧因「假装自杀」被 TikTok 判定鼓励自残<b>永久封号</b>；DramaBox 美区已被 Apple 评 <b>18+</b>。缓解：投放素材与 App 内内容分级分离、多 BM 矩阵</td></tr>
+          <tr><td><span class="sev s3">高</span></td><td>EU AI Act 第 50 条未标注</td><td><b>已生效 2026-08-02</b></td><td>罚至 €1,500 万或全球营收 3%。<b>deepfake 规则不以欺骗意图为要件</b>——只要「看起来像真人」就要标。<b>AI 漫剧风险显著低于 AI 仿真人</b></td></tr>
+          <tr><td><span class="sev s2">高</span></td><td>买量成本吞掉全部利润</td><td>持续</td><td>投流占收入 80%+；行业 ROI 1.03–1.2；80–90% 项目不回本。<b>缓解方式就是不买量</b></td></tr>
+          <tr><td><span class="sev s2">高</span></td><td>版权侵权（换皮抄袭 / 无授权改编）</td><td>持续</td><td>2025-07 ReelShort 一日连遭两诉，下架 3 部剧；「剑网 2025」专项已把短剧版权列为重点。缓解：IP 授权链条书面化，发行前做 clearance</td></tr>
+          <tr><td><span class="sev s2">中高</span></td><td>肖像 / 声音权诉讼</td><td>加州已生效；丹麦 2026-03-31</td><td>加州 AB 1836 法定赔偿 <b>$10,000 起</b>。缓解：<b>不用真人素材训练主角形象</b></td></tr>
+          <tr><td><span class="sev s2">中高</span></td><td>Web 自建收银台的税务敞口</td><td>触及门槛即生效</td><td>美国州销售税门槛典型 $100,000 或 200 笔/年，补缴 + 5–25% 罚金；EU VAT 17–27%，可能触及 80+ 国。缓解：接 OSS 或用 MoR（但 Paddle 等明确禁成人内容）</td></tr>
+          <tr><td><span class="sev s1">中</span></td><td>AI 生成内容无著作权保护</td><td>持续</td><td>多数法域下纯 AI 输出不受保护——<b>你的爆款别人可以合法逐帧翻拍</b>。护城河只能建在 IP 授权、发行渠道、买量能力上，不能建在画面上</td></tr>
+          <tr><td><span class="sev s1">中</span></td><td>技术栈时效风险</td><td>Sora 2 API 据报 2026-09-24 日落</td><td>Veo 3 已于 2026-06-30 关停。<b>管线不要押在 Sora 上</b>；Seedance 保留 1.5-pro 作为非关键镜头的降级通道（价格仅为 2.0 的 1/3–1/6）</td></tr>
+          <tr><td><span class="sev s1">中</span></td><td>供应商锁定</td><td>持续</td><td>即梦 2026 年 4 月<b>一个月连涨三次价</b>，高级会员月产出从 83 分钟砍到 7 分钟，从业者因甲方预算固定无法转嫁</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 9 ============ -->
+  <section id="s9">
+    <div class="sechead"><span class="secno">09</span><h2>90 天行动清单</h2></div>
+
+    <div class="phase">
+      <div class="phase-h"><span class="wk">第 1–2 周</span><h3>拿掉最大的信息盲区</h3></div>
+      <ul class="todo">
+        <li class="key"><strong>拿到 TikTok 短剧分账的真实合同条款</strong>——分成比例、准入门槛、结算周期。走 MCN / BD，公开检索解决不了。这是全份报告唯一的关键空白，也是 2026 年最大的收益变量</li>
+        <li>申请 <strong>TikTok × Sundance 微短剧编剧课</strong>（4 周线上，全球开放申请）——低成本的官方关系入口</li>
+        <li>注册点众「双十亿」和听花岛的创作者计划，拿到<strong>剧本评级标准和投稿模板</strong></li>
+        <li>核对 Seedance 商用条款与水印政策原文（二手来源可信度低，投产前必须自查）</li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-h"><span class="wk">第 3–8 周</span><h3>用最低成本验证内容能力</h3></div>
+      <ul class="todo">
+        <li class="key"><strong>投 3–5 个剧本</strong>给点众和听花岛。边际成本≈0，是风险最低的入场</li>
+        <li>做 <strong>1 部 10–20 集完整原创短剧</strong>（预算 $2,000–4,000）。严格按第 07 节的节拍引擎写，前 10 集反复重写</li>
+        <li>建 YouTube 频道发<strong>长视频</strong>（合集/串烧），冲 YPP 门槛（1,000 订阅 + 4,000 小时长视频观看，比 1,000 万 Shorts 播放容易得多）。打开 altered/synthetic content 披露开关</li>
+        <li class="key">跑一组 <strong>AI 剧本 vs 人工剧本的 A/B 对照</strong>，记录完播率与付费率。全行业没人公开做过</li>
+        <li><strong>不要</strong>做：搬运切片、纯 Shorts 变现、买量、建 App</li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-h"><span class="wk">第 9–13 周</span><h3>决策点</h3></div>
+      <ul class="todo">
+        <li>盘点三个答案：剧本有没有拿到保底 / TikTok 条款是否可接受 / 自己做的剧数据如何</li>
+        <li>如果剧本拿到保底 → 进档位 B，把流水线做起来，收入引擎切 TikTok 分账</li>
+        <li>如果同时找到<strong>靠谱的阿语内容合伙人</strong> → 启动中东本土原创押注（见第 06 节）</li>
+        <li>如果三个答案都是否定的 → <strong>停手</strong>。这个赛道 80–90% 的项目不回本，不回本的原因通常在前 90 天就已经暴露</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 10 ============ -->
+  <section id="s10">
+    <div class="sechead"><span class="secno">10</span><h2>数据纪律与已知缺口</h2></div>
+
+    <h3 class="sub">引用这些数字时的三条纪律</h3>
+    <ol class="prose">
+      <li><b>永远标口径。</b>说「海外短剧 X 亿美元」必须补「App 内购」还是「全产业链」。2025 年这两个数分别是约 $23 亿和 $36–40 亿，差 1.6 倍。</li>
+      <li><b>永远标机构和年份。</b>国内 2025 年规模在 ¥677.9 亿（艾媒）到 ¥1,000 亿+（DataEye / 网络视听协会）之间，差 48%，口径不同不可混用。</li>
+      <li><b>集中度别抄媒体。</b>流传的「CR10 = 45.83%」是分子（内购）除以分母（全产业链）的错配结果。按同源数据换算应为 <b>70.8%</b>。推荐口径：2026 H1 <b>CR3 ≈ 40%、CR20 ≈ 80%</b>。</li>
+    </ol>
+
+    <div class="gap">
+      <h4>明确未找到公开数据的项（未做任何编造）</h4>
+      <ol>
+        <li><b>TikTok 短剧分账计划的官方分成比例、准入门槛、结算规则</b> ← 最关键空白，必须走 BD 拿</li>
+        <li>海外短剧 App 的「内购 : 订阅 : 广告」三分收入占比——无任何机构公开拆分</li>
+        <li>Web 支付占总收入的官方比例——只能从「公司报表 − 商店 IAP」倒推出 30–45% 量级，属推导而非发布数据</li>
+        <li>短剧行业实际拒付率——只能用卡组织阈值反推风险</li>
+        <li>逐集完播率曲线 / 每集跳出率基准——各家的核心资产，无公开源</li>
+        <li>按题材切分的收入占比——只有第三方「热值 / 充值指数」代理指标</li>
+        <li><b>AI 剧本 vs 人工剧本的数据对照</b>——全行业无人公开发布（这也是机会）</li>
+        <li>英文网文平台（Wattpad / Dreame / GoodNovel）的 B 端 IP 授权报价——无公开 rate card</li>
+        <li>ReelShort「种太阳」与 ShortMax 的具体投稿流程和分账条款</li>
+        <li>TikTok Series 的权威覆盖国家清单（9 国 vs 94 国两种说法冲突）</li>
+      </ol>
+    </div>
+
+    <h3 class="sub">主要来源</h3>
+    <p class="src">
+      <b>行业数据机构：</b>
+      <a href="https://sensortower.com/blog/state-of-short-drama-apps-2026-report">Sensor Tower · State of Short Drama Apps 2026</a> ·
+      <a href="https://sensortower.com/blog/state-of-short-drama-apps-2025">Sensor Tower 2025</a> ·
+      <a href="https://pdf.dfcfw.com/pdf/H3_AP202601211818183880_1.pdf">DataEye 2025 微短剧行业数据报告</a> ·
+      <a href="https://www.kchuhai.com/report/view-67130.html">点点数据 · 2026 中国短剧出海市场研究</a> ·
+      <a href="https://naavik.co/digest/the-microdrama-volume-vs-value-paradox/">Naavik · The Microdrama Volume vs. Value Paradox</a> ·
+      <a href="https://lens.streaming-radar.com/micro-drama-apps">Streaming Radar Lens · Micro-Drama Apps 2026</a>
+    </p>
+    <p class="src">
+      <b>市场与格局：</b>
+      <a href="https://www.36kr.com/p/3923212244424320">36氪 · 2026 上半年海外短剧 12.7 亿美金</a> ·
+      <a href="https://36kr.com/p/3648633863893505">36氪 · 2025 海外短剧观察</a> ·
+      <a href="https://36kr.com/p/3815737964667142">36氪 · 36 亿市场里只有少数人真正赚到钱</a> ·
+      <a href="https://36kr.com/p/3813271293058566">36氪 · 短剧出海流量开荒</a> ·
+      <a href="https://www.cbndata.com/information/294947">CBNData · 2026 短剧出海：淘汰赛加速</a> ·
+      <a href="https://www.cbndata.com/information/295348">CBNData · AI 短剧出海，烧钱之后还剩什么</a> ·
+      <a href="https://m.thepaper.cn/newsDetail_forward_33045922">澎湃 · 短剧出海：狂飙之后，赚钱为王</a> ·
+      <a href="https://m.thepaper.cn/newsDetail_forward_33575913">澎湃 · 短剧出海分化时代，三路玩家</a>
+    </p>
+    <p class="src">
+      <b>AI 技术与成本：</b>
+      <a href="https://www.huxiu.com/article/4879566.html">虎嗅 · 2026 年 AI 短剧产能暴增但爆款率不足 0.1%</a> ·
+      <a href="https://www.huxiu.com/article/4856082.html">虎嗅 · AI 视频生成赛道 90 天竞速（废片率 1:20→1:2）</a> ·
+      <a href="https://www.yicai.com/news/103084978.html">第一财经 · 成本千元一分钟</a> ·
+      <a href="https://36kr.com/p/3666281730433928">36氪 · 单集成本降至 500 元</a> ·
+      <a href="https://www.tmtpost.com/8085955.html">钛媒体 · 成本砍了 90%，但钱去哪儿了</a> ·
+      <a href="https://www.lanjinger.com/d/1775803661543374566">蓝鲸财经 · 即梦涨价，从业者被压成夹心饼干</a> ·
+      <a href="https://ai.google.dev/gemini-api/docs/pricing">Google Gemini API 官方定价（Veo 3.1）</a> ·
+      <a href="https://developers.openai.com/api/docs/pricing">OpenAI 官方定价（Sora 2）</a>
+    </p>
+    <p class="src">
+      <b>分发与平台政策：</b>
+      <a href="https://support.google.com/youtube/answer/1311392">YouTube 官方 · 频道变现政策</a> ·
+      <a href="https://techcrunch.com/2026/07/20/youtube-clarifies-policies-around-ai-slop-and-upsetting-videos/">TechCrunch · YouTube clarifies policies around AI slop</a> ·
+      <a href="https://www.techtimes.com/articles/320629/20260715/youtube-wiped-35m-subscribers-over-ai-slop-now-its-judging-your-taste.htm">TechTimes · YouTube 终止 16 个频道</a> ·
+      <a href="https://outlierkit.com/resources/vertical-micro-drama-youtube-shorts/">OutlierKit · Vertical Micro Drama on YouTube Shorts</a> ·
+      <a href="https://36kr.com/p/3814839435878659">36氪 · 单季分账 1.7 亿，TikTok 正在改写游戏规则</a> ·
+      <a href="https://www.huxiu.com/article/4861158.html">虎嗅 · TikTok 单月分账破亿</a> ·
+      <a href="https://techcrunch.com/2026/01/16/tiktok-quietly-launches-a-micro-drama-app-called-pinedrama/">TechCrunch · TikTok 上线 PineDrama</a> ·
+      <a href="https://www.socialmediatoday.com/news/tiktok-launches-microdrama-development-program/822079/">Social Media Today · TikTok microdrama development program</a> ·
+      <a href="https://news.qq.com/rain/a/20260418A04RDF00">腾讯新闻 · 点众砸 20 亿抢全球好故事</a> ·
+      <a href="https://news.qq.com/rain/a/20260424A03HCP00">腾讯新闻 · 听花岛开出 10 万保底 + 30% 分账</a>
+    </p>
+    <p class="src">
+      <b>合规与法律：</b>
+      <a href="https://artificialintelligenceact.eu/article/50/">EU AI Act Article 50（2026-08-02 生效）</a> ·
+      <a href="https://digital-strategy.ec.europa.eu/en/faqs/transparency-obligations-under-article-50-ai-act">欧委会 · Art.50 透明度义务 FAQ</a> ·
+      <a href="https://www.cac.gov.cn/2025-03/14/c_1743654685899683.htm">网信办 · 人工智能生成合成内容标识办法</a> ·
+      <a href="https://developer.apple.com/app-store/review/guidelines/">Apple · App Store Review Guidelines</a> ·
+      <a href="https://developer.apple.com/support/communication-and-promotion-of-offers-on-the-app-store-in-the-eu/">Apple · 欧盟 DMA 外链费率</a> ·
+      <a href="https://www.macrumors.com/2025/12/11/apple-app-store-fees-external-payment-links/">MacRumors · 第九巡回法院部分推翻 Epic 判决</a> ·
+      <a href="https://www.coda.co/blog/epic-v-google-policy-update-2026/">Coda · Epic v. Google 政策更新 2026</a> ·
+      <a href="https://stripe.com/en-mx/legal/restricted-businesses">Stripe · Restricted Businesses</a> ·
+      <a href="https://m.jiemian.com/article/13100953.html">界面新闻 · ReelShort 版权纠纷</a>
+    </p>
+    <p class="src">
+      <b>内容与受众：</b>
+      <a href="https://filmustage.com/blog/how-to-write-a-vertical-drama-script/">Filmustage · How to Write a Vertical Drama Script</a> ·
+      <a href="https://johnaugust.com/2025/writing-for-microdramas-aka-verticals">John August · Writing for microdramas</a> ·
+      <a href="https://www.digital-i.com/news-articles/press-release-women-35-drive-youtube-microdrama-surge-while-male-users-tune-out">Digital i · Women 35+ Drive YouTube Microdrama Surge</a> ·
+      <a href="https://trends.vc/serialized-fiction-apps-cliffhanger-economics-rented-audience-werewolf-formula/">Trends.vc · Serialized Fiction Apps</a> ·
+      <a href="https://time.com/7173765/reelshort-crazy-maple-studio-joey-jia-interview/">TIME · The Not-So Unexpected Success of ReelShort</a>
+    </p>
+    <p class="src">
+      <b>地区与历史剧代理指标：</b>
+      <a href="https://www.turkiyetoday.com/culture/turkish-drama-industry-surpasses-500-million-export-revenue-in-2024-107534">Türkiye Today · dizi 出口破 5 亿美元</a> ·
+      <a href="https://www.sciencenorway.no/entertainment-researchers-zone-scandinavia/turkish-tv-dramas-have-taken-an-unexpected-global-journey/2475935">Science Norway · 土耳其剧全球化研究</a> ·
+      <a href="https://news.qq.com/rain/a/20241205A04SQY00">腾讯新闻 ·《2024 中国剧集报告》C-Drama 东南亚第一</a> ·
+      <a href="https://www.korea.net/NewsFocus/Society/view?articleId=248349">Korea Foundation · 韩流粉丝国别调查</a> ·
+      <a href="https://www.fu-berlin.de/en/featured-stories/research/2023/telenovelas/index.html">FU Berlin · telenovela 研究</a> ·
+      <a href="https://knowledge.antom.com/streamings-next-frontier-capitalizing-on-the-rise-of-short-dramas-in-the-latin-american-market">Antom · 拉美短剧市场</a> ·
+      <a href="https://knowledge-cn.antom.com/southeast-asia-short-drama/">Antom · 东南亚短剧报告</a>
+    </p>
+  </section>
+
+  <footer>
+    <p><b>关于这份报告。</b>由 6 路子智能体并行调研生成，共 313 次工具调用。所有数字均标注来源与年份；
+    凡口径冲突处均已标注矛盾而非取平均；凡未找到公开数据处均明确写「未找到」，未做任何推测性编造。
+    标为「本人推算」的数字（启动资金、年收入区间）为基于公开数据的建模结果，非机构发布数据。</p>
+    <p>数据截止 2026 年 8 月 4 日。这个赛道的政策与平台条款变化极快——
+    抽成规则、AI 内容政策、平台补贴条款三项建议在任何重大投入前重新核实。</p>
+  </footer>
+</div>
+
+</body>
+</html>
