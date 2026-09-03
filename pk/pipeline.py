@@ -19,6 +19,7 @@ import shutil
 import subprocess
 import time
 
+from pk.assemble import build, load_props, verify
 from pk.run import ROOT, load_corpus
 
 PROPOSE = """你是 agent {aid}。你刚刚经历了下面这件事，要向一个跨行业的共享 pattern 库提交**写入建议**。
@@ -67,39 +68,36 @@ PROPOSE = """你是 agent {aid}。你刚刚经历了下面这件事，要向一�
 写完文件就结束，用一句话说明你提了什么。"""
 
 TRIAGE = """你是 triage。下面是同一批 {n} 个 agent 各自**独立**提出的写入建议 —— 他们互相看不见对方，
-也看不见对方新建的东西。你的工作是把这些建议归并成一次干净的写入。
+也看不见对方新建的东西。你要判断这些建议里**哪些其实是同一个东西**。
 
 【当前库】{root}，只读：
   python3 -m pk.cli --db {snap} patterns / conditions / search "..." / get <id>
 
 【这批建议】{props}
 
-【你的唯一工作是归并，不是创作】
-- 几个 agent 提的新 pattern（或 condition）其实是**同一个假说的不同说法** → 合成一个节点，
-  把他们各自的 link 全挂到这一个节点上，并在 merges 里记账。**这是你最重要的产出**。
-- 某个 agent 提的新东西其实库里**已经有了**（他没查到）→ 映射到已有真 id，记账。
-- 其余原样保留。
-- **你不能发明**新的 pattern / condition / link / prescription。一条都不行。
-- 合并时**保留提出者作为 source**，不要记成你自己 —— 来源多样性是这个库可信度的唯一来源。
-  合并后的节点用最早提出者的 id 作 source；每条 link 用它原提出者的 id。
-- 两个 agent 描述的**事件本身**如果本质上是同一个情境，给后者的 link 加
-  "novel": false, "same_as": "<前者的 item key>"。不是同一个情境就别加。
+【你只做判断，不搬运文字】
+你**不需要**、也**不允许**重写任何 claim / test / why。最终写入由代码按你的映射从原始提议里
+原样搬运。你的产出只有一份很短的映射表。
 
-【产出】把最终写入写成 JSON 存到 {out}：
+三件事：
+1. **归并**：几个 agent 提的新 pattern（或 condition）其实是**同一个假说的不同说法** → 归成一组，
+   指定保留哪一个（用最早提出者的），其余的并进去。**这是你最重要的产出。**
+   判据是「这两条说的是不是同一件事」，不是「像不像」。粒度不同、适用范围不同的，不要合。
+2. **映射到已有**：某个 agent 提的新东西库里**已经有了**（他没查到）→ 指到那个真 id。
+3. **同情境**：两个 agent 的**事件本身**本质上是同一个情境 → 标出来，后者只算又一次确认。
+   不是同一个情境就别标。这批大概率一个都没有，没有就给空数组。
+
+【产出】写到 {out}：
 {{
-  "items": [{{"key":"i_AG01","what":"...","facts":{{}},"intervention":null,
-              "outcome":"worked|failed|unknown","source":"AG01"}}, ...],
-  "patterns":  [{{"key":"pa","claim":"...","side":"phenomenon","order":1,"source":"AG01"}}, ...],
-  "conditions":[{{"key":"ca","claim":"...","test":"...","source":"AG03"}}, ...],
-  "links":     [{{"src":"i_AG01","dst":"pa","why":"...","polarity":"+","source":"AG01"}}, ...],
-  "prescriptions":[{{"phenomenon":"pa","conditions":["ca"],"solution":"pb",
-                     "item":"i_AG01","outcome":"worked","source":"AG01"}}, ...],
-  "merges":[{{"into":"pa","merged":["AG01:pa","AG04:pc"],
-              "why":"两人说的是同一个假说，只是一个从供应链说、一个从医疗说"}}, ...]
+  "merges": [{{"keep":"B1A1:pa", "drop":["B1A5:pc","B1A3:px"],
+               "why":"同一个假说，一个从供应链说、一个从医疗说"}}],
+  "map_to_existing": [{{"proposal":"B1A2:pb", "existing":"P17",
+                        "why":"库里已有这条，他没查到"}}],
+  "same_situation": [{{"item":"B1A4", "same_as":"B1A2", "why":"..."}}]
 }}
-每个 item 的 key 用 i_<agent id>，link 的 src 指向它。库里已有的节点直接写真 id。
+key 一律写成 `<agent id>:<他给的 key>`。三个数组都可以为空。没有要归并的就 "merges": []。
 
-写完文件就结束，用一段话说明：合并了哪几组、为什么，以及有没有谁提的东西其实库里已经有了。"""
+写完文件就结束，用一段话说明：合并了哪几组、依据是什么，以及有没有谁提的东西其实库里已经有了。"""
 
 
 def claude(prompt, timeout=900, model="claude-opus-5"):
@@ -133,6 +131,7 @@ def main():
     ap.add_argument("--shuffle", type=int, default=7)
     ap.add_argument("--outdir", default="runs/v2")
     ap.add_argument("--log", default="runs/v2/pipeline.jsonl")
+    ap.add_argument("--reuse", action="store_true", help="已有 prop_*.json 就不重跑提议")
     a = ap.parse_args()
 
     events = load_corpus(a.corpus, None if a.shuffle < 0 else a.shuffle)[:a.limit]
@@ -147,7 +146,13 @@ def main():
         print(f"\n=== 批 {bi}/{len(batches)} — {len(batch)} 个 agent 并行提议（只读快照 {snap}）===")
 
         t0 = time.time()
-        with cf.ThreadPoolExecutor(max_workers=len(batch)) as ex:
+        cached = [f"{a.outdir}/prop_B{bi}A{i+1}.json" for i in range(len(batch))]
+        if a.reuse and all(os.path.exists(c) for c in cached):
+            props = [dict(aid=f"B{bi}A{i+1}", file=batch[i]["_file"], out=c, ok=True,
+                          cost=0, turns=0, secs=0, result="(复用)") for i, c in enumerate(cached)]
+            print("  复用已有提议，跳过")
+        else:
+          with cf.ThreadPoolExecutor(max_workers=len(batch)) as ex:
             futs = {ex.submit(propose, ev, f"B{bi}A{i+1}", snap, a.outdir): ev
                     for i, ev in enumerate(batch)}
             props = [f.result() for f in cf.as_completed(futs)]
@@ -160,15 +165,27 @@ def main():
         if not good:
             print("  这批没有可用提议，跳过"); continue
 
-        plan = f"{a.outdir}/plan_b{bi}.json"
+        mmf = f"{a.outdir}/merge_b{bi}.json"
         blob = "\n\n".join(f"--- {p['aid']} 的建议 ---\n" + open(p["out"]).read() for p in good)
         t0 = time.time()
-        r = claude(TRIAGE.format(n=len(good), root=ROOT, snap=snap, out=plan, props=blob), timeout=1200)
+        r = claude(TRIAGE.format(n=len(good), root=ROOT, snap=snap, out=mmf, props=blob), timeout=1200)
         total += r.get("total_cost_usd", 0)
         print(f"  triage {round(time.time()-t0,1)}s ${r.get('total_cost_usd',0):.2f} "
-              f"turns={r.get('num_turns')} {'ok' if os.path.exists(plan) else 'NO PLAN'}")
+              f"turns={r.get('num_turns')} {'ok' if os.path.exists(mmf) else 'NO MAP'}")
 
-        if os.path.exists(plan):
+        if os.path.exists(mmf):
+            props = load_props([(p["aid"], p["out"]) for p in good])
+            mm = json.load(open(mmf))
+            spec = build(props, mm)
+            bad = verify(props, spec)
+            print(f"  归并 {len(mm.get('merges',[]))} 组 / 映射到已有 {len(mm.get('map_to_existing',[]))} 条"
+                  f" / 同情境 {len(mm.get('same_situation',[]))} 条")
+            if bad:
+                print(f"  ⚠️ 断言失败：{len(bad)} 处文字不是提议原文 —— {bad[:2]}")
+            else:
+                print("  ✓ 断言通过：写入的每一句都是提议原文")
+            plan = f"{a.outdir}/plan_b{bi}.json"
+            json.dump(spec, open(plan, "w"), ensure_ascii=False, indent=1)
             w = subprocess.run(["python3", "-m", "pk.cli", "--db", a.db, "batch",
                                 "--file", plan, "--source", f"TRIAGE{bi}"],
                                cwd=ROOT, capture_output=True, text=True)

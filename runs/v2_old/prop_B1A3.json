@@ -1,0 +1,147 @@
+{
+  "item": {
+    "what": "假期后第一个工作日早上，所有客户端缓存同时冷启动回来拉数据，请求形状与稳态完全不同。AWS Transit Gateway 的自动扩容跟不上这种阶跃，网关先饱和丢包；web 层等后端超时把资源占满，成功率从 >99.999% 掉到 99%。我们自己的扩容动作反而加剧了问题：15 分钟内试图开 1200 台机器，provision-service 撞上 Linux open files 上限和 AWS 服务配额，新机器起不来，重试继续往已经拥堵的网络里灌流量。根因不是某段代码写错，是弹性伸缩速度追不上流量突变，加上恢复动作本身制造了二次风暴。",
+    "facts": {
+      "事件日期": "2021-01-04（Slack 全球不可用）",
+      "劣化起点": "美西时间 06:57，消息发送成功率从 >99.999% 掉到 99%",
+      "触发流量形状": "假期流量低 → 节后首个周一客户端缓存冷启动，拉取量远超平时",
+      "先饱和的层": "AWS Transit Gateway（托管共享网络层），自动扩容跟不上突变，丢包",
+      "扩容规模": "07:01–07:15 之间试图新增 1200 台服务器",
+      "扩容失败原因": "provision-service 撞上 Linux open files 限制和 AWS 服务配额，新实例起不来",
+      "二次放大": "失败重试继续灌入已拥堵网络；web 层等后端超时耗尽资源",
+      "完全恢复": "美西时间约 10:40",
+      "根因性质": "非代码缺陷；容量变化率不足 + 恢复动作正反馈"
+    },
+    "intervention": "1) 先关掉 autoscaling 的缩容，保住现有容量不被回收；2) 请 AWS 手工给 Transit Gateway 扩容（这才是解掉根因的一步）；3) 修 provision-service 的 open files / 配额限制，让新实例能正常起来；4) 负载均衡切 panic mode，配合重试兜底摊平请求。",
+    "outcome": "worked"
+  },
+  "patterns": [
+    {
+      "key": "p_cold_cache_herd",
+      "claim": "当大量客户端的本地缓存在同一时刻全部失效或过冷（长假、全网重启、版本强更），它们回归时会产生一个远超稳态、且形状与稳态完全不同的同步请求洪峰；这个洪峰是外生的，服务端无法靠内部限速把它消掉。",
+      "side": "phenomenon",
+      "order": 1
+    },
+    {
+      "key": "p_scale_lag",
+      "claim": "故障来自容量的『变化率』而非『上限』：系统的稳态容量本来够用，但负载阶跃的速度快于弹性伸缩的补充速度，于是在扩容完成之前系统已经先饱和。",
+      "side": "phenomenon",
+      "order": 1
+    },
+    {
+      "key": "p_unscalable_shared_layer",
+      "claim": "在一个『整体弹性』的架构里，通常藏着一两个不随业务扩容而同步伸缩的共享基础设施层（托管网关、NAT、共享链路、DNS、配额型服务）。真实瓶颈往往落在这里，而它不在你的控制面内，你自己的扩容动作对它无效甚至有害。",
+      "side": "phenomenon",
+      "order": 1
+    },
+    {
+      "key": "p_provision_path_ceiling",
+      "claim": "平时零散扩容从不触发的硬性限制（进程 fd 上限、云 API 配额、镜像拉取带宽），会在一次性大批量 provision 时集中撞上，使『扩容』这个恢复动作本身成为失败点——而这条路径平时无人压测。",
+      "side": "phenomenon",
+      "order": 1
+    },
+    {
+      "key": "p_recovery_feedback_loop",
+      "claim": "当恢复动作（拉起新实例、重试、健康检查、重连）消耗的正是已经饱和的那份资源时，恢复行为与故障构成正反馈；此时系统的劣化不再由原始触发因素驱动，而是自维持的，停手比继续抢救更能降低负载。",
+      "side": "phenomenon",
+      "order": 2
+    },
+    {
+      "key": "s_freeze_reclaim",
+      "claim": "事故期间第一时间冻结一切会回收容量的自动化（缩容、驱逐、滚动替换、自动重建），把已有容量锁死——保住手上的比争取新的更快、更确定。",
+      "side": "solution",
+      "order": 1
+    },
+    {
+      "key": "s_escalate_to_provider",
+      "claim": "当瓶颈落在托管/供应商侧的共享层时，唯一解根因的动作是走人工升级通道让供应商扩容或提配额；这一步应尽早并行发起，而不是等自助手段全部失败之后。",
+      "side": "solution",
+      "order": 1
+    },
+    {
+      "key": "s_flatten_load",
+      "claim": "用负载均衡的降级模式（panic mode / 全量摊平 / 放弃健康检查择优）配合有界重试兜底，把请求摊到所有还活着的后端，用可用性换掉排队与择优逻辑造成的二次放大。",
+      "side": "solution",
+      "order": 1
+    },
+    {
+      "key": "s_fix_provision_ceiling",
+      "claim": "把恢复路径本身当作一等生产路径去修和去压测：提高 provision 组件的 fd/连接上限、预申请云配额、给批量扩容加并发闸门，使『需要一次开 N 倍机器』时这条路不会自己断掉。",
+      "side": "solution",
+      "order": 1
+    },
+    {
+      "key": "s_break_loop_then_root",
+      "claim": "顺序律：先切断正反馈把系统稳住（冻结自愈动作、限流重试、摊平负载），再去解真正的容量根因。反过来做——在反馈环还开着的时候猛加容量——会延长故障而不是缩短它。",
+      "side": "solution",
+      "order": 2
+    },
+    {
+      "key": "s_scale_out_absorbs_spike",
+      "claim": "面对突发流量，加机器/让 autoscaling 顶上去是主解法：容量问题可以靠扩容解决。",
+      "side": "solution",
+      "order": 1
+    },
+    {
+      "key": "s_rollback_recent_change",
+      "claim": "大规模服务不可用通常由近期代码或配置变更触发，首选动作是定位并回滚最近一次变更。",
+      "side": "solution",
+      "order": 1
+    }
+  ],
+  "conditions": [
+    {
+      "key": "c_bottleneck_outside_control",
+      "claim": "饱和的那个资源不在你的控制面内：你自己增加实例数既不能扩大它，反而会增加对它的压力。",
+      "test": "问一句：『如果我现在把自己的实例数翻倍，这个饱和指标会变好、不变、还是变差？』答案是不变或变差，则条件成立。再确认该资源的扩容开关是否只握在供应商/平台手里（托管网关、配额、共享链路）。"
+    },
+    {
+      "key": "c_recovery_shares_saturated_resource",
+      "claim": "恢复动作所依赖的路径与正在饱和的资源重叠——即修复行为要通过故障点才能生效。",
+      "test": "把恢复动作（拉新实例、重试、健康检查、拉镜像、注册服务）逐条列出它经过的资源；若其中任一条与当前饱和/丢包的资源相同，则条件成立。经验信号：暂停恢复动作后，饱和指标不升反降。"
+    }
+  ],
+  "links": [
+    {"src": "ITEM", "dst": "p_cold_cache_herd", "why": "假期后首个工作日，全体客户端缓存冷启动同时回归，拉取量与形状都远离稳态——这正是该现象的一个实例", "polarity": "+"},
+    {"src": "ITEM", "dst": "p_scale_lag", "why": "稳态容量本来够，是负载阶跃快于 Transit Gateway 与实例池的补充速度，导致先饱和后扩容", "polarity": "+"},
+    {"src": "ITEM", "dst": "p_unscalable_shared_layer", "why": "真实瓶颈是 AWS Transit Gateway 这个托管共享网络层，它不随我们加机器而扩，只能由 AWS 手工扩容", "polarity": "+"},
+    {"src": "ITEM", "dst": "p_provision_path_ceiling", "why": "一次要开 1200 台时才撞上 Linux open files 上限和 AWS 服务配额，平时零散扩容从未触发", "polarity": "+"},
+    {"src": "ITEM", "dst": "p_recovery_feedback_loop", "why": "扩容与重试本身把更多流量灌进已拥堵的网关，web 层超时又占满资源，劣化在触发因素之外自维持", "polarity": "+"},
+    {"src": "ITEM", "dst": "s_freeze_reclaim", "why": "先关掉 autoscaling 的缩容保住现有容量，是第一个见效的稳态动作", "polarity": "+"},
+    {"src": "ITEM", "dst": "s_escalate_to_provider", "why": "请 AWS 手工扩 Transit Gateway 是真正解掉根因的一步；这一步开始得越早恢复越快", "polarity": "+"},
+    {"src": "ITEM", "dst": "s_flatten_load", "why": "负载均衡切 panic mode 配合重试兜底，减少了择优/排队带来的二次放大", "polarity": "+"},
+    {"src": "ITEM", "dst": "s_fix_provision_ceiling", "why": "修好 provision-service 的 fd/配额限制后新实例才起得来，恢复路径才重新可用", "polarity": "+"},
+    {"src": "ITEM", "dst": "s_break_loop_then_root", "why": "实际生效的顺序就是：先冻结缩容+panic mode 稳住反馈环，再由 AWS 扩网关解根因", "polarity": "+"},
+    {"src": "ITEM", "dst": "s_scale_out_absorbs_spike", "why": "反例：我们在 14 分钟内试图加 1200 台机器，结果扩容动作撞上 fd/配额上限并把更多流量灌进已饱和的网关，加机器让故障更严重而不是更轻——瓶颈不在自己的实例数上时，扩容是有害动作", "polarity": "-"},
+    {"src": "ITEM", "dst": "s_rollback_recent_change", "why": "反例：这次全球不可用没有任何近期变更可回滚，根因是流量形状突变叠加弹性速率不足；按『找最近变更回滚』的路径排查只会浪费黄金时间", "polarity": "-"},
+    {"src": "p_recovery_feedback_loop", "dst": "p_scale_lag", "why": "高阶：扩容追不上负载是这个正反馈环的一条具体成因——扩容动作本身要占用饱和资源", "polarity": "+"},
+    {"src": "p_recovery_feedback_loop", "dst": "p_provision_path_ceiling", "why": "高阶：provision 路径撞限制导致重试不断，是正反馈环的另一条具体成因", "polarity": "+"},
+    {"src": "p_scale_lag", "dst": "p_unscalable_shared_layer", "why": "我这条常常是它的特例：伸缩追不上，往往是因为某个共享层根本不参与你的伸缩", "polarity": "+"},
+    {"src": "s_break_loop_then_root", "dst": "s_freeze_reclaim", "why": "高阶抽象自它：冻结回收是『切断反馈环』这一步的具体手段之一", "polarity": "+"},
+    {"src": "s_break_loop_then_root", "dst": "s_flatten_load", "why": "高阶抽象自它：摊平负载是『切断反馈环』这一步的另一具体手段", "polarity": "+"},
+    {"src": "s_break_loop_then_root", "dst": "s_escalate_to_provider", "why": "高阶抽象自它：向供应商升级是『再解根因』那一步的具体手段", "polarity": "+"}
+  ],
+  "prescriptions": [
+    {
+      "phenomenon": "p_unscalable_shared_layer",
+      "conditions": ["c_bottleneck_outside_control"],
+      "solution": "s_escalate_to_provider",
+      "outcome": "worked",
+      "note": "确认自己加机器无法缓解（甚至恶化）之后，唯一解根因的路径是人工找供应商扩容。这一步的等待时间很长，应在稳态动作的同时并行发起，而不是排在后面。"
+    },
+    {
+      "phenomenon": "p_recovery_feedback_loop",
+      "conditions": ["c_recovery_shares_saturated_resource"],
+      "solution": "s_break_loop_then_root",
+      "outcome": "worked",
+      "note": "顺序是关键：先冻结缩容/摊平负载，让系统停止自我加压，再动根因。我们把这两件事的顺序做对了，但『少做一点抢救』这个直觉出现得偏晚。"
+    },
+    {
+      "phenomenon": "p_provision_path_ceiling",
+      "conditions": ["c_recovery_shares_saturated_resource"],
+      "solution": "s_fix_provision_ceiling",
+      "outcome": "worked",
+      "note": "适用范围有限：这是在事故中现修，能救场但代价高。真正的价值在事故后——把批量扩容当一等路径去压测，验证『一次开平时 10 倍机器』时 fd 和云配额都够。"
+    }
+  ]
+}
