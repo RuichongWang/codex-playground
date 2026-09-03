@@ -32,17 +32,30 @@ PROMPT = """你是 agent {aid}。你刚刚经历了下面这件事，现在要�
   conditions                           列所有条件
   get <id>  /  neighbors <id>          看一个节点 / 看它的上下邻居和反驳
   prescriptions <现象id>               看这个现象下有哪些解法、各自要什么条件
-写：
-  add-item --what "..." --source {aid} --facts '{{"k":"v"}}' [--intervention "..." --outcome worked|failed]
-  add-pattern --claim "..." --side phenomenon|solution --source {aid} [--order 2]
-  add-condition --claim "..." --test "别人怎么判断自己满不满足" --source {aid}
-  link --src <id> --dst <patternid> --why "..." --source {aid} [--polarity -] [--novel false --same-as <itemid>]
-  prescribe --phenomenon <P> --conditions <C1,C2> --solution <S> --source {aid}
-  apply --prescription <R> --item <I> --outcome worked|failed --source {aid}
+写：**一次性提交，不要一条条写** —— 把 JSON 写进文件再 batch，只花一轮：
+
+  cat > /tmp/{aid}.json <<'EOF'
+  {{
+    "item": {{"what":"...", "facts":{{"k":"v"}}, "intervention":"没有就 null", "outcome":"worked|failed|unknown"}},
+    "patterns":  [{{"key":"pa", "claim":"...", "side":"phenomenon", "order":1}},
+                  {{"key":"pb", "claim":"...", "side":"solution", "order":1}}],
+    "conditions":[{{"key":"ca", "claim":"...", "test":"别人怎么判断自己满不满足"}}],
+    "links":     [{{"src":"ITEM", "dst":"pa", "why":"...", "polarity":"+"}},
+                  {{"src":"ITEM", "dst":"P3",  "why":"...", "novel":false, "same_as":"I7"}},
+                  {{"src":"pa",   "dst":"P9",  "why":"我这个是它的特例"}},
+                  {{"src":"ITEM", "dst":"P5",  "why":"反例：...", "polarity":"-"}}],
+    "prescriptions":[{{"phenomenon":"pa", "conditions":["ca","C2"], "solution":"pb", "outcome":"worked", "note":"..."}}]
+  }}
+  EOF
+  python3 -m pk.cli batch --file /tmp/{aid}.json --source {aid}
+
+  说明：`key` 是你自己起的临时别名（新建的东西），库里已有的直接写它的真 id（P3/C2/I7）；
+  `"ITEM"` 指你这条新事件。所有字段都可省，没有就不写那一段。
 
 【规则】
 1. **先查库。** 换不同说法多查几次 —— 别人的措辞不会跟你一样。
-2. 先 add-item 把你这件事写进去，拿到 item id，然后所有 link 都从这个 id 出发。
+   查的时候把多条命令用 && 串在一次 Bash 调用里，别一条一轮。
+2. 想清楚之后**用一次 batch 提交全部写入**。不要 add-item / add-pattern / link 一条条来 —— 那样要十几轮。
 3. **必须给出 link，能 link 多少 link 多少** —— 一件事可以同时是多个假说的证据。
 4. 只有真的相关才 link。明确**不成立**的打负 link（--polarity -），那比正 link 更值钱。
 5. 鼓励猜新 pattern，粒度不确定就猜几个不同层级的。但**先确认库里没有意思相同的**；有就复用，别新建。
