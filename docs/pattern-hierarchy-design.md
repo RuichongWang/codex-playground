@@ -32,9 +32,51 @@ v0.1 那套「沿层级下钻、每步问判别问题」在这里可能才有真
 
 ## 对象
 
-**Item**：一件具体的事。`{what, context(域/场景), outcome, links[]}`
-**Pattern**：一个猜测。`{claim, level(阶数), proposed_by, links_in[]}`
-**Link**：`{from: item|pattern, to: pattern, polarity: +/-, why, source}`
+**Item**：一件具体的事。`{what(现象), intervention(做了什么), outcome(管不管用), context(域/场景), links[]}`
+**Pattern**：一个猜测。`{kind: 现象|解法, claim, level(阶数), proposed_by, links_in[]}`
+**Link**：`{from: item|pattern, to: pattern, polarity: +/-, condition(解法边必填), why, source}`
+
+## 现象 + 解法（两侧）
+
+item 不只记「发生了什么」，也记**做了什么干预、结果如何**。
+pattern 因此有两类，用同一套机制生长（猜 → 别人 link → 汇聚出可信度 → 可再往上抽象）：
+
+- **现象 pattern**：这类事情为什么会发生
+- **解法 pattern**：这类事情该怎么动
+
+连接两者的边 `现象 pattern --[条件]--> 解法 pattern` 是整个库里最值钱的对象。
+它**必须带条件** —— 同一个现象在不同约束下要用完全不同的解。
+
+### 为什么这一侧是关键
+
+现象 pattern 的可信度只能靠**汇聚**（别的 agent 也觉得自己那件事属于它）——软信号，
+可能收敛到流行而非正确。解法 pattern 的可信度可以靠**结果**（套上去到底管不管用）——硬信号。
+
+不对称的根源：现象 pattern 是一个**解释**，很难证伪（「这是节奏错位」是一种说法）；
+解法 pattern 是一个**预测**，可测（「加个缓冲，问题会消失」——试了就知道）。
+
+所以解法侧反过来给现象侧背书：如果同一个解法在多个域里对同一个现象 pattern 反复奏效，
+那这个现象 pattern 大概率是真抽象，不是措辞上的巧合。
+**这是「靠汇聚验证」那个失效模式的解药。**
+
+解法可以先于理解：agent 可以只记「我这么干了、好了、不知道为什么」，
+现象侧的归属由后来的人补。系统要容纳这种写入。
+
+### 用「张力」索引，而不是用「现象」索引
+
+TRIZ 的矛盾矩阵不是「现象 → 解法」，是 `(要改善的参数 × 会变坏的参数) → 原理编号`。
+索引键是**矛盾**，不是现象 —— 因为同一个现象在不同约束下解不同。
+本系统边上的 `条件` 字段做的是同一件事，值得考虑做成一等公民而不是备注。
+
+CBR 里对应的概念叫 **determinator**：真正决定一个解法适不适用的那些属性，
+而不是表面相似度。相似度假设不成立时，kNN 检索会返回一堆没用的案例。
+
+### 新增的失效模式：照搬
+
+高可信解法会诱发「不看条件直接套」。这正是 skill 库实证里那个
+**误用/忽略 10.0% vs 原始执行 0.8%** 的失败模式。
+所以边上的 `条件` 不是可选字段；解法侧的**负 link**（试了、不管用、因为 X）
+和正 link 一样重要 —— 它是在给条件划边界。
 
 ## 可信度：数来源，不数 link
 
@@ -83,4 +125,6 @@ Altshuller 分析了几十万份专利，发现所有工程领域的发明问题
 - Collaborative Memory: Multi-User Memory Sharing in LLM Agents：https://arxiv.org/html/2505.18279v1
 - HypoAgent（溯因假说生成 → 证据收集 → 剪枝）：https://arxiv.org/html/2605.31370
 - Emergent Semantics from Folksonomies：https://link.springer.com/chapter/10.1007/11803034_8
+- TRIZ 矛盾矩阵（用矛盾而非现象索引解法）：https://www.triz-consulting.de/about-triz/triz-matrix/?lang=en
+- CBR 基础问题与 determinator：https://www.iiia.csic.es/~enric/papers/AICom.pdf
 - Demystifying Agent Skills（skill 库的实证失败模式）：https://arxiv.org/html/2608.14036v1
