@@ -1,0 +1,84 @@
+[
+  {
+    "what": "我做项目管理这些年最信的一条是 Brooks 定律：往一个已经延期的软件项目里加人，只会让它更晚交付。原因不神秘——新人要爬坡、老人要抽时间带、沟通路径随人数组合式增长，而且有些任务本身不可拆分，九个女人生不出一个月的孩子。它的边界很清楚：说的是已经晚了的项目在晚期加人，早期就把人配足是有效的；加进来的若是熟悉这套代码的老手、模块边界又切得干净，负面效应会小很多，Brooks 自己都称它是一个离谱的过度简化。",
+    "frame": "你手上是一条你所在领域的通识/教科书原理",
+    "facts": {
+      "提出者": "Frederick P. Brooks Jr.",
+      "出处": "《人月神话》(The Mythical Man-Month), Addison-Wesley, 1975",
+      "核心陈述": "Adding manpower to a late software project makes it later",
+      "三个机制": "新人爬坡时间 / 沟通开销随人数组合式增长 / 任务不可无限拆分",
+      "适用边界": "仅限已延期项目的晚期加人；早期配足人力、加入熟悉代码的老手、模块化良好时效应减弱",
+      "作者自评": "Brooks 称其为 outrageous oversimplification"
+    },
+    "intervention": null,
+    "outcome": "unknown",
+    "source_url": "https://en.wikipedia.org/wiki/Brooks%27s_law",
+    "source_note": "原始出处为 Brooks 1975 年著作《人月神话》，该条目汇总了原书表述、三条机制解释及作者本人对定律局限性的说明。"
+  },
+  {
+    "what": "康威定律讲的是：一个组织设计出来的系统，其结构会复刻这个组织的沟通结构。道理很朴素——模块 A 和 B 要能正确对接，A 的设计者和 B 的设计者就必须能说上话，所以接口的形状最后长得像人际关系的形状。用它要注意边界：它对应的是实际沟通结构，不是墙上那张组织架构图，两者常常不一致；Conway 本人也强调初版设计极少是最优的，组织必须保持弹性、允许开发过程中改变结构，否则会被自己的沟通拓扑锁死。",
+    "frame": "你手上是一条你所在领域的通识/教科书原理",
+    "facts": {
+      "提出者": "Melvin E. Conway",
+      "出处": "How Do Committees Invent?, Datamation, Vol. 14, No. 5, April 1968, pp. 28-31",
+      "投稿史": "1967 年投 Harvard Business Review 被拒，1968 年由 Datamation 发表",
+      "命名者": "Fred Brooks 在《人月神话》中将其命名为 Conway's Law",
+      "核心陈述": "组织设计的系统结构会复制该组织的沟通结构",
+      "微观机制": "模块 A 与 B 无法正确对接，除非 A 与 B 的设计实现者之间存在沟通",
+      "适用边界": "对应实际沟通结构而非正式组织架构图；Conway 强调初版设计罕有最优，组织需保持可变以允许结构演化"
+    },
+    "intervention": null,
+    "outcome": "unknown",
+    "source_url": "https://www.melconway.com/Home/Conways_Law.html",
+    "source_note": "Conway 本人网站上的定律说明页，给出原始表述、1968 年 Datamation 发表信息以及他自己提出的推论。"
+  },
+  {
+    "what": "做大项目估算我信 Flyvbjerg 那套参考类预测：不要从项目内部一条条加工时往上堆，而是把这个项目归入一类可比项目，用那类项目的实际结果分布去推它。之所以要这么做，是因为估算失准有两个来源——认知层面的乐观偏差和政治层面的战略性虚报，参考类预测绕开的是二者共同依赖的内部视角。边界在于它需要足够多且真实可比的历史样本，类别选错或历史数据本身被污染就失效；它给的是分布和调增幅度，不是对某个具体项目的因果诊断。",
+    "frame": "你手上是一条你所在领域的通识/教科书原理",
+    "facts": {
+      "提出者": "Bent Flyvbjerg（理论基础来自 Kahneman & Tversky 的外部视角与规划谬误）",
+      "出处": "Curbing Optimism Bias and Strategic Misrepresentation in Planning: Reference Class Forecasting in Practice, European Planning Studies, Vol. 16, No. 1, 2008, pp. 3-21",
+      "两大失准成因": "乐观偏差（认知）与战略性虚报（政治激励）",
+      "方法核心": "以可比项目实际表现构成的参考类为基准作预测，绕开内部视角",
+      "实务采用": "英国交通部将其纳入大型交通基建的成本与工期评估流程，案例含爱丁堡有轨电车与伦敦 Crossrail",
+      "适用边界": "依赖足够多且真实可比的历史样本；类别划分错误或历史数据受污染即失效；输出为分布与调增幅度而非个案因果解释"
+    },
+    "intervention": null,
+    "outcome": "unknown",
+    "source_url": "https://www.tandfonline.com/doi/abs/10.1080/09654310701747936",
+    "source_note": "Flyvbjerg 2008 年发表于 European Planning Studies 的论文，首次报告参考类预测在英国交通部的实际应用。"
+  },
+  {
+    "what": "Goodhart 定律说的是：任何被观测到的统计规律，一旦被拿来当控制手段施压，这个规律就会垮掉；Strathern 后来那句更好记的转述是，当一个测量变成目标，它就不再是个好测量。我设 KPI 时拿它当警戒线，但边界得说清楚——它讲的是指标被当成压力目标之后的失效机制，不是说测量本身没用；指标与真实目标耦合越松、被考核方的操作空间越大，失效越快，反之在耦合紧密、难以钻空子的场景里指标仍然可用。",
+    "frame": "你手上是一条你所在领域的通识/教科书原理",
+    "facts": {
+      "原始提出者": "Charles Goodhart",
+      "原始出处": "Problems of Monetary Management: The UK Experience, Papers in Monetary Economics, Vol. 1, Reserve Bank of Australia, 1975",
+      "原始表述": "Any observed statistical regularity will tend to collapse once pressure is placed upon it for control purposes",
+      "流行转述出处": "Marilyn Strathern, 'Improving ratings': audit in the British University system, European Review 5(3), 1997, pp. 305-321",
+      "流行转述": "When a measure becomes a target, it ceases to be a good measure",
+      "失效机制": "博弈、扭曲、激励错配——人优化的是测量系统内的行为而非底层目标",
+      "适用边界": "针对指标被当作施压目标后的失效，而非否定测量本身；指标与真实目标耦合越松、可操作空间越大则失效越快"
+    },
+    "intervention": null,
+    "outcome": "unknown",
+    "source_url": "https://en.wikipedia.org/wiki/Goodhart%27s_law",
+    "source_note": "该条目给出 Goodhart 1975 年原始出处与措辞，以及 Strathern 1997 年 European Review 论文中流行转述的完整引用。"
+  },
+  {
+    "what": "承诺升级是我在项目评审里最警惕的一件事：人对自己拍板过的方案，在收到负面反馈后反而会追加更多资源，而不是止损。Staw 1976 年那两个实验把关键变量分离了出来——当个人对负面后果负有责任时，追加投入最多，说明这不只是沉没成本算错账，自我辩护才是主要动力。边界也在这里：换一个与原决策无关的人来复核、或把负面结果的归因从当初是你拍的板上剥离，效应就明显减弱；它解释的是决策者的追加行为，并不预测项目最终成败。",
+    "frame": "你手上是一条你所在领域的通识/教科书原理",
+    "facts": {
+      "提出者": "Barry M. Staw",
+      "出处": "Knee-deep in the Big Muddy: A Study of Escalating Commitment to a Chosen Course of Action, Organizational Behavior and Human Performance, Vol. 16, 1976, pp. 27-44",
+      "方法": "两项实验室研究，模拟商业投资决策并操纵责任归属变量",
+      "核心发现": "当个人对负面后果负有个人责任时，对先前所选方案追加的资源最多",
+      "机制": "自我辩护（self-justification），区别于单纯的沉没成本误算",
+      "适用边界": "换由与原决策无关者复核、或切断负面结果与个人责任的归因即显著减弱；解释决策者的追加投入行为，不预测项目最终成败"
+    },
+    "intervention": null,
+    "outcome": "unknown",
+    "source_url": "https://strategy.sjsu.edu/www.stable/B290/reading/Staw,%20B%20M,%201976,%20Organizational%20Behavior%20and%20Human%20Performance.%2016%20pp%2027-44.pdf",
+    "source_note": "Staw 1976 年原始论文全文 PDF，是承诺升级现象的首次系统实验描述。"
+  }
+]
