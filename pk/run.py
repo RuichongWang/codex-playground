@@ -61,7 +61,7 @@ PROMPT = """你是 agent {aid}。你刚刚经历了下面这件事，现在要�
 做完后用一段话说明：你复用了哪些已有的、新建了哪些、为什么这么判断。"""
 
 
-def load_corpus(pattern):
+def load_corpus(pattern, shuffle=None):
     out = []
     for f in sorted(glob.glob(pattern)):
         try:
@@ -72,6 +72,10 @@ def load_corpus(pattern):
         for r in rows:
             r["_file"] = os.path.basename(f)
             out.append(r)
+    if shuffle is not None:
+        # 交错顺序：同行业连着写会让汇聚看起来更容易，那不是我们要测的
+        import random
+        random.Random(shuffle).shuffle(out)
     return out
 
 
@@ -92,10 +96,11 @@ def main():
     ap.add_argument("--start", type=int, default=0)
     ap.add_argument("--log", default="runs/stage1.jsonl")
     ap.add_argument("--timeout", type=int, default=600)
+    ap.add_argument("--shuffle", type=int, default=7, help="交错种子；--shuffle -1 保持文件顺序")
     ap.add_argument("--dry", action="store_true")
     a = ap.parse_args()
 
-    events = load_corpus(a.corpus)[a.start:a.start + a.limit]
+    events = load_corpus(a.corpus, None if a.shuffle < 0 else a.shuffle)[a.start:a.start + a.limit]
     print(f"语料 {len(events)} 条，模型 {a.model}，库 {a.db}")
     os.makedirs(os.path.dirname(a.log) or ".", exist_ok=True)
     env = dict(os.environ, PK_DB=a.db)
