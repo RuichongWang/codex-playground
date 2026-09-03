@@ -8,16 +8,19 @@ prescription 是 TRIZ 矩阵格子的一般化：(现象 pattern, 条件集合) 
 它只是在「光伏傍晚出力下降」这一个事件上成立。而且「上升到域」本身也是一次抽象 ——
 域标签就不该是预先给定的，它跟 pattern 一样应该是被猜出来的东西。
 
-所以证据的单位是 **item（一个具体事件）**，多样性从图里算：
-两条证据有多独立 = 它们的事件有多不像 + 来源是否不同。前期用事件文本的字面差异做代理，
-以后换成 embedding 就行 —— 关键是它是算出来的，不是查表查来的。
+所以证据的单位是 **item（一个具体事件）**。「这两条证据算不算互相独立」不用相似度函数，
+也不用 embedding —— **由 agent 在 link 的时候自己声明**：
+「已经挂在这个 pattern 下的事件里，有没有跟我这件事本质上是同一个情境？」
+有就 novel=False（同情境的又一次确认），没有就是新的独立事件。
+
+这跟整个系统的哲学一致：所有判断都是模型做的、靠汇聚验证，不靠写死的阈值。
+风险是自报可能不准或被刷，对冲是后来的 agent 看到不对可以打负 link 或提合并。
 """
 import json
 import time
 from collections import defaultdict
 
 POS, NEG = "+", "-"
-SIM_THRESH = 0.35  # 事件文本相似度超过这个就算同一个情境，不重复计独立性
 
 
 class Store:
@@ -47,9 +50,11 @@ class Store:
     def add_condition(self, claim, test, source):
         return self._new("C", kind="condition", claim=claim, test=test, proposed_by=source)
 
-    def link(self, src, dst, why, source, polarity=POS):
+    def link(self, src, dst, why, source, polarity=POS, novel=True, same_as=None):
+        """novel=False 表示「我这件事跟 same_as 本质上是同一个情境」，只算又一次确认，不算新独立事件。"""
         assert src in self.nodes and dst in self.nodes, (src, dst)
-        self.links.append(dict(src=src, dst=dst, polarity=polarity, why=why, source=source))
+        self.links.append(dict(src=src, dst=dst, polarity=polarity, why=why, source=source,
+                               novel=bool(novel), same_as=same_as))
 
     def prescribe(self, phenomenon, conditions, solution, source):
         key = (phenomenon, tuple(sorted(conditions)), solution)
@@ -71,8 +76,15 @@ class Store:
     def search(self, text, kind=None, side=None, limit=8):
         def ok(n):
             return (kind is None or n["kind"] == kind) and (side is None or n.get("side") == side)
-        scored = [(_sim(text, n.get("claim") or n.get("what", "")), n)
-                  for n in self.nodes.values() if ok(n)]
+        def txt(n):
+            base = n.get("claim") or n.get("what", "")
+            if n["kind"] == "item":
+                base += " " + " ".join(f"{k}{v}" for k, v in n.get("facts", {}).items())
+                base += " " + (n.get("intervention") or "")
+            elif n["kind"] == "condition":
+                base += " " + n.get("test", "")
+            return base
+        scored = [(_sim(text, txt(n)), n) for n in self.nodes.values() if ok(n)]
         return [n for s, n in sorted(scored, key=lambda x: -x[0])[:limit] if s > 0]
 
     def supporters(self, nid, polarity=POS):
@@ -108,36 +120,26 @@ class Store:
                and (satisfied is None or set(p["conditions"]) <= set(satisfied))]
         return sorted(out, key=lambda p: -self.prescription_score(p["id"])["score"])
 
-    # ---------- 可信度：数独立事件，不数 link，也不数域 ----------
-    def _independent(self, item_ids):
-        """把事件按相似度贪心聚簇，返回簇数 —— 这就是「有多少个真正互不相同的情境」。"""
-        groups = []
+    # ---------- 可信度：数独立事件（agent 自报），不数 link，也不用域 ----------
+    def _novel(self, item_ids):
+        """只留下「自己声明是新情境」的事件。被声明为同情境的不重复计独立性。"""
+        out = []
         for i in item_ids:
-            t = self._sig(i)
-            for g in groups:
-                if any(_sim(t, self._sig(j)) >= SIM_THRESH for j in g):
-                    g.append(i)
-                    break
-            else:
-                groups.append([i])
-        return groups
-
-    def _sig(self, item_id):
-        n = self.nodes[item_id]
-        return n["what"] + " " + " ".join(f"{k}={v}" for k, v in sorted(n["facts"].items()))
+            ls = [l for l in self.links if l["src"] == i and l["polarity"] == POS]
+            if not ls or any(l.get("novel", True) for l in ls):
+                out.append(i)
+        return out
 
     def credibility(self, nid):
         pos, neg = self.supporters(nid, POS), self.supporters(nid, NEG)
         items = self.grounding_items(nid)
-        return dict(events=len(self._independent(items)), items=len(items),
+        novel = self._novel(items)
+        return dict(events=len(novel), items=len(items), dup=len(items) - len(novel),
                     sources=len({l["source"] for l in pos}), links=len(pos), refutes=len(neg))
 
-    def score(self, nid):
-        """只由独立事件数和来源数决定。link 总数不计分 —— 否则同一个情境反复写就能刷。
 
-        重复确认不是没价值，但它的价值已经体现在 events/sources 里；
-        把 link 数单独计分会让「刷」有正收益，那是这个库最容易死的方式。
-        """
+    def score(self, nid):
+        """只由独立事件数和来源数决定。link 总数不计分 —— 否则同一个情境反复写就能刷。"""
         c = self.credibility(nid)
         return c["events"] * 3 + c["sources"] * 2 - c["refutes"] * 2
 
@@ -145,7 +147,7 @@ class Store:
         ev = self.prescriptions[pid]["evidence"]
         w = [e for e in ev if e["outcome"] == "worked"]
         f = [e for e in ev if e["outcome"] == "failed"]
-        wg = self._independent([e["item"] for e in w])
+        wg = self._novel([e["item"] for e in w])
         return dict(score=len(wg) * 3 - len(f) * 2, worked_events=len(wg),
                     tried=len(ev), failed=len(f),
                     worked_on=[self.nodes[e["item"]]["what"][:24] for e in w])

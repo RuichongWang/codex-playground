@@ -4,7 +4,7 @@
 不调 LLM —— agent 的判断在这里写成脚本，为的是让数据模型本身跑起来看得见。
 真实系统里这些判断由 pk/agent.py 里的 agent 自己做。
 
-没有 domain 标签。证据的单位是具体事件，独立性从事件之间有多不像算出来。
+没有 domain 标签。证据的单位是具体事件，独立性由 agent 在 link 时自报（novel=False 表示同情境）。
 """
 from pk.store import Store, NEG
 
@@ -96,7 +96,7 @@ def spam(s, p1):
             "周一早上急诊等待时间暴涨；周末骨干只排了一半，病人积压到周一",
             "周一急诊等待时间又暴涨了；周末排班只有平日一半，积压压到周一早"]):
         i = s.add_item(txt, source="A", facts={"周期": "一周", "低产能窗口": "周末", "爆发点": "周一早"})
-        s.link(i, p1, "同一类情况", "A")
+        s.link(i, p1, "同一类情况", "A", novel=False, same_as="I1")
 
 
 def report(s, ids):
@@ -146,7 +146,7 @@ if __name__ == "__main__":
     print(f"\n=== 刷分测试：同一来源把同一个情境又写了 2 遍 ===")
     print(f"  {ids['p1']}  score {before} -> {st.score(ids['p1'])}"
           f"   独立事件 {c0['events']} -> {c1['events']}   link {c0['links']} -> {c1['links']}")
-    print("  link 数涨了，独立事件数没涨 —— 如果按域或按 link 数算，这里就被刷动了")
+    print("  agent 自报 novel=False，所以 link 涨了独立事件数没涨 —— 按域或按 link 数算就被刷动了")
 
     st.save("pk/library.json")
     print(f"\n库：{len(st.nodes)} 节点 / {len(st.links)} link / {len(st.prescriptions)} prescription")
