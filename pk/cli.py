@@ -159,29 +159,33 @@ def main(argv=None):
         spec = json.load(open(a.file))
         alias = {}
         out = []
-        it = spec.get("item")
-        if it:
-            alias["ITEM"] = s.add_item(it["what"], a.source, it.get("facts") or {},
-                                       it.get("intervention"), it.get("outcome", "unknown"))
-            out.append(f"item {alias['ITEM']}")
+        src = lambda o: o.get("source") or a.source
+        items = spec.get("items") or ([dict(spec["item"], key="ITEM")] if spec.get("item") else [])
+        for it in items:
+            alias[it["key"]] = s.add_item(it["what"], src(it), it.get("facts") or {},
+                                          it.get("intervention"), it.get("outcome", "unknown"))
+            out.append(f"{it['key']} -> {alias[it['key']]}")
         for p_ in spec.get("patterns", []):
-            alias[p_["key"]] = s.add_pattern(p_["claim"], p_["side"], a.source, p_.get("order", 1))
+            alias[p_["key"]] = s.add_pattern(p_["claim"], p_["side"], src(p_), p_.get("order", 1))
             out.append(f"{p_['key']} -> {alias[p_['key']]}")
         for c in spec.get("conditions", []):
-            alias[c["key"]] = s.add_condition(c["claim"], c["test"], a.source)
+            alias[c["key"]] = s.add_condition(c["claim"], c["test"], src(c))
             out.append(f"{c['key']} -> {alias[c['key']]}")
         R = lambda k: alias.get(k, k)
         for l in spec.get("links", []):
-            s.link(R(l["src"]), R(l["dst"]), l["why"], a.source,
+            s.link(R(l["src"]), R(l["dst"]), l["why"], src(l),
                    l.get("polarity", POS), l.get("novel", True), R(l["same_as"]) if l.get("same_as") else None)
             out.append(f"link {R(l['src'])}{l.get('polarity',POS)}{R(l['dst'])}")
         for rx in spec.get("prescriptions", []):
             pid = s.prescribe(R(rx["phenomenon"]), [R(c) for c in rx.get("conditions", [])],
-                              R(rx["solution"]), a.source)
+                              R(rx["solution"]), src(rx))
             out.append(f"prescription {pid}")
             if rx.get("outcome") in ("worked", "failed"):
-                s.record_application(pid, R(rx.get("item", "ITEM")), rx["outcome"], a.source, rx.get("note", ""))
+                s.record_application(pid, R(rx.get("item", "ITEM")), rx["outcome"], src(rx), rx.get("note", ""))
                 out.append(f"  applied {rx['outcome']}")
+        if spec.get("merges"):
+            open(a.file + ".merges", "w").write(json.dumps(spec["merges"], ensure_ascii=False, indent=1))
+            out.append(f"归并记账 {len(spec['merges'])} 条")
         print("\n".join(out))
     elif a.cmd == "apply":
         s.record_application(a.prescription, a.item, a.outcome, a.source, a.note)
