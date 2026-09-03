@@ -144,8 +144,13 @@ class Store:
         pos, neg = self.supporters(nid, POS), self.supporters(nid, NEG)
         items = self.grounding_items(nid)
         novel = self._novel(items)
+        # 来源也必须按**落地事件**算，不能只数直接 link ——
+        # 高阶 pattern 的直接支持者是 pattern（往往只有两三条边），
+        # 只数直接 link 会把「21 个事件、21 个提出者」误报成「2 个来源」，
+        # 恰恰在高阶抽象上系统性低估。
         return dict(events=len(novel), items=len(items), dup=len(items) - len(novel),
-                    sources=len({l["source"] for l in pos}), links=len(pos), refutes=len(neg))
+                    sources=len({self.nodes[i]["source"] for i in novel}),
+                    direct=len({l["source"] for l in pos}), links=len(pos), refutes=len(neg))
 
 
     def score(self, nid):

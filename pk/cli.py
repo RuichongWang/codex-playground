@@ -28,7 +28,7 @@ def fmt(s, n):
         c = s.credibility(n["id"])
         return (f"{n['id']} [{'现象' if n['side']=='phenomenon' else '解法'}/阶{n['order']}] "
                 f"{n['claim']}\n    分{s.score(n['id'])} 独立事件{c['events']} 同情境重复{c['dup']} "
-                f"来源{c['sources']} 反驳{c['refutes']}")
+                f"来源{c['sources']}(直接{c['direct']}) 反驳{c['refutes']}")
     if n["kind"] == "condition":
         return f"{n['id']} [条件] {n['claim']}\n    判断：{n['test']}"
     iv = f"\n    干预：{n['intervention']}（{n['outcome']}）" if n.get("intervention") else ""
