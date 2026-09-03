@@ -148,5 +148,5 @@ if __name__ == "__main__":
           f"   独立事件 {c0['events']} -> {c1['events']}   link {c0['links']} -> {c1['links']}")
     print("  agent 自报 novel=False，所以 link 涨了独立事件数没涨 —— 按域或按 link 数算就被刷动了")
 
-    st.save("pk/library.json")
+    st.save("pk/demo_library.json")
     print(f"\n库：{len(st.nodes)} 节点 / {len(st.links)} link / {len(st.prescriptions)} prescription")
