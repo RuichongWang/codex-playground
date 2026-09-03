@@ -1,84 +1,86 @@
-# Pattern Hierarchy — 精简设计
+# Pattern Hierarchy — 设计 v0.2（方向已修正）
 
-目标：够用，能跑，快。不追求可发表的严谨性。
+> v0.1 把这件事理解成「层级已经存在，怎么把问题下钻到对的叶子」——一个检索问题。
+> 错了。核心是**写入**：层级不是给定的，是一群 agent 边干活边猜、互相 link 出来的。
 
-## 想法
+## 系统
 
-让 agent 把具体经历压成 pattern、pattern 再压成更抽象的 pattern；遇到新问题**沿层级走下来**拿到可执行步骤，而不是把库向量化 top-k 捞一把。
+一群 agent 在各自的领域干活。每遇到一件具体的事，写一条 **item**。
+写入时**必须**给出它要 link 的 **pattern**（可以 N 个），并鼓励顺手猜新的 pattern。
+一个被猜出来的 pattern，底下独立来源的 link 越多，可信度越高。
+pattern 自己也能被 link 到更高阶的 pattern —— 层级是**从下往上被 link 撑起来的**，不是从上往下切出来的。
 
-## 只回答一个问题
+**迁移不是单独的机制**：就是从库里捞一个高可信 pattern，套到手头的问题上。
+系统里没有训练/测试之分，也没有域的边界 —— item 的表面特征不同，pattern 本来就是跨域的。
 
-**在"看起来很像但做法不同"的候选之间，走层级选得比平铺捞更准吗？**
+**枢纽是「写入即验证」。** 没有单独的验证 pass，没有 sleep phase，没有目标函数。
+一个猜测能不能活，取决于后来有没有别的 agent 在写自己的东西时，独立地判断「我这个也是它」。
+跟科学假说一个结构：假说不是被提出者证明的，是被后来的独立观察撑起来的。
 
-选这个当靶子的理由：现有数据显示 skill 库崩的地方是**辨析**不是召回 —— 库从 5 涨到 100，用对 skill 的 precision 从 29.6% 掉到 3.3%；语义相近的候选里 top-1 从 70.5% 掉到 53.4%，而随机干扰项只从 97.7% 掉到 84.1%。
+## 已定的规则
 
-迁移（高层节点能不能用在没见过的域上）当**附带观察**，不单独设计实验 —— 反正合成域换套表皮就能顺手测一下。
-
-## 数据结构
-
-一个 JSON 文件。不上数据库。
-
-```json
-{
-  "id": "p17",
-  "level": 2,
-  "name": "...",
-  "when": "一句判别式问句 + 判据",
-  "vs_siblings": "我和兄弟节点的区别是什么",
-  "steps": ["..."],
-  "parent": ["p4"],
-  "from": ["traj_003", "traj_019"],
-  "stats": {"used": 12, "ok": 9}
-}
-```
-
-`level` 用显式整数（0 = 具体轨迹，越大越抽象）。`parent` 是 list —— DAG 不是树。
-
-## 域：自造合成域
-
-一个任务生成器：预先定义一批"深层解法模板"（我知道 ground truth 层级），每个任务从模板实例化 + 随机表皮。
-
-- outcome 程序化验证，不用 LLM 打分
-- confusable 对直接构造：同一父节点下的两个兄弟模板
-- 换一套表皮词汇 = 域 B，顺手测迁移
-- 便宜到可以跑几千条
-
-不用 ALFWorld / WebShop 那套：接环境的时间够我把整个东西写完了，而且没有 ground-truth 层级可对。
-
-## 三个环（各取最简版）
-
-**归纳** trajectory → pattern：输入带成功/失败标注（带标注 vs 不带，效果 0.75 vs 0.40，这个便宜且必须要）。失败的不丢，写进 `when` 的负向条款。
-
-**抬升** pattern → 更抽象：LLM 提候选父节点，但**必须过一道客观筛子**，否则会长出一堆听着深刻、下钻时毫无判别力的空话。最简版筛子：候选父节点得覆盖 ≥ 2 个子节点，且 `len(父) + Σlen(子|父) < Σlen(子)`（省下的字数为正）。离线跑，不在执行路径上。
-
-**下钻** query → path：从根贪心往下，每层给 LLM 一个候选列表（带 `vs_siblings`）。关键 —— 不问"哪个最像"，问 **"要在这些里做选择，我得先确认关于当前任务的哪件事"**，先要出判别问题再打分。走错允许回溯一次，不做 beam。必须能输出"都不适用"。
-
-## 怎么算赢
-
-跑两条曲线，库规模 5 / 25 / 100：
-
-1. **confusable 集合上的 top-1 命中率**：层级 vs flat embedding top-k
-2. 顺手记 token 数和"选错了还硬套"的比例
-
-层级在小库上不赢没关系，**看的是曲线随规模的斜率** —— flat 崩、层级不崩，就成立。
-
-## 我替你定的默认值
-
-| 问题 | 定成 |
+| 决策 | 定成 |
 |---|---|
-| 域 | 自造合成域 |
-| 层级何时更新 | 只在离线 sleep phase，不在线改 |
-| level | 显式整数 |
-| 判别问题谁答 | LLM 只看任务描述，不去环境里探测 |
+| link 有类型吗 | **有正负**。正 = 我是它的一个实例；负 = 我反驳它 / 它在这个情形下不适用 |
+| 一个 item 能 link 几个 pattern | **多个**，且鼓励尽可能多 link |
+| 什么时候猜新 pattern | **每次写入都要给出 link**，同时鼓励猜新的 |
+| 怎么找到候选 pattern | **agent 自己跟库交互查询**，系统不预筛 |
 
-## 明确不做
+最后一条的含义：库要暴露一组查询接口（搜索 / 浏览邻居 / 沿 link 上下走），
+agent 自主决定怎么找。检索问题在这里回来了，但它在**写入侧**，且由 agent 自己发起 ——
+v0.1 那套「沿层级下钻、每步问判别问题」在这里可能才有真正的用武之地。
 
-严格等 token 预算的对照、beam search + 分数校准、多种 baseline（只留 flat top-k + 随机 sanity）、图数据库、五类边、库的剪枝/合并/健康度、真实环境接入、端到端成功率作为主指标。
+## 对象
 
-需要时再加。
+**Item**：一件具体的事。`{what, context(域/场景), outcome, links[]}`
+**Pattern**：一个猜测。`{claim, level(阶数), proposed_by, links_in[]}`
+**Link**：`{from: item|pattern, to: pattern, polarity: +/-, why, source}`
+
+## 可信度：数来源，不数 link
+
+**不能只数 link 数。** 10 个来自同一个 agent、同一个场景的 link，价值远低于 3 个跨域跨 agent 的。
+前者是一个 agent 的口癖被记了 10 遍，后者才是真的抽象。
+
+可信度 ≈ f(独立来源数, 覆盖的域种类数, 正负比)，link 总数只是次要项。
+
+不做这个区分，「靠汇聚验证」会退化成**收敛到流行，而不是正确** —— 这是它相对于
+「靠目标函数验证」（v0.1 的 MDL 方案）最主要的失效模式。
+
+## 负 link 的作用
+
+负 link 不只是减分。它会**催生更准的 pattern** —— 一条「X 在这个情形下不成立」的记录，
+往往直接指向「X 真正的适用边界是什么」，而那个边界本身就是个更好的 pattern。
+
+## 已知的失效模式
+
+1. **收敛到流行而非正确** —— 见上，靠来源多样性对冲。
+2. **库爆炸** —— 每次写入都鼓励猜，pattern 数会疯长。靠沉底（长期零 link 的猜测降权）自净，
+   但需要观察实际增长曲线再决定要不要主动剪。
+3. **抽象过高反而不可用** —— TRIZ 的实证研究发现，降低发明原理的抽象层级反而提升了使用效率。
+   「越抽象越好迁移」不是免费的，高阶 pattern 可能变成正确但没用的废话。这条要盯着。
+
+## 人类先例：TRIZ
+
+Altshuller 分析了几十万份专利，发现所有工程领域的发明问题都归结为有限的一组矛盾，
+同样的 40 条发明原理反复跨领域出现。用法也一样：具体问题 → 抽象成矛盾 → 查原理库 → 落回具体方案。
+
+**这就是本系统的人类手工版。** 区别在于 TRIZ 是一个人自上而下、一次性建成、然后冻结的；
+这里是一群 agent 自下而上、持续生长、可信度由汇聚证据决定的。
+
+同类的还有 Christopher Alexander 的 pattern language、生物启发设计的 AskNature 库。
+
+## M0 代码的处置
+
+`ph/` 下那套（合成域 + 生成的层级 + 下钻 + 平铺 baseline）是按 v0.1 的检索命题写的，
+跟现在的方向不对口。**留着不删** —— 里面的下钻算法在「agent 自己查库找候选 pattern」这一步
+可能可以直接复用。但它不是本系统的骨架。
 
 ## 参考
 
-- Demystifying Agent Skills: Why They Work—Until They Don't — https://arxiv.org/html/2608.14036v1
-- LLM-guided Hierarchical Search (LATTICE) — https://arxiv.org/html/2510.13217
-- LILO: Learning Interpretable Libraries — https://arxiv.org/abs/2310.19791
+- TRIZ / 跨域类比：https://www.patsnap.com/resources/blog/articles/cross-domain-analogy-methods-triz-and-biomimicry/
+- 降低 TRIZ 抽象层级反而提升使用效率：https://link.springer.com/chapter/10.1007/978-3-030-32497-1_41
+- Governed Shared Memory for Multi-Agent LLM Systems（speculative write / 语义冲突）：https://arxiv.org/html/2606.24535v1
+- Collaborative Memory: Multi-User Memory Sharing in LLM Agents：https://arxiv.org/html/2505.18279v1
+- HypoAgent（溯因假说生成 → 证据收集 → 剪枝）：https://arxiv.org/html/2605.31370
+- Emergent Semantics from Folksonomies：https://link.springer.com/chapter/10.1007/11803034_8
+- Demystifying Agent Skills（skill 库的实证失败模式）：https://arxiv.org/html/2608.14036v1
