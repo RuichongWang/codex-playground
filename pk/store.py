@@ -115,10 +115,20 @@ class Store:
         return list(dict.fromkeys(out))
 
     def prescriptions_for(self, phenomenon, satisfied=None):
-        """矩阵查表。satisfied=None 则不过滤，把条件一起交给 agent 自己判断。"""
-        out = [p for p in self.prescriptions.values() if p["phenomenon"] == phenomenon
-               and (satisfied is None or set(p["conditions"]) <= set(satisfied))]
-        return sorted(out, key=lambda p: -self.prescription_score(p["id"])["score"])
+        """矩阵查表。
+
+        satisfied 给了也**不硬过滤** —— 按满足比例排序，并把没满足的条件一并返回。
+        硬过滤会让条件多的 prescription 永远匹配不上（第一条真实数据就挂了 4 个条件的合取），
+        而「差一个条件」对 agent 是有用的信息：它可以去想办法让那个条件成立。
+        """
+        out = []
+        for p in self.prescriptions.values():
+            if p["phenomenon"] != phenomenon:
+                continue
+            unmet = [] if satisfied is None else [c for c in p["conditions"] if c not in satisfied]
+            frac = 1.0 if not p["conditions"] else 1 - len(unmet) / len(p["conditions"])
+            out.append(dict(p, _unmet=unmet, _frac=frac))
+        return sorted(out, key=lambda p: (-p["_frac"], -self.prescription_score(p["id"])["score"]))
 
     # ---------- 可信度：数独立事件（agent 自报），不数 link，也不用域 ----------
     def _novel(self, item_ids):

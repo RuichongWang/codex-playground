@@ -130,7 +130,13 @@ def main(argv=None):
             print("（这个现象下还没有适用的解法）")
         for r in rs:
             sc = s.prescription_score(r["id"])
-            print(f"{r['id']}  [{' ∧ '.join(s.nodes[c]['claim'] for c in r['conditions']) or '无条件'}]")
+            head = f"{r['id']}"
+            if sat is not None:
+                head += f"  满足 {int(r['_frac']*100)}%"
+            print(head)
+            for c in r["conditions"]:
+                mark = "✗" if c in r.get("_unmet", []) else ("✓" if sat is not None else "·")
+                print(f"   {mark} {c} {s.nodes[c]['claim']}")
             print(f"   -> {s.nodes[r['solution']]['claim']}")
             print(f"      分{sc['score']} 试过{sc['tried']} 独立成功{sc['worked_events']} 失败{sc['failed']}")
         dirty = False
