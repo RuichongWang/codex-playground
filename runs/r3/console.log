@@ -2,3 +2,44 @@
 30 条 / 1 批 × 30
 
 === 批 1/1 — 30 个 agent 并行提议（只读快照 runs/r3/snap_b1.json）===
+  B1A1 239.5s $1.16 turns=9 ok
+  B1A10 372.3s $1.73 turns=18 ok
+  B1A11 342.5s $1.38 turns=8 ok
+  B1A12 302.9s $1.81 turns=11 ok
+  B1A13 356.1s $1.68 turns=10 ok
+  B1A14 249.0s $1.58 turns=11 ok
+  B1A15 226.9s $1.03 turns=10 ok
+  B1A16 245.0s $0.98 turns=10 ok
+  B1A17 290.6s $1.84 turns=11 ok
+  B1A18 354.6s $1.58 turns=14 ok
+  B1A19 371.0s $1.58 turns=10 ok
+  B1A2 357.6s $1.41 turns=14 ok
+  B1A20 490.8s $1.97 turns=10 ok
+  B1A21 211.6s $0.98 turns=9 ok
+  B1A22 362.0s $1.53 turns=16 ok
+  B1A23 299.3s $1.35 turns=12 ok
+  B1A24 316.7s $1.74 turns=11 ok
+  B1A25 266.3s $1.27 turns=10 ok
+  B1A26 330.1s $1.98 turns=13 ok
+  B1A27 340.2s $2.05 turns=15 ok
+  B1A28 322.6s $1.76 turns=12 ok
+  B1A29 420.8s $2.33 turns=15 ok
+  B1A3 283.6s $1.42 turns=9 ok
+  B1A30 273.2s $1.53 turns=9 ok
+  B1A4 388.7s $1.83 turns=11 ok
+  B1A5 453.8s $2.14 turns=14 ok
+  B1A6 415.2s $1.96 turns=11 ok
+  B1A7 287.5s $1.43 turns=11 ok
+  B1A8 286.3s $1.75 turns=11 ok
+  B1A9 208.9s $0.84 turns=7 ok
+  并行墙钟 1164.1s
+  triage 762.8s $3.95 turns=19 ok
+  归并 1 组 / 映射到已有 2 条 / 同情境 1 条
+  ✓ 断言通过：写入的每一句都是提议原文
+  写入：  applied worked / 归并记账 3 条
+事件 90 / pattern 310 / 条件 177 / link 1396 / prescription 189
+爆炸系数 pattern/事件 = 3.44  （接近 1 = 各猜各的，从不汇聚）
+最大 pattern：P43 独立事件 65 — 资源告急的真实自变量常常是负载的时间形状，而不是产能的上限；而只看总量或平均利用率的度量把时间形状整个抹掉了，因此在没有按来源和时间分解负载之前，任何容量诊断都只能得出『加容量』这一个答案——不是因为它对，是因为其它答案在这套度量里不可见。
+事件→pattern 的正 link 共 787 条
+
+累计 $51.59
