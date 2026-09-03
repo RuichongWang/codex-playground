@@ -1,0 +1,4 @@
+以 runs/r3/library_round2_frozen.json 为基线开跑
+30 条 / 1 批 × 30
+
+=== 批 1/1 — 30 个 agent 并行提议（只读快照 runs/r3/snap_b1.json）===
