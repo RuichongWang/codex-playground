@@ -70,15 +70,15 @@ def _fmt(nodes):
         elif n["kind"] == "condition":
             out.append(f"- {n['id']} [条件] {n['claim']}（判断：{n['test']}）")
         else:
-            out.append(f"- {n['id']} [item/{n['domain']}] {n['what']}")
+            out.append(f"- {n['id']} [item] {n['what']}")
     return "\n".join(out) or "（没查到）"
 
 
 class Writer:
-    def __init__(self, store: Store, source: str, domain: str, effort="low"):
+    def __init__(self, store: Store, source: str, effort="low"):
         import anthropic
         self.client = anthropic.Anthropic()
-        self.s, self.source, self.domain, self.effort = store, source, domain, effort
+        self.s, self.source, self.effort = store, source, effort
         self.tokens = 0
 
     def _ask(self, prompt, schema):
@@ -109,7 +109,7 @@ class Writer:
                 break
         return hits
 
-    def write(self, what, intervention=None, outcome="unknown"):
+    def write(self, what, facts=None, intervention=None, outcome="unknown"):
         exp = what + (f"\n我做的干预：{intervention}（结果：{outcome}）" if intervention else "")
         cands = self.explore(exp)
         plan = self._ask(
@@ -117,18 +117,18 @@ class Writer:
             "决定：link 哪些（正/负）、猜哪些新 pattern 和条件、以及（有干预时）"
             "一条 (现象 + 条件集合) -> 解法 的 prescription。", WRITE_SCHEMA)
 
-        item = self.s.add_item(what, self.domain, self.source, intervention, outcome)
+        item = self.s.add_item(what, self.source, intervention, outcome)
         by_claim = {}
         for l in plan["links"]:
             if l["target"] in self.s.nodes:
-                self.s.link(item, l["target"], l["why"], self.source, self.domain, l["polarity"])
+                self.s.link(item, l["target"], l["why"], self.source, l["polarity"])
         for c in plan["new_phenomena"]:
-            by_claim[c] = self.s.add_pattern(c, "phenomenon", self.source, self.domain)
-            self.s.link(item, by_claim[c], "自己猜的", self.source, self.domain)
+            by_claim[c] = self.s.add_pattern(c, "phenomenon", self.source)
+            self.s.link(item, by_claim[c], "自己猜的", self.source)
         for c in plan["new_solutions"]:
-            by_claim[c] = self.s.add_pattern(c, "solution", self.source, self.domain)
+            by_claim[c] = self.s.add_pattern(c, "solution", self.source)
         for c in plan["new_conditions"]:
-            by_claim[c["claim"]] = self.s.add_condition(c["claim"], c["test"], self.source, self.domain)
+            by_claim[c["claim"]] = self.s.add_condition(c["claim"], c["test"], self.source)
 
         rx = plan["prescription"]
         if rx["outcome"] != "none":
@@ -137,5 +137,5 @@ class Writer:
             conds = [c for c in map(resolve, rx["conditions"]) if c]
             if ph and sol:
                 pid = self.s.prescribe(ph, conds, sol, self.source)
-                self.s.record_application(pid, item, rx["outcome"], self.source, self.domain)
+                self.s.record_application(pid, item, rx["outcome"], self.source)
         return item, plan
