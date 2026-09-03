@@ -22,10 +22,10 @@ import time
 from pk.assemble import build, load_props, verify
 from pk.run import ROOT, load_corpus
 
-PROPOSE = """你是 agent {aid}。你刚刚经历了下面这件事，要向一个跨行业的共享 pattern 库提交**写入建议**。
+PROPOSE = """你是 agent {aid}。{frame}，要向一个跨行业的共享 pattern 库提交**写入建议**。
 库里的 pattern 都是别的 agent 从他们自己遇到的事情里**猜**出来的假说，不是定论。
 
-【你经历的事】
+【你手上的材料】
 {what}
 关键事实：{facts}
 {iv}
@@ -58,6 +58,9 @@ PROPOSE = """你是 agent {aid}。你刚刚经历了下面这件事，要向一�
 1. **先查库**，换不同说法多查几次 —— 别人的措辞不会跟你一样。
 2. **能 link 多少 link 多少** —— 一件事可以同时是多个假说的证据。只有真相关才 link。
 3. 明确**不成立**的打负 link（polarity "-"），那比正 link 更值钱。
+   **特别注意**：如果你手上是一条行业通识/教科书主张，而库里某个 pattern（或某条 prescription 的条件）
+   跟它冲突 —— 或者反过来，你的材料说明那条通识**有个没写出来的边界条件** —— 一定要打负 link 并写清楚。
+   「通识说 X，但在某条件下 X 不成立」是这个库里最值钱的一种记录。
 4. **配额：最多新建 3 个 pattern。** 库里已经有很多假说了，先尽力复用真 id ——
    复用一条已有的比新建一条有价值得多，因为它给那条假说添了一个独立来源。
    实在要新建，先在心里排序，只提你最有把握、最可能被别的行业复用的那 3 个。
@@ -119,8 +122,9 @@ def claude(prompt, timeout=900, model="claude-opus-5"):
 def propose(ev, aid, snap, outdir):
     out = f"{outdir}/prop_{aid}.json"
     iv = f"你做的干预：{ev['intervention']}（结果：{ev.get('outcome','unknown')}）" if ev.get("intervention") else ""
+    frame = ev.get("frame") or "你刚刚经历了下面这件事"
     t0 = time.time()
-    r = claude(PROPOSE.format(aid=aid, what=ev["what"], root=ROOT, snap=snap, out=out, iv=iv,
+    r = claude(PROPOSE.format(aid=aid, what=ev["what"], root=ROOT, snap=snap, out=out, iv=iv, frame=frame,
                               facts=json.dumps(ev.get("facts", {}), ensure_ascii=False)))
     ok = os.path.exists(out)
     return dict(aid=aid, file=ev["_file"], out=out, ok=ok, cost=r.get("total_cost_usd", 0),
