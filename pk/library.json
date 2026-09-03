@@ -1,0 +1,388 @@
+{
+ "nodes": {
+  "I1": {
+   "id": "I1",
+   "ts": 1788439005.6428003,
+   "kind": "item",
+   "what": "周一早上急诊等待时间暴涨；周末只排了工作日一半骨干，积压全压到周一",
+   "intervention": null,
+   "outcome": "unknown",
+   "domain": "医疗",
+   "source": "A"
+  },
+  "P1": {
+   "id": "P1",
+   "ts": 1788439005.6428044,
+   "kind": "pattern",
+   "side": "phenomenon",
+   "claim": "周期性的低产能窗口会把负载推给下一个窗口",
+   "order": 1,
+   "proposed_by": "A",
+   "domain": "医疗"
+  },
+  "P2": {
+   "id": "P2",
+   "ts": 1788439005.6428065,
+   "kind": "pattern",
+   "side": "phenomenon",
+   "claim": "排班按人头平均，没按到达量分布",
+   "order": 1,
+   "proposed_by": "A",
+   "domain": "医疗"
+  },
+  "P3": {
+   "id": "P3",
+   "ts": 1788439005.6428084,
+   "kind": "pattern",
+   "side": "phenomenon",
+   "claim": "周末效应",
+   "order": 1,
+   "proposed_by": "A",
+   "domain": "医疗"
+  },
+  "I2": {
+   "id": "I2",
+   "ts": 1788439005.6428132,
+   "kind": "item",
+   "what": "门店周二备料不够；中央厨房周一晚一周一配，周二午市是配送后第一个高峰，备料按日均算",
+   "intervention": null,
+   "outcome": "unknown",
+   "domain": "餐饮",
+   "source": "B"
+  },
+  "P4": {
+   "id": "P4",
+   "ts": 1788439005.6428175,
+   "kind": "pattern",
+   "side": "phenomenon",
+   "claim": "补货周期和消耗周期不同频，导致周期性缺口",
+   "order": 1,
+   "proposed_by": "B",
+   "domain": "餐饮"
+  },
+  "I3": {
+   "id": "I3",
+   "ts": 1788439005.6428201,
+   "kind": "item",
+   "what": "光伏出力傍晚快速下降，居民用电高峰恰在傍晚，备用机组爬坡跟不上",
+   "intervention": null,
+   "outcome": "unknown",
+   "domain": "电力",
+   "source": "C"
+  },
+  "P5": {
+   "id": "P5",
+   "ts": 1788439005.6428242,
+   "kind": "pattern",
+   "side": "phenomenon",
+   "claim": "供给曲线和需求曲线的相位差，比总量缺口更致命",
+   "order": 1,
+   "proposed_by": "C",
+   "domain": "电力"
+  },
+  "I4": {
+   "id": "I4",
+   "ts": 1788439005.6428268,
+   "kind": "item",
+   "what": "工单积压；二线专家只在工作日在岗，周末一线只能挂起，周一二线被淹",
+   "intervention": null,
+   "outcome": "unknown",
+   "domain": "客服",
+   "source": "D"
+  },
+  "P6": {
+   "id": "P6",
+   "ts": 1788439005.64283,
+   "kind": "pattern",
+   "side": "phenomenon",
+   "claim": "两个不同频的节奏耦合时，故障周期性出现在相位错开的那个点上",
+   "order": 2,
+   "proposed_by": "E",
+   "domain": null
+  },
+  "C1": {
+   "id": "C1",
+   "ts": 1788439005.6428332,
+   "kind": "condition",
+   "claim": "两个节奏之间的东西可存储",
+   "test": "能不能先攒着、之后再用？人和实时服务不行",
+   "proposed_by": "C",
+   "domain": "电力"
+  },
+  "C2": {
+   "id": "C2",
+   "ts": 1788439005.6428351,
+   "kind": "condition",
+   "claim": "存取成本近似为零",
+   "test": "存进去再取出来，本身要不要花时间/人力？",
+   "proposed_by": "F",
+   "domain": "电商仓储"
+  },
+  "C3": {
+   "id": "C3",
+   "ts": 1788439005.6428366,
+   "kind": "condition",
+   "claim": "提高低频侧频率的边际成本低",
+   "test": "多排一个班 vs 多建一座电站",
+   "proposed_by": "A",
+   "domain": "医疗"
+  },
+  "C4": {
+   "id": "C4",
+   "ts": 1788439005.6428378,
+   "kind": "condition",
+   "claim": "需求侧可被调度",
+   "test": "能不能让需求方改时间？门诊可以，急诊不行",
+   "proposed_by": "A",
+   "domain": "医疗"
+  },
+  "P7": {
+   "id": "P7",
+   "ts": 1788439005.6428392,
+   "kind": "pattern",
+   "side": "solution",
+   "claim": "提高低频那一侧的频率，让两个节奏对齐",
+   "order": 1,
+   "proposed_by": "A",
+   "domain": null
+  },
+  "P8": {
+   "id": "P8",
+   "ts": 1788439005.6428413,
+   "kind": "pattern",
+   "side": "solution",
+   "claim": "在两个节奏之间插入缓冲，把它们解耦",
+   "order": 1,
+   "proposed_by": "C",
+   "domain": null
+  },
+  "P9": {
+   "id": "P9",
+   "ts": 1788439005.6428432,
+   "kind": "pattern",
+   "side": "solution",
+   "claim": "把负载从相位错开的那个点挪走（错峰/预约）",
+   "order": 1,
+   "proposed_by": "A",
+   "domain": null
+  },
+  "I5": {
+   "id": "I5",
+   "ts": 1788439005.6428576,
+   "kind": "item",
+   "what": "拣货波次 vs 订单到达不同频；加了暂存缓冲区，结果更慢 —— 缓冲堆积让找货时间上升",
+   "intervention": "加暂存缓冲区",
+   "outcome": "failed",
+   "domain": "电商仓储",
+   "source": "F"
+  },
+  "I6": {
+   "id": "I6",
+   "ts": 1788439005.6428623,
+   "kind": "item",
+   "what": "两条产线换模时间错开半小时后，卡顿消失了；不知道为什么",
+   "intervention": "错开换模时间",
+   "outcome": "worked",
+   "domain": "制造",
+   "source": "G"
+  }
+ },
+ "links": [
+  {
+   "src": "I1",
+   "dst": "P1",
+   "polarity": "+",
+   "why": "自己猜的",
+   "source": "A",
+   "domain": "医疗"
+  },
+  {
+   "src": "I1",
+   "dst": "P2",
+   "polarity": "+",
+   "why": "自己猜的",
+   "source": "A",
+   "domain": "医疗"
+  },
+  {
+   "src": "I1",
+   "dst": "P3",
+   "polarity": "+",
+   "why": "自己猜的",
+   "source": "A",
+   "domain": "医疗"
+  },
+  {
+   "src": "I2",
+   "dst": "P1",
+   "polarity": "+",
+   "why": "一周一次的补货节奏把缺口推给了下一个窗口",
+   "source": "B",
+   "domain": "餐饮"
+  },
+  {
+   "src": "I2",
+   "dst": "P4",
+   "polarity": "+",
+   "why": "自己猜的",
+   "source": "B",
+   "domain": "餐饮"
+  },
+  {
+   "src": "I3",
+   "dst": "P4",
+   "polarity": "+",
+   "why": "供给节奏和需求节奏不同频",
+   "source": "C",
+   "domain": "电力"
+  },
+  {
+   "src": "I3",
+   "dst": "P5",
+   "polarity": "+",
+   "why": "自己猜的",
+   "source": "C",
+   "domain": "电力"
+  },
+  {
+   "src": "I4",
+   "dst": "P1",
+   "polarity": "+",
+   "why": "周末是低产能窗口，负载推给了周一",
+   "source": "D",
+   "domain": "客服"
+  },
+  {
+   "src": "P1",
+   "dst": "P6",
+   "polarity": "+",
+   "why": "低产能窗口就是低频那一侧",
+   "source": "E",
+   "domain": "医疗"
+  },
+  {
+   "src": "P4",
+   "dst": "P6",
+   "polarity": "+",
+   "why": "补货频率 vs 消耗频率",
+   "source": "E",
+   "domain": "餐饮"
+  },
+  {
+   "src": "P5",
+   "dst": "P6",
+   "polarity": "+",
+   "why": "相位差就是这个",
+   "source": "E",
+   "domain": "电力"
+  },
+  {
+   "src": "I5",
+   "dst": "P6",
+   "polarity": "+",
+   "why": "确实是节奏不同频",
+   "source": "F",
+   "domain": "电商仓储"
+  },
+  {
+   "src": "I5",
+   "dst": "P8",
+   "polarity": "-",
+   "why": "在存取有成本时，缓冲只是把延迟换了个形态",
+   "source": "F",
+   "domain": "电商仓储"
+  },
+  {
+   "src": "I6",
+   "dst": "P9",
+   "polarity": "+",
+   "why": "后来别人判断这就是错峰",
+   "source": "H",
+   "domain": "制造"
+  }
+ ],
+ "prescriptions": {
+  "R1": {
+   "id": "R1",
+   "phenomenon": "P6",
+   "conditions": [
+    "C3"
+   ],
+   "solution": "P7",
+   "proposed_by": "A",
+   "evidence": [
+    {
+     "item": "I1",
+     "outcome": "worked",
+     "source": "A",
+     "domain": "医疗",
+     "note": "周末排一部分骨干值班"
+    },
+    {
+     "item": "I2",
+     "outcome": "worked",
+     "source": "B",
+     "domain": "餐饮",
+     "note": "一周一配改两配"
+    },
+    {
+     "item": "I4",
+     "outcome": "worked",
+     "source": "D",
+     "domain": "客服",
+     "note": "二线周末轮值"
+    }
+   ]
+  },
+  "R2": {
+   "id": "R2",
+   "phenomenon": "P6",
+   "conditions": [
+    "C1",
+    "C2"
+   ],
+   "solution": "P8",
+   "proposed_by": "C",
+   "evidence": [
+    {
+     "item": "I3",
+     "outcome": "worked",
+     "source": "C",
+     "domain": "电力",
+     "note": "加储能"
+    },
+    {
+     "item": "I5",
+     "outcome": "failed",
+     "source": "F",
+     "domain": "电商仓储",
+     "note": "满足可存储，但不满足存取成本≈0"
+    }
+   ]
+  },
+  "R3": {
+   "id": "R3",
+   "phenomenon": "P6",
+   "conditions": [
+    "C4"
+   ],
+   "solution": "P9",
+   "proposed_by": "A",
+   "evidence": [
+    {
+     "item": "I6",
+     "outcome": "worked",
+     "source": "H",
+     "domain": "制造",
+     "note": "事后才归因"
+    }
+   ]
+  }
+ },
+ "counters": {
+  "I": 6,
+  "P": 9,
+  "C": 4,
+  "R": 3
+ }
+}
