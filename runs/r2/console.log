@@ -2,3 +2,35 @@
 30 条 / 1 批 × 30
 
 === 批 1/1 — 30 个 agent 并行提议（只读快照 runs/r2/snap_b1.json）===
+  复用已有提议，跳过
+  B1A1 0s $0.00 turns=0 ok
+  B1A10 0s $0.00 turns=0 ok
+  B1A11 0s $0.00 turns=0 ok
+  B1A12 0s $0.00 turns=0 ok
+  B1A13 0s $0.00 turns=0 ok
+  B1A14 0s $0.00 turns=0 ok
+  B1A15 0s $0.00 turns=0 ok
+  B1A16 0s $0.00 turns=0 ok
+  B1A17 0s $0.00 turns=0 ok
+  B1A18 0s $0.00 turns=0 ok
+  B1A19 0s $0.00 turns=0 ok
+  B1A2 0s $0.00 turns=0 ok
+  B1A20 0s $0.00 turns=0 ok
+  B1A21 0s $0.00 turns=0 ok
+  B1A22 0s $0.00 turns=0 ok
+  B1A23 0s $0.00 turns=0 ok
+  B1A24 0s $0.00 turns=0 ok
+  B1A25 0s $0.00 turns=0 ok
+  B1A26 0s $0.00 turns=0 ok
+  B1A27 0s $0.00 turns=0 ok
+  B1A28 0s $0.00 turns=0 ok
+  B1A29 0s $0.00 turns=0 ok
+  B1A3 0s $0.00 turns=0 ok
+  B1A30 0s $0.00 turns=0 ok
+  B1A4 0s $0.00 turns=0 ok
+  B1A5 0s $0.00 turns=0 ok
+  B1A6 0s $0.00 turns=0 ok
+  B1A7 0s $0.00 turns=0 ok
+  B1A8 0s $0.00 turns=0 ok
+  B1A9 0s $0.00 turns=0 ok
+  并行墙钟 0.0s

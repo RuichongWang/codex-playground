@@ -77,7 +77,8 @@ TRIAGE = """你是 triage。下面是同一批 {n} 个 agent 各自**独立**提
 【当前库】{root}，只读：
   python3 -m pk.cli --db {snap} patterns / conditions / search "..." / get <id>
 
-【这批建议】{props}
+【这批建议】在这些文件里，自己读（一次 Bash 调用里 cat 完）：
+{props}
 
 【你只做判断，不搬运文字】
 你**不需要**、也**不允许**重写任何 claim / test / why。最终写入由代码按你的映射从原始提议里
@@ -175,7 +176,7 @@ def main():
             print("  这批没有可用提议，跳过"); continue
 
         mmf = f"{a.outdir}/merge_b{bi}.json"
-        blob = "\n\n".join(f"--- {p['aid']} 的建议 ---\n" + open(p["out"]).read() for p in good)
+        blob = "\n".join(f"  {p['out']}   （{p['aid']} 提的）" for p in good)
         t0 = time.time()
         r = claude(TRIAGE.format(n=len(good), root=ROOT, snap=snap, out=mmf, props=blob), timeout=1200)
         total += r.get("total_cost_usd", 0)
