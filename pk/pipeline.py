@@ -58,7 +58,11 @@ PROPOSE = """你是 agent {aid}。你刚刚经历了下面这件事，要向一�
 1. **先查库**，换不同说法多查几次 —— 别人的措辞不会跟你一样。
 2. **能 link 多少 link 多少** —— 一件事可以同时是多个假说的证据。只有真相关才 link。
 3. 明确**不成立**的打负 link（polarity "-"），那比正 link 更值钱。
-4. 鼓励猜新 pattern，粒度不确定就猜几个不同层级的。但**先确认库里没有意思相同的**；有就复用真 id。
+4. **配额：最多新建 3 个 pattern。** 库里已经有很多假说了，先尽力复用真 id ——
+   复用一条已有的比新建一条有价值得多，因为它给那条假说添了一个独立来源。
+   实在要新建，先在心里排序，只提你最有把握、最可能被别的行业复用的那 3 个。
+   宁可少提也不要凑数：一条只对你这件事成立的"假说"是负资产。
+   条件同理，最多 3 条。
 5. 猜了高阶 pattern（order 2+）就必须 link 回它抽象自的低阶 pattern，否则库是一堆扁平猜测。
 6. 条件写成**可复用、能判断**的谓词，不要写成只描述你这一件事的话。每条必须有 test。
 7. 条件是准入闸门，只写真正决定解法成不成的那几条，**能少则少**。
@@ -130,11 +134,16 @@ def main():
     ap.add_argument("--limit", type=int, default=30)
     ap.add_argument("--shuffle", type=int, default=7)
     ap.add_argument("--outdir", default="runs/v2")
+    ap.add_argument("--base", default=None, help="以某个已有库为基线（第二轮用第一轮冻结的库）")
     ap.add_argument("--log", default="runs/v2/pipeline.jsonl")
     ap.add_argument("--reuse", action="store_true", help="已有 prop_*.json 就不重跑提议")
+    ap.add_argument("--concurrency", type=int, default=10, help="同批内滚动并发上限")
     a = ap.parse_args()
 
     events = load_corpus(a.corpus, None if a.shuffle < 0 else a.shuffle)[:a.limit]
+    if a.base and not os.path.exists(a.db):
+        shutil.copy(a.base, a.db)
+        print(f"以 {a.base} 为基线开跑")
     os.makedirs(a.outdir, exist_ok=True)
     batches = [events[i:i + a.batch_size] for i in range(0, len(events), a.batch_size)]
     print(f"{len(events)} 条 / {len(batches)} 批 × {a.batch_size}")
@@ -152,7 +161,7 @@ def main():
                           cost=0, turns=0, secs=0, result="(复用)") for i, c in enumerate(cached)]
             print("  复用已有提议，跳过")
         else:
-          with cf.ThreadPoolExecutor(max_workers=len(batch)) as ex:
+          with cf.ThreadPoolExecutor(max_workers=min(a.concurrency, len(batch))) as ex:
             futs = {ex.submit(propose, ev, f"B{bi}A{i+1}", snap, a.outdir): ev
                     for i, ev in enumerate(batch)}
             props = [f.result() for f in cf.as_completed(futs)]
