@@ -18,3 +18,9 @@
 事件→pattern 的正 link 共 32 条
 
 === 批 2/6 — 5 个 agent 并行提议（只读快照 runs/v2/snap_b2.json）===
+  B2A1 251.5s $0.87 turns=6 ok
+  B2A2 183.0s $0.77 turns=8 ok
+  B2A3 248.5s $0.74 turns=6 ok
+  B2A4 221.4s $0.80 turns=7 ok
+  B2A5 284.9s $0.92 turns=6 ok
+  并行墙钟 284.9s
