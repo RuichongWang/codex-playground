@@ -109,13 +109,13 @@ def do_trap(case, ans):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="runs/stage4")
-    ap.add_argument("--arms", default="A,B,C,D")
+    ap.add_argument("--arms", default="A,A2,C,D")
     ap.add_argument("--limit", type=int, default=30)
     ap.add_argument("--workers", type=int, default=6)
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     dbs = make_variants(a.out)
-    cases = [c for f in sorted(glob.glob(os.path.join(ROOT, "heldout/*.json")))
+    cases = [c for f in sorted([f for f in glob.glob(os.path.join(ROOT, "heldout/*.json")) if "mech" not in f])
              for c in json.load(open(f))][:a.limit]
     arms = a.arms.split(",")
     fails = [c for c in cases if c["outcome"] == "failed"]
@@ -138,7 +138,7 @@ def main():
     rng = random.Random(11)
     lj = [(lambda c=cmap[i], x=x, y=y: do_lenient(c, answers[(i, x)], answers[(i, y)], rng),
            dict(id=i, pair=f"{x}v{y}"))
-          for i in cmap for x, y in (("C", "D"), ("C", "B"), ("C", "A"), ("B", "A"))
+          for i in cmap for x, y in (("C", "D"), ("C", "A"), ("A", "A2"))
           if (i, x) in answers and (i, y) in answers]
     parallel(lj, a.workers, P("lenient.jsonl"), lambda r: (r["id"], r["pair"]), "lenient")
     subprocess.run([sys.executable, "-m", "pk.report4", "--out", a.out], cwd=ROOT)

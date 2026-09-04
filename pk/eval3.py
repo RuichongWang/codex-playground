@@ -342,7 +342,7 @@ def main():
     os.makedirs(a.out, exist_ok=True)
 
     cases = []
-    for f in sorted(glob.glob(os.path.join(ROOT, "heldout/*.json"))):
+    for f in sorted([f for f in glob.glob(os.path.join(ROOT, "heldout/*.json")) if "mech" not in f]):
         cases += json.load(open(f))
     cases = cases[:a.limit]
     s = load_lib()

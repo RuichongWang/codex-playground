@@ -97,7 +97,7 @@ def make_variants(outdir):
         s.links = [l for l in s.links if l["src"] in s.nodes and l["dst"] in s.nodes]
         s.prescriptions = {}
         s.save(items)
-    return {"B": items, "C": full, "D": full}
+    return {"B": items, "C": full, "D": full, "A": full, "A2": full}
 
 
 def main():
@@ -109,7 +109,7 @@ def main():
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     dbs = make_variants(a.out)
-    cases = [c for f in sorted(glob.glob(os.path.join(ROOT, "heldout/*.json")))
+    cases = [c for f in sorted([f for f in glob.glob(os.path.join(ROOT, "heldout/*.json")) if "mech" not in f])
              for c in json.load(open(f))][:a.limit]
     arms = a.arms.split(",")
     print(f"held-out {len(cases)} 条 × arm {arms}（agentic：Bash + skill + CLI）", flush=True)

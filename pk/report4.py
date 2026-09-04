@@ -20,7 +20,7 @@ def sign(w, l):
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--out", default="runs/stage4"); a = ap.parse_args()
     P = lambda n: os.path.join(a.out, n)
-    cases = {c["id"]: c for f in sorted(glob.glob(os.path.join(ROOT, "heldout/*.json")))
+    cases = {c["id"]: c for f in sorted([f for f in glob.glob(os.path.join(ROOT, "heldout/*.json")) if "mech" not in f])
              for c in json.load(open(f))}
     ans = {(r["id"], r["arm"]): r for r in load(P("answers.jsonl"))}
     trap = {(r["id"], r["arm"]): r for r in load(P("trap.jsonl"))}

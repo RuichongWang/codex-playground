@@ -28,7 +28,7 @@ def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--out", default="runs/stage3"); a = ap.parse_args()
     P = lambda n: os.path.join(a.out, n)
     cases = []
-    for f in sorted(glob.glob(os.path.join(ROOT, "heldout/*.json"))): cases += json.load(open(f))
+    for f in sorted([f for f in glob.glob(os.path.join(ROOT, "heldout/*.json")) if "mech" not in f]): cases += json.load(open(f))
     cmap = {c["id"]: c for c in cases}
 
     pj = {r["id"]: r for r in load(P("probe_judge.jsonl"))}
