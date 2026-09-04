@@ -12,10 +12,15 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LIB = os.path.join(ROOT, "runs/r3/library.json")
 
 
-def claude(prompt, timeout=600, model="claude-opus-5"):
-    p = subprocess.run(["claude", "-p", prompt, "--model", model, "--output-format", "json",
-                        "--allowed-tools", "", "--strict-mcp-config"],
-                       cwd=ROOT, capture_output=True, text=True, timeout=timeout)
+def claude(prompt, timeout=600, model="claude-opus-5", tools=None, cwd=None):
+    """提示走 stdin，不走 argv —— argv 单参数上限 128KB，中文一字 3 字节，很容易撞。"""
+    cmd = ["claude", "-p", "--model", model, "--output-format", "json"]
+    if tools:
+        cmd += ["--allowed-tools", tools, "--permission-mode", "acceptEdits", "--add-dir", ROOT]
+    else:
+        cmd += ["--allowed-tools", "", "--strict-mcp-config"]
+    p = subprocess.run(cmd, input=prompt, cwd=cwd or ROOT,
+                       capture_output=True, text=True, timeout=timeout)
     try:
         r = json.loads(p.stdout)
         return r.get("result", ""), r.get("total_cost_usd", 0)

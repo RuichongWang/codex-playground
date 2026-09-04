@@ -52,6 +52,8 @@ def main(argv=None):
     p.add_argument("--limit", type=int, default=20)
     sub.add_parser("conditions", help="列所有条件")
     sub.add_parser("stats", help="库的规模和爆炸系数")
+    p = sub.add_parser("catalog", help="一行一条列出全部 claim，供 grep")
+    p.add_argument("--kind", default="pattern")
 
     p = sub.add_parser("prescriptions", help="查某现象在条件下的解法")
     p.add_argument("phenomenon"); p.add_argument("--satisfied", default=None)
@@ -96,7 +98,16 @@ def main(argv=None):
     dirty = True
 
     if a.cmd == "search":
-        hits = s.search(a.text, kind=a.kind, side=a.side, limit=a.limit)
+        if os.environ.get("PK_BLIND_SEARCH"):
+            # 安慰剂：返回同等数量的真实节点，但与查询无关。
+            # 用于把「有库可查」和「查得准」这两件事分开。
+            import random as _r
+            pool = [n for n in s.nodes.values()
+                    if (a.kind is None or n["kind"] == a.kind)
+                    and (a.side is None or n.get("side") == a.side)]
+            hits = _r.Random(hash(a.text) & 0xffff).sample(pool, min(a.limit, len(pool)))
+        else:
+            hits = s.search(a.text, kind=a.kind, side=a.side, limit=a.limit)
         print("\n".join(fmt(s, n) for n in hits) or "（没查到）"); dirty = False
     elif a.cmd == "get":
         print(fmt(s, s.nodes[a.id]) if a.id in s.nodes else f"没有 {a.id}"); dirty = False
@@ -127,6 +138,13 @@ def main(argv=None):
             top = max(pats, key=lambda n: s.credibility(n["id"])["events"])
             print(f"最大 pattern：{top['id']} 独立事件 {s.credibility(top['id'])['events']} — {top['claim']}")
         print(f"事件→pattern 的正 link 共 {reuse} 条"); dirty = False
+    elif a.cmd == "catalog":
+        for n in s.nodes.values():
+            if n["kind"] != a.kind:
+                continue
+            tag = ("现象" if n.get("side") == "phenomenon" else "解法") if a.kind == "pattern" else "条件"
+            print(f"{n['id']}\t[{tag}]\t{(n.get('claim') or '').replace(chr(10),' ')}")
+        dirty = False
     elif a.cmd == "prescriptions":
         sat = a.satisfied.split(",") if a.satisfied else None
         rs = s.prescriptions_for(a.phenomenon, satisfied=sat)
