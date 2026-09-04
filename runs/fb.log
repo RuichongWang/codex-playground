@@ -1,28 +1,8 @@
-2026-06-07：取前 3 题 × ['A', 'C']
-  [acled] Will there be more 'Riots' in Mongolia for the 30 days before {resolution_date}   → 实际 0.0
-  [acled] Will there be more 'Strategic developments' in Albania for the 30 days before {r  → 实际 0.0
-  [acled] Will there be more than ten times as many fatalities in Sao Tome and Principe fo  → 实际 0.0
-  fb: 共 6，已完成 0，待跑 6
-
-=== 结果 ===
-  A: n=3  Brier=0.2102  $0.16
-  C: n=3  Brier=0.2003  $1.63
-  市场价基线: n=3 Brier=0.5648
-
-  [A] Will there be more 'Riots' in Mongolia for the 30 days before {resolut
-      预测 7  实际 0  市场 0  1轮 $0.05
-
-  [C] Will there be more 'Riots' in Mongolia for the 30 days before {resolut
-      预测 8  实际 0  市场 0  11轮 $0.55
-
-  [A] Will there be more 'Strategic developments' in Albania for the 30 days
-      预测 79  实际 0  市场 83  1轮 $0.07
-
-  [C] Will there be more 'Strategic developments' in Albania for the 30 days
-      预测 77  实际 0  市场 83  9轮 $0.58
-
-  [A] Will there be more than ten times as many fatalities in Sao Tome and P
-      预测 4  实际 0  市场 100  1轮 $0.05
-
-  [C] Will there be more than ten times as many fatalities in Sao Tome and P
-      预测 4  实际 0  市场 100  9轮 $0.51
+2026-06-07：取前 6 题 × ['A', 'C']
+  [acled] Will there be more 'Explosions/Remote violence' in Romania for the 30 days befor  → 实际 1.0
+  [dbnomics] What is the probability that the daily average temperature at the French weather  → 实际 0.0
+  [fred] Will the market yield on US treasury securities at 3-year constant maturity, quo  → 实际 0.0
+  [infer] Will China's year-over-year GDP growth rate for Q2 2026 equal or exceed 5.0%, ac  → 实际 0.0
+  [manifold] Will the United States make it out of the group stage in the 2026 FIFA World Cup  → 实际 1.0
+  [metaculus] Will Iran and U.S play against each other in the 2026 FIFA World Cup?  → 实际 0.0
+  fb: 共 12，已完成 0，待跑 12
