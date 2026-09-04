@@ -144,11 +144,15 @@ def do_probe_judge(case, probe):
 
 def do_arm(case, arm, s, cases):
     block = ""
-    if arm == "B":
+    if arm == "A2":      # 裸模型的第二次独立运行 —— 用来量运行间方差
+        arm_eff = "A"
+    else:
+        arm_eff = arm
+    if arm_eff == "B":
         block = "\n" + block_items(s, case["situation"]) + "\n"
-    elif arm == "C":
+    elif arm_eff == "C":
         block = "\n" + block_patterns(s, case["situation"]) + "\n"
-    elif arm == "D":
+    elif arm_eff == "D":
         # 活性安慰剂：结构/篇幅/质量一致，但检索的是另一个案例的内容
         other = cases[(cases.index(case) + 15) % len(cases)]
         block = "\n" + block_patterns(s, other["situation"]) + "\n"
