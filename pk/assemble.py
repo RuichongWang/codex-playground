@@ -96,6 +96,13 @@ def build(props, mm):
             ph = resolve(aid, rx["phenomenon"]) if is_local(aid, rx["phenomenon"]) else rx["phenomenon"]
             so = resolve(aid, rx["solution"]) if is_local(aid, rx["solution"]) else rx["solution"]
             cs = [resolve(aid, c) if is_local(aid, c) else c for c in rx.get("conditions", [])]
+            # triage 可能用 claim 原文指代解法，解析不出来就会写进一个悬空引用。
+            # 一条悬空引用会被后续检索反复命中，爆炸半径远大于它本身 —— 当场丢弃。
+            known = set(alias.values()) | {x["key"] for x in spec["patterns"] + spec["conditions"]}
+            if (so not in known and not so.startswith(("P", "C", "I"))) or \
+               any(c not in known and not c.startswith(("P", "C")) for c in cs):
+                spec.setdefault("_dropped", []).append(dict(aid=aid, why="prescription 引用解析不出", solution=so[:60]))
+                continue
             spec["prescriptions"].append(dict(phenomenon=ph, conditions=cs, solution=so,
                                               item=f"i_{aid}", source=aid,
                                               outcome=rx.get("outcome", "none"), note=rx.get("note", "")))

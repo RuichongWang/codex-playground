@@ -19624,16 +19624,6 @@
    "proposed_by": "B6A5",
    "evidence": []
   },
-  "R63": {
-   "id": "R63",
-   "phenomenon": "P145",
-   "conditions": [
-    "C48"
-   ],
-   "solution": "把返工/事后修改单独立成一类受控作业，给它一份与首次制造等强度的放行序列，并把这份要求挂在一个握有停线权与预算的具体岗位上",
-   "proposed_by": "B6A5",
-   "evidence": []
-  },
   "R64": {
    "id": "R64",
    "phenomenon": "P148",

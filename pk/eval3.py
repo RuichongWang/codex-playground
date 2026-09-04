@@ -52,6 +52,8 @@ def block_patterns(s, text, k=8):
         out.append(f"- [{'现象' if p['side']=='phenomenon' else '解法'}] {p['claim']}")
         out.append(f"    （{c['events']} 个独立事件支持，{c['refutes']} 条反驳）")
         for r in s.prescriptions.values():
+            if r["solution"] not in s.nodes or any(c not in s.nodes for c in r["conditions"]):
+                continue  # 悬空引用：跳过这条，不要让一处数据缺陷打掉整次运行
             if r["phenomenon"] == p["id"] and r["conditions"]:
                 sc = s.prescription_score(r["id"])
                 out.append(f"    · 若要用「{s.nodes[r['solution']]['claim'][:60]}」，前提是：")
