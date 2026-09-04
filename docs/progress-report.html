@@ -1,0 +1,250 @@
+<title>跨行业假说库进展</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#F6F7F9; --panel:#FFFFFF; --ink:#141A21; --ink-2:#3D4753; --muted:#6B7684;
+  --rule:#DCE1E8; --rule-soft:#EAEEF3;
+  --accent:#2E5E8C; --accent-soft:#E7EEF6;
+  --pos:#3A6F57; --pos-soft:#E6F0EA;
+  --neg:#A2452F; --neg-soft:#F7E9E5;
+  --warn:#8A6A24; --warn-soft:#F6EFDF;
+  --serif:"Newsreader",Georgia,"Songti SC",serif;
+  --sans:"IBM Plex Sans","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0F1317; --panel:#161B21; --ink:#E7EBF0; --ink-2:#BAC3CE; --muted:#8894A2;
+  --rule:#2A323B; --rule-soft:#212932;
+  --accent:#7FAFD8; --accent-soft:#1B2733;
+  --pos:#7BB394; --pos-soft:#18241E;
+  --neg:#D98E79; --neg-soft:#2A1D19;
+  --warn:#CBAE6C; --warn-soft:#2A2418;
+}}
+:root[data-theme="dark"]{
+  --ground:#0F1317; --panel:#161B21; --ink:#E7EBF0; --ink-2:#BAC3CE; --muted:#8894A2;
+  --rule:#2A323B; --rule-soft:#212932;
+  --accent:#7FAFD8; --accent-soft:#1B2733;
+  --pos:#7BB394; --pos-soft:#18241E;
+  --neg:#D98E79; --neg-soft:#2A1D19;
+  --warn:#CBAE6C; --warn-soft:#2A2418;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--sans);
+  font-size:16px;line-height:1.72;-webkit-font-smoothing:antialiased}
+.wrap{max-width:820px;margin:0 auto;padding:56px 26px 96px}
+h1,h2,h3{font-family:var(--serif);text-wrap:balance;margin:0}
+h1{font-size:40px;line-height:1.18;font-weight:500;letter-spacing:-.01em}
+h2{font-size:25px;font-weight:500;margin:0 0 14px}
+h3{font-size:18px;font-weight:600;margin:0 0 6px}
+p{margin:0 0 15px;color:var(--ink-2)}
+.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--muted);margin:0 0 14px}
+.lede{font-family:var(--serif);font-size:20px;line-height:1.62;color:var(--ink);margin:20px 0 0}
+header{border-bottom:1px solid var(--rule);padding-bottom:30px;margin-bottom:6px}
+.meta{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:22px;
+  font-family:var(--mono);font-size:12px;color:var(--muted)}
+section{padding:36px 0;border-bottom:1px solid var(--rule-soft)}
+section:last-of-type{border-bottom:0}
+.status{display:flex;flex-direction:column;gap:10px;margin:26px 0 0}
+.st{display:grid;grid-template-columns:104px 1fr;gap:16px;align-items:baseline;
+  padding:13px 16px;background:var(--panel);border:1px solid var(--rule);border-radius:3px}
+.tag{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  padding:3px 8px;border-radius:2px;text-align:center;white-space:nowrap}
+.t-pos{background:var(--pos-soft);color:var(--pos)}
+.t-warn{background:var(--warn-soft);color:var(--warn)}
+.t-neg{background:var(--neg-soft);color:var(--neg)}
+.st b{font-weight:600;color:var(--ink)}
+.st span{color:var(--ink-2);font-size:15px}
+.rounds{counter-reset:r}
+.round{position:relative;padding-left:46px;margin-bottom:26px}
+.round::before{counter-increment:r;content:"轮 " counter(r);position:absolute;left:0;top:3px;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--muted);
+  writing-mode:vertical-rl;text-orientation:mixed}
+.round::after{content:"";position:absolute;left:30px;top:2px;bottom:-14px;width:1px;background:var(--rule)}
+.round:last-child::after{bottom:6px}
+.tbl{overflow-x:auto;margin:20px 0 6px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;font-variant-numeric:tabular-nums}
+th,td{text-align:right;padding:9px 12px;border-bottom:1px solid var(--rule-soft);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;white-space:normal}
+thead th{font-family:var(--mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--muted);border-bottom:1px solid var(--rule);font-weight:400}
+tbody tr:last-child td{border-bottom:0}
+td.hi{color:var(--ink);font-weight:600}
+td.dim{color:var(--muted)}
+.cap{font-size:13px;color:var(--muted);margin:6px 0 0}
+code,.id{font-family:var(--mono);font-size:.88em;background:var(--accent-soft);color:var(--accent);
+  padding:1px 5px;border-radius:2px}
+blockquote{margin:18px 0;padding:14px 18px;background:var(--panel);
+  border-left:2px solid var(--accent);border-radius:0 3px 3px 0;color:var(--ink-2);font-size:15px}
+blockquote p:last-child{margin:0}
+.note{background:var(--panel);border:1px solid var(--rule);border-radius:3px;padding:18px 20px;margin:20px 0}
+.note.warn{border-left:3px solid var(--warn)}
+.note.neg{border-left:3px solid var(--neg)}
+.note h3{margin-bottom:8px}
+.note p:last-child{margin:0}
+ul{margin:0 0 15px;padding-left:20px;color:var(--ink-2)}
+li{margin-bottom:7px}
+li::marker{color:var(--muted)}
+.q{border-top:1px solid var(--rule);margin-top:14px;padding-top:22px}
+.q ol{padding-left:20px;margin:0}
+.q li{margin-bottom:13px;color:var(--ink-2)}
+.q li b{color:var(--ink);font-weight:600}
+a{color:var(--accent)}
+@media (max-width:620px){
+  .wrap{padding:38px 18px 70px}h1{font-size:31px}
+  .st{grid-template-columns:1fr;gap:7px}.tag{justify-self:start}
+  .round{padding-left:0}.round::before,.round::after{display:none}
+  .round h3{border-left:2px solid var(--rule);padding-left:12px}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <p class="eyebrow">进展汇报 · Pattern Hierarchy</p>
+  <h1>跨行业假说库</h1>
+  <p class="lede">一群 agent 边干活边把经历写进共享库、互相猜彼此的假说——三轮建库跑通了，「库能不能让判断变好」还没测到，而上一轮实验的设计本身就测不出来。</p>
+  <div class="meta">
+    <span>90 条材料 · 310 个假说 · 1396 条 link</span>
+    <span>累计约 $237</span>
+    <span>分支 claude/pattern-hierarchy-experiment</span>
+  </div>
+</header>
+
+<section>
+  <h2>三个命题的状态</h2>
+  <div class="status">
+    <div class="st"><span class="tag t-pos">已验证</span>
+      <span><b>互不相识的 agent 会独立归到同一个猜测下面。</b>第二轮 30 个提议 agent 打第一轮冻结的库，283 条正 link 里 217 条（77%）落在上一轮完全另一批人建的 pattern 上。</span></div>
+    <div class="st"><span class="tag t-pos">已验证</span>
+      <span><b>抽象能跨类型接住。</b>第三轮换成教科书原理和「做对了」的案例，71% 仍落在前两轮从事故里长出来的假说下面；负 link 密度翻了近三倍。</span></div>
+    <div class="st"><span class="tag t-warn">未测出</span>
+      <span><b>库能不能让判断变好。</b>迁移实验是 null，但天花板效应和检索失效都能产生同样的 null，含义相反。这一轮没有分辨力。</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>库建起来了</h2>
+  <p>三轮各 30 条材料，每轮打上一轮冻结的库。写入 agent 互相不可见、只看只读快照，所以「撞上同一个假说」是独立发生的，不是被撮合的。</p>
+  <div class="tbl">
+  <table>
+    <thead><tr><th>指标</th><th>轮 1 事故</th><th>轮 2 事故</th><th>轮 3 通识</th></tr></thead>
+    <tbody>
+      <tr><td>每条材料新建假说</td><td class="dim">5.4</td><td class="hi">2.43</td><td>2.53</td></tr>
+      <tr><td>复用已有假说的比例</td><td>57%<span class="dim"> 跨批</span></td><td class="hi">77%<span class="dim"> 跨轮</span></td><td>71%<span class="dim"> 跨类型</span></td></tr>
+      <tr><td>负 link / 每条材料</td><td class="dim">~0.9</td><td class="dim">~0.9</td><td class="hi">2.60</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="cap">轮 2 的配额（最多新建 3 个）把爆炸系数砍了一半多；轮 3 的教科书语料让负 link 密度跳了三倍。</p>
+
+  <div class="rounds" style="margin-top:30px">
+    <div class="round"><h3>事故 → 假说</h3>
+      <p>医疗运营、供应链、电力、制造召回、软件事故、交通教育。最强的假说 <span class="id">P43</span> 现在有 <b>65 个独立事件、48 个来源、2 条反驳</b>。</p></div>
+    <div class="round"><h3>另一批人、另一批事件</h3>
+      <p>金融风控、农业水资源、建筑基建、公卫、赛事。还专门造了配对语料测「同情境自报」——这个机制轮 1 一次都没触发过。结果：同一起事故的两个视角<b>判对了</b>；两起机制雷同的不同事故<b>正确地没有合并</b>，而是共同 link 到 4 个相同的假说；表面用词相近的干扰项<b>没有误判</b>。</p></div>
+    <div class="round"><h3>通识与「做对了」的案例</h3>
+      <p>教科书原理 20 条 + 有边界条件的最佳实践 5 条 + 本来会出事但没出事的案例 5 条。后者直接对治「只看事故就分不清机制危险还是机制常见」这个认识论缺陷——采集时找到了同机制对照：福岛第二对福岛第一、爱信火灾对一般 JIT 单点失效。</p></div>
+  </div>
+
+  <blockquote>
+    <p>库反过来限定了教科书：<span class="id">Goodhart</span> ⊣ <span class="id">P61</span>——「反例（针对流行转述的过宽读法）：P61 明确把预演天数当成日程压力下的考核目标，<b>却没有出现 Goodhart 式失效，且被 8 个独立事件支持。原因是这个量没有旁路</b>。」</p>
+  </blockquote>
+  <p class="cap">教科书给库补边界，库给教科书补反例。这个方向是原设计里没预料到的。</p>
+</section>
+
+<section>
+  <h2>迁移实验：null，而且这个 null 不能当结论</h2>
+  <p>30 个 held-out 案例，来自六个被<b>永久锁定、以后扩库必须避开</b>的领域（采矿、航天、司法监狱、影视档案、渔业极地、国防采办）。污染探针分层干净：认得出 15 / 认不出 15，达到预注册门槛。</p>
+  <div class="tbl">
+  <table>
+    <thead><tr><th>干净样本 n=15</th><th>A 裸模型</th><th>B 只有案例</th><th>C 全库</th><th>D 安慰剂</th></tr></thead>
+    <tbody>
+      <tr><td>条件 F1（主指标）</td><td>0.845</td><td>0.828</td><td class="hi">0.812</td><td>0.846</td></tr>
+      <tr><td>precision</td><td>0.863</td><td>0.816</td><td>0.798</td><td>0.827</td></tr>
+      <tr><td>Brier（越低越好）</td><td>0.070</td><td>0.067</td><td>0.065</td><td>0.061</td></tr>
+      <tr><td>干预成败预测准确率</td><td>0.933</td><td>0.933</td><td>0.933</td><td>0.933</td></tr>
+      <tr><td class="dim">（全押 failed 的基线）</td><td class="dim" colspan="4">0.800</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="cap">C−D = −0.034，逐案例 C 胜 4 / D 胜 8 / 平 3，p=0.388。配对盲比 C vs D 17:13（p=0.585）、C vs B 18:12（p=0.362）。全部不显著。</p>
+
+  <div class="note warn">
+    <h3>两个解释都还站着，含义相反</h3>
+    <p><b>天花板。</b>裸模型预测准确率已经 0.933、条件 F1 已经 0.845，没余量可涨。题面虽不泄露答案，但仍含足够判据；而条件清单是同族模型从同一份源材料写的，所以另一个模型读题面就能收敛到 82%——<b>这个指标测的是读题仔细程度，不是可迁移的抽象</b>。</p>
+    <p><b>检索失效。</b>抽查 C 拿到的库内容，相关性跟 D 的张冠李戴差不多。给「监测型干预的前提」那道题检索到的是「外部二值放行事件」「优化器排紧的计划网络」——一条对不上。<b>那这次测的是「不相关的库 vs 不相关的库」。</b></p>
+  </div>
+  <p>最讽刺的是：这个项目一开始的命题就是「层级下钻 &gt; 平铺 top-k」，而我在收官实验里用的正是平铺字面 top-k。</p>
+</section>
+
+<section>
+  <h2>两个差点变成结论的错误</h2>
+  <div class="note neg">
+    <h3>不等长的臂之间比了均值</h3>
+    <p>首轮报表在<b>各臂各自的有效子集</b>上取 Brier 均值。C 有 3 个案例没吐出概率（恰好都是难题），均值从 0.064 掉到 0.014——看起来像「库让判断质量提升 5 倍」。在四臂共同子集上重算，四个臂是 0.013~0.017，<b>毫无差别</b>。已修：报表强制用交集。</p>
+  </div>
+  <div class="note neg">
+    <h3>把自己的 KeyError 报成了模型的问题</h3>
+    <p>我曾报告「长上下文降低格式遵从率」。真实原因是库里 189 条 prescription 中有 1 条的 solution 指向不存在的节点，被 8 个案例检索到，打掉了 120 次运行里的 8 次。<b>库块只有约 3.4k token，对 1M 窗口根本不叫长。</b>已修：删掉那条、格式化器加防御、拼装器加校验。</p>
+  </div>
+</section>
+
+<section>
+  <h2>已经改掉的：库从「材料」变成「环境」</h2>
+  <p>之前是静态检索 top-8 塞进 prompt。现在四个 arm 拿到完全一样的工具——Bash、CLI 和一个配套 skill——差别只在指向哪个库、检索准不准。</p>
+  <ul>
+    <li><b>Skill 教的是怎么走库，不是命令表</b>：别指望一次 search 命中（别人用的是他自己行业的词）；<code>catalog | grep</code> 跨行业时比 search 好使；找到一条像的立刻看 neighbors；<b>一定要看反驳</b>，它直接给出边界；拿到解法先查条件；<b>库里没有就说没有</b>。</li>
+    <li><b>安慰剂重新设计</b>：喂错内容在 agent 能自己查之后就不可比了（它会重查一遍）。新的 D 是<b>盲检索</b>——同一个全库、同样的工具、同样的工作量，但 search 返回与查询无关的真节点。它分离的是「有库可查」和「查得准」。</li>
+    <li><b>提示走 stdin</b>：argv 单参数上限 128KB，中文一字 3 字节，这个坑踩了两次。已从根上消掉。</li>
+    <li><b>轨迹全量落盘</b>：之前只存最终答案和轮次，中间做了什么是黑盒。</li>
+  </ul>
+
+  <div class="note">
+    <h3>第一次 agentic 运行：跨域迁移真的发生了</h3>
+    <p>16 轮、225 秒、$1.33。它在推理里直接引用了库里的节点：</p>
+    <blockquote><p>这正是 <span class="id">I36</span> 的形状：剂数在总量上「到货正常」，而最优先段可用量为零。</p></blockquote>
+    <p><span class="id">I36</span> 是<b>日本 2021 年注射器死腔与瓶剂量不匹配</b>（1.44 亿剂按 6 剂/瓶签约，普通注射器只能抽 5 剂，凭空少 1200 万人份）。它把这个搬到了<b>加州影视退税扩容</b>上——判定 failed、概率 20，全对。</p>
+  </div>
+
+  <h3 style="margin-top:30px">轨迹：skill 的六条教法全部被用上</h3>
+  <p>14 次工具调用，顺序是这样的：</p>
+  <div class="tbl">
+  <table>
+    <thead><tr><th>skill 教的</th><th>实际做的</th></tr></thead>
+    <tbody>
+      <tr><td>先读 skill</td><td style="text-align:left">第 1 步就 Read 了 SKILL.md</td></tr>
+      <tr><td>换机制层面的说法多查几次</td><td style="text-align:left"><b>13 种查法</b>，全是机制词：「干预作用在错误的变量上」「把资源投在弹性最小的变量上」「总量指标掩盖结构分化」——没有一个领域词</td></tr>
+      <tr><td>多条命令串一次调用</td><td style="text-align:left">用 <code>for</code> 循环把 7 个查询打包成 1 轮</td></tr>
+      <tr><td><code>catalog | grep</code> 扫全局</td><td style="text-align:left">导出全部 claim 到文件再筛</td></tr>
+      <tr><td>展开 neighbors</td><td style="text-align:left">对候选节点逐个展开上下邻居</td></tr>
+      <tr><td>拿到解法先查条件</td><td style="text-align:left">列了全部 177 条条件，又查了 <span class="id">P43</span> / <span class="id">P286</span> 的 prescription</td></tr>
+      <tr><td><b>库里没有就说没有</b></td><td style="text-align:left"><b>明确写下</b>「库里没有传媒或产业政策的事件」，然后转为只在机制层面找——<b>没有硬套</b></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="cap">这直接回答了「skill 有没有用」：有。它不是被当成命令表读的，六条走法都落到了行为上。</p>
+
+  <div class="note warn" style="margin-top:22px">
+    <h3>一个越界行为要记一笔</h3>
+    <p>第 9 步它去 <code>grep</code> 了 <code>/root/.claude/projects/…/tool-results</code>——那是<b>我自己的 session 记录目录，不是库</b>。只读、无害，但说明 <code>--add-dir</code> 之外它仍能访问 home，评测环境的隔离不够干净。要在下一轮收紧。</p>
+  </div>
+</section>
+
+<section>
+  <h2>下一步</h2>
+  <ul>
+    <li><b>把 skill 的教法推广到写入侧。</b>轨迹显示读取侧的六条教法全部生效（见上），但写入 agent 用的还是硬编在 prompt 里的规则。同一套「怎么走库」应该合并成一份。</li>
+    <li><b>把题出难。</b>不给干预、让 agent 自己提，再跟实际奏效的做法比；条件清单必须包含<b>从题面推不出来</b>的条目；题面再削一层；把成败配比压到 0.5 附近。30 个案例的 ground truth 和污染标注都能复用。</li>
+    <li><b>agentic 全量。</b>单次约 $1.33 × 120 次 ≈ $160，比静态版贵一个量级。建议先看轨迹、改完 skill 再跑。</li>
+  </ul>
+</section>
+
+<section class="q">
+  <h2>要你定的三件事</h2>
+  <ol>
+    <li><b>先修题还是先修检索？</b>两个 null 解释我建议<b>先修题</b>——因为即使检索完美，天花板还在那儿，实验照样没有分辨力。但你如果更想先看「库到底能不能被查到」，那就先跑 agentic 全量。</li>
+    <li><b>$160 花不花？</b>agentic 单次 $1.33，比静态版贵十倍。可以只跑 C 和 D 两臂（省一半），或者先跑 10 个案例探路。</li>
+    <li><b>要不要引入第二个模型？</b>现在建库、答题、判分全是 opus-5 —— 条件清单和答案同源，是天花板效应的一个成因。换个模型判分或答题能拆开这层同源性，但会引入模型能力差异这个新变量。</li>
+  </ol>
+</section>
+</div>

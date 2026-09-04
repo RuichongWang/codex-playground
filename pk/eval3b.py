@@ -56,7 +56,9 @@ def run_arm(case, arm, dbs, outdir):
     env = dict(os.environ)
     if arm == "D":
         env["PK_BLIND_SEARCH"] = "1"
-    cmd = ["claude", "-p", "--model", "claude-opus-5", "--output-format", "json"]
+    trace = f"{outdir}/trace_{case['id']}_{arm}.jsonl"
+    cmd = ["claude", "-p", "--model", "claude-opus-5",
+           "--output-format", "stream-json", "--verbose", "--include-partial-messages"]
     if arm != "A":
         cmd += ["--allowed-tools", "Bash", "--permission-mode", "acceptEdits", "--add-dir", ROOT]
     else:
@@ -65,10 +67,16 @@ def run_arm(case, arm, dbs, outdir):
     p = subprocess.run(cmd, input=PROMPT.format(situation=case["situation"],
                                                 intervention=case["intervention"], lib=lib, out=out),
                        cwd=ROOT, capture_output=True, text=True, timeout=1200, env=env)
-    try:
-        meta = json.loads(p.stdout)
-    except Exception:
-        meta = {}
+    # 轨迹落盘：不然事后完全看不见 agent 到底怎么走的库
+    open(trace, "w").write(p.stdout)
+    meta = {}
+    for line in p.stdout.splitlines():
+        try:
+            ev = json.loads(line)
+        except Exception:
+            continue
+        if ev.get("type") == "result":
+            meta = ev
     d = jparse(open(out).read()) if os.path.exists(out) else jparse(meta.get("result", ""))
     d = d or {}
     return dict(id=case["id"], arm=arm, mechanism=d.get("mechanism", ""),
