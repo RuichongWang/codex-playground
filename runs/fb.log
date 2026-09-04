@@ -3,3 +3,26 @@
   [acled] Will there be more 'Strategic developments' in Albania for the 30 days before {r  → 实际 0.0
   [acled] Will there be more than ten times as many fatalities in Sao Tome and Principe fo  → 实际 0.0
   fb: 共 6，已完成 0，待跑 6
+
+=== 结果 ===
+  A: n=3  Brier=0.2102  $0.16
+  C: n=3  Brier=0.2003  $1.63
+  市场价基线: n=3 Brier=0.5648
+
+  [A] Will there be more 'Riots' in Mongolia for the 30 days before {resolut
+      预测 7  实际 0  市场 0  1轮 $0.05
+
+  [C] Will there be more 'Riots' in Mongolia for the 30 days before {resolut
+      预测 8  实际 0  市场 0  11轮 $0.55
+
+  [A] Will there be more 'Strategic developments' in Albania for the 30 days
+      预测 79  实际 0  市场 83  1轮 $0.07
+
+  [C] Will there be more 'Strategic developments' in Albania for the 30 days
+      预测 77  实际 0  市场 83  9轮 $0.58
+
+  [A] Will there be more than ten times as many fatalities in Sao Tome and P
+      预测 4  实际 0  市场 100  1轮 $0.05
+
+  [C] Will there be more than ten times as many fatalities in Sao Tome and P
+      预测 4  实际 0  市场 100  9轮 $0.51

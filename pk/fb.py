@@ -10,6 +10,8 @@ from pk.eval3 import ROOT, jparse, parallel
 from pk.eval3b import LIB_BLOCK, SKILL
 
 FB = "/home/user/forecastingresearch/forecastbench-datasets/datasets"
+# 只有这几个来源的 freeze_datetime_value 才是「市场概率」，才能当 baseline
+MARKET_SRC = {"manifold", "metaculus", "polymarket", "infer"}
 
 PROMPT = """今天是 {due}。下面是一个关于**未来**的问题，你要给出它发生的概率。
 
@@ -40,7 +42,12 @@ def load_pair(tag):
         seen.add(r["id"])
         q = dict(qs[r["id"]])
         q["resolved_to"] = r["resolved_to"]
-        q["resolution_date"] = r.get("resolution_date")
+        rdate = r.get("resolution_date") or ""
+        q["resolution_date"] = rdate
+        # 题面里带 {resolution_date} 占位符，不填就是残缺的题
+        for k in ("question", "resolution_criteria", "background"):
+            if isinstance(q.get(k), str):
+                q[k] = q[k].replace("{resolution_date}", rdate)
         q["due"] = qd["forecast_due_date"]
         out.append(q)
     return out
@@ -51,7 +58,11 @@ def run(q, arm, outdir):
     lib = "" if arm == "A" else LIB_BLOCK.format(
         skill=SKILL, db=os.path.join(ROOT, "runs/r3/library.json"), root=ROOT)
     mv = q.get("freeze_datetime_value")
-    market = (f"\n【冻结时刻的市场价】{float(mv):.3f}\n" if mv not in (None, "N/A") else "")
+    exp = str(q.get("freeze_datetime_value_explanation") or "").strip()
+    # 这个字段在市场类来源是概率，在数据类来源是序列当前值 —— 必须带着它自己的说明给，
+    # 否则就是在向模型谎报一个数的含义。
+    market = (f"\n【参考值】{mv}\n（这个数是什么：{exp[:200]}）\n"
+              if mv not in (None, "N/A") and exp else "")
     sink = ("只输出 JSON，不要任何别的文字：" if arm == "A"
             else f"把答案写进文件 {out}：")
     tail = "" if arm == "A" else "\n写完文件就结束。"
@@ -79,7 +90,8 @@ def run(q, arm, outdir):
     d = (jparse(open(out).read()) if os.path.exists(out) else jparse(meta.get("result", ""))) or {}
     return dict(id=q["id"], arm=arm, source=q["source"], question=q["question"][:110],
                 probability=d.get("probability"), reasoning=(d.get("reasoning") or "")[:1500],
-                resolved_to=q["resolved_to"], market=mv if mv != "N/A" else None,
+                resolved_to=q["resolved_to"],
+                market=(mv if q["source"] in MARKET_SRC and mv != "N/A" else None),
                 turns=meta.get("num_turns"), secs=round(time.time() - t0, 1),
                 cost=meta.get("total_cost_usd", 0))
 
@@ -91,9 +103,26 @@ def main():
     ap.add_argument("--arms", default="A,C")
     ap.add_argument("--limit", type=int, default=3)
     ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--stratify", action="store_true", help="按来源分层抽样，而不是取前 N 条")
+    ap.add_argument("--seed", type=int, default=7)
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
-    qs = load_pair(a.tag)[:a.limit]
+    allq = load_pair(a.tag)
+    if a.stratify:
+        import random
+        from collections import defaultdict
+        by = defaultdict(list)
+        for q in allq:
+            by[q["source"]].append(q)
+        rng = random.Random(a.seed)
+        per = max(1, a.limit // len(by))
+        qs = []
+        for k in sorted(by):
+            rng.shuffle(by[k])
+            qs += by[k][:per]
+        qs = qs[:a.limit]
+    else:
+        qs = allq[:a.limit]
     arms = a.arms.split(",")
     print(f"{a.tag}：取前 {len(qs)} 题 × {arms}")
     for q in qs:
