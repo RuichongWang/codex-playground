@@ -1,0 +1,4 @@
+{"id": "HO-culture-01", "arm": "C", "hits": [1, 2, 3, 4, 5], "extra": 1, "n": 5, "cost": 0.10769999999999999}
+{"id": "HO-culture-01", "arm": "D", "hits": [1, 2, 3, 4, 5], "extra": 1, "n": 5, "cost": 0.105479}
+{"id": "HO-culture-02", "arm": "C", "hits": [1, 2, 3, 5], "extra": 1, "n": 5, "cost": 0.108438}
+{"id": "HO-culture-02", "arm": "D", "hits": [1, 2, 3, 4], "extra": 0, "n": 5, "cost": 0.130948}
