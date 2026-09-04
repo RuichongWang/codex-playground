@@ -53,7 +53,10 @@ def main():
 
     for label, ids in (("全部 30 条", list(cmap)), ("仅干净样本", [i for i in cmap if not contam.get(i)]),
                        ("仅受污染样本", known)):
-        ids = [i for i in ids if any((i, m) in ans for m in arms)]
+        # 只在四臂都给出可解析输出的交集上算 —— 否则各臂在不同子集上取平均，不可比。
+        # 首轮就是栽在这里：C 有 3 个案例没吐出概率，恰好都是难题，均值凭空好了 5 倍。
+        ids = [i for i in ids
+               if all(isinstance(ans.get((i, m), {}).get("probability"), (int, float)) for m in arms)]
         if not ids: continue
         print(f"\n{'─'*74}\n【{label}】n={len(ids)}")
         hdr = f"{'':16}" + "".join(f"{m:>10}" for m in arms)

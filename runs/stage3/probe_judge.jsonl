@@ -1,0 +1,30 @@
+{"id": "HO-culture-01", "identified": false, "root_cause_match": false, "why": "模型自述认不出", "cost": 0}
+{"id": "HO-culture-02", "identified": true, "root_cause_match": true, "why": "猜测准确指向大英博物馆Higgs失窃案（Gradel 2021预警、2023年8月公开、Boardman独立评估均对应），根因也抓住了核心的'大量小件未登记编号影像导致失窃在账面不可见'与内控/举报响应失灵，只是未点明缺乏定期盘点制度和调查交由关联部门人员这两处细节，实质一致。", "cost": 0.086227}
+{"id": "HO-culture-05", "identified": true, "root_cause_match": true, "why": "猜测正是《玩具总动员2》资产误删事件（并正确纠正了题干细节），根因也同样指出了资产根目录上的 rm -rf 递归删除叠加长期静默失效的备份，实质一致；仅备份失效时长（约一个月 vs 数月）与'root权限'等细节略有出入，不影响实质。", "cost": 0.08483200000000002}
+{"id": "HO-defense-03", "identified": true, "root_cause_match": true, "why": "猜测准确指向英国 Ajax 项目的噪声/振动伤害事件，且回忆的根因（非单一致因、采办与治理的系统性失效、把复杂项目当货架产品低估其规模、Bowman 通信与车内噪声耦合、行走机构/悬挂引起振动、安全告警未被及时升级上报）与官方 HS&EP 审查和 NAO 结论实质一致。", "cost": 0.09004900000000002}
+{"id": "HO-justice-02", "identified": false, "root_cause_match": false, "why": "模型自述认不出", "cost": 0}
+{"id": "HO-defense-04", "identified": true, "root_cause_match": true, "why": "模型准确指向了柯林斯级潜艇保障危机与 Coles 评审，且核心归因（非平台设计缺陷，而是缺乏单一端到端问责主体、缺少共同认可的使用—维修周期与主计划、可用性要求未明确定义传递、各方信任与合同关系失灵）与真实根因实质一致，附加的备件、人力、资金等细节属于合理扩展而非偏离。", "cost": 0.090698}
+{"id": "HO-culture-04", "identified": true, "root_cause_match": true, "why": "猜测正是2023年10月大英图书馆Rhysida勒索事件，且回忆的根因（无MFA的对外远程访问服务器入口、缺乏网络分段、遗留系统放大后果）与官方报告实质一致，仅数据多副本一项未提及。", "cost": 0.089097}
+{"id": "HO-culture-03", "identified": true, "root_cause_match": true, "why": "准确认出瓦萨号并复述了同一化学链条——沉没期缺氧水中的H2S被木材吸收、还原态硫蓄积、出水后在铁离子催化下氧化成硫酸并水解纤维素析出硫酸盐，提到硫酸盐还原菌只是说明水中H2S的来源，不改变纯化学的实质根因。", "cost": 0.09518}
+{"id": "HO-defense-02", "identified": true, "root_cause_match": false, "why": "猜测正确锁定了陆军155mm弹药扩产计划并点名了德州Mesquite新建弹体线，但回忆的根因把瓶颈归于发射药/装填/LAP等串行环节的不同步，恰恰否认了弹体端是卡点，也未提及把30%产能押在未验证的旧设备改造新工艺且无备份产能这一真实单点失效。", "cost": 0.100964}
+{"id": "HO-marine-02", "identified": false, "root_cause_match": false, "why": "模型自述认不出", "cost": 0}
+{"id": "HO-defense-01", "identified": true, "root_cause_match": true, "why": "模型准确锁定了 USS Boise (SSN-764) 长期趴窝这同一起事件，且其根因回忆的核心——公共船厂干船坞与核认证技工产能不足导致排期反复后推、闲置本身又加剧艇况劣化形成延误—劣化—工作量激增的恶性循环——与真实根因实质一致，仅遗漏 GAO 关于未量化「继续等待」成本这一补充点。", "cost": 0.10278}
+{"id": "HO-justice-01", "identified": true, "root_cause_match": true, "why": "模型准确指认了英国司法部2026年1—3月刑事法院季度统计中的Crown Court积案数据，且明确指出瓶颈已从开庭日配额转移到刑事律师供给与庭审生产率（法援费率导致律师流失、无效/改期审判率高、复杂性侵案增加、法院设施失修），与真实根因的核心机制实质一致，只是额外掺入了疫情与紧缩等背景因素。", "cost": 0.099627}
+{"id": "HO-justice-05", "identified": true, "root_cause_match": true, "why": "模型准确认出这是纽约州《Less Is More Act》所针对的技术性违规再监禁问题，并抓住了核心机制——羁押作为撤销程序的默认状态、证明标准偏低、缺乏时限；虽未提到'守规即减少监督期'这一正向激励缺失，但用'监督期长导致累计违规概率上升'表达了同一循环的实质。", "cost": 0.08684499999999999}
+{"id": "HO-mining-01", "identified": false, "root_cause_match": false, "why": "模型自述认不出", "cost": 0}
+{"id": "HO-mining-02", "identified": false, "root_cause_match": false, "why": "模型自述认不出", "cost": 0}
+{"id": "HO-defense-05", "identified": true, "root_cause_match": true, "why": "猜测精确指向 2018–2019 年海军超级大黄蜂 80% 任务可执行率与 NSS-A 整改（341/343 架量级一致），且其根因回忆同样落在维修供应系统的流程吞吐——FRC 周转慢、等件/拆件、O-I-D 级流程不统一、缺乏统一计划与端到端责任主体——与真实诊断实质一致，仅在各分项权重上多做了 WIP/节拍等细化推断。", "cost": 0.098133}
+{"id": "HO-marine-01", "identified": true, "root_cause_match": false, "why": "冰架前缘崩解漂走的机制描述吻合，但模型把根因归到“选址时对崩解风险评估不足”，而真实结论明确排除了选址/流程疏漏、认定该崩解在当时不可预判。", "cost": 0.08998199999999999}
+{"id": "HO-mining-05", "identified": false, "root_cause_match": false, "why": "模型自述认不出", "cost": 0}
+{"id": "HO-space-01", "identified": false, "root_cause_match": false, "why": "模型自述认不出", "cost": 0}
+{"id": "HO-space-02", "identified": false, "root_cause_match": false, "why": "模型自述认不出", "cost": 0}
+{"id": "HO-justice-04", "identified": true, "root_cause_match": true, "why": "模型指向的正是英格兰和威尔士的监狱错误释放危机（其引用的262起即本事件的上一年度基线，179起同比-32%正好对应），且把根因归结为人工刑期计算+规则复杂、跨机构数据割裂无单一可信记录、释放前核对失效、流程培训薄弱，与真实根因实质一致（仅未点明治理责任人缺位这一类）。", "cost": 0.096282}
+{"id": "HO-marine-04", "identified": true, "root_cause_match": true, "why": "猜测精确指向白令海雪蟹崩塌与2022年关闭，且核心归因同为2018–2019海洋热浪下代谢需求翻倍、栖息压缩致密加剧竞争的饥饿死亡而非捕捞，附加的捕食与病害等只是次要补充。", "cost": 0.086838}
+{"id": "HO-justice-03", "identified": true, "root_cause_match": false, "why": "它确实指向同一起事件（英国司法部/HMPPS电子监控与NAO的相关报告），但把根因归为Serco交接不力与合同管理薄弱这一供应商/采购层面的解释，恰恰漏掉了真实报告强调的跨法院—监狱—缓刑—警察的治理碎片化、无人负责端到端流程以及数据质量差到无法度量在监人数这一核心。", "cost": 0.09712}
+{"id": "HO-marine-03", "identified": true, "root_cause_match": true, "why": "猜测准确锁定加纳小型中上层鱼类渔业危机与saiko转载（虽未点明休渔期评估这一具体载体），且回忆的根因——开放准入、产能过剩、治理执法失效叠加saiko/灯光诱捕/小网目捕捞幼鱼，环境因素次要——与真实根因实质一致。", "cost": 0.09864600000000001}
+{"id": "HO-mining-03", "identified": true, "root_cause_match": false, "why": "事件指认准确（Grasberg GBC 2025年9月湿矿石涌出、7人遇难），但回忆的根因仍是崩落区内部饱水细粒料失稳，未指出真实关键——崩落区与废弃露天坑之间存在未探测、未标注的连通通道，形成地表泥料直灌井下的补给路径。", "cost": 0.087095}
+{"id": "HO-marine-05", "identified": true, "root_cause_match": true, "why": "猜测准确指向2000年美国西海岸底层鱼渔业灾难及后续买断/RCA/2011年IFQ与100%观察员，且回忆的根因（低生产力岩鱼与高值种混栖不可分离、仅有总量限制而无个体化兼捕责任导致抢捕式竞争与丢弃、补贴造成的船队产能过剩）与真实根因实质一致，额外提到的补贴与ABC高估只是同一结构的补充细节。", "cost": 0.096846}
+{"id": "HO-space-03", "identified": true, "root_cause_match": false, "why": "猜测正确指向戈尔德斯通DSS-14 70米天线的方位驱动越限事故（虽日期偏差且臆造了水管淹水情节），但它明确表示没有可靠记忆、未给出任何根因，故与真实的误报圈数、控制逻辑缺口、失效液压限位及程序/职责组织性根因无从匹配。", "cost": 0.09126000000000001}
+{"id": "HO-mining-04", "identified": true, "root_cause_match": false, "why": "它准确指向了 Codelco El Teniente 的 Andes Norte（Nuevo Nivel Mina）深部项目停工这同一起事件，虽表述为不确定；但它未给出任何根因内容，因而无法与'新生型深部地震超出地质力学模型标定范围且无前兆、现有微震台网观测不到'的真实根因构成实质一致。", "cost": 0.089296}
+{"id": "HO-space-05", "identified": true, "root_cause_match": true, "why": "猜测精确指向VV22（Zefiro-40二级、Pléiades Neo 5/6），且根因锁定乌克兰供应商碳-碳喉衬材料的异常热-机械侵蚀导致喉部扩大、室压下降，与真实结论实质一致，仅额外附加了鉴定/验收流程不足这一非核心补充。", "cost": 0.095323}
+{"id": "HO-space-04", "identified": true, "root_cause_match": false, "why": "事件识别完全正确（Starliner CFT），但它复述的是2024年'过热致PTFE密封件热膨胀变形'的初步解释，缺少最终报告的四氧化二氮长期浸泡致聚四氟乙烯溶胀挤出、两相流以及轻接触式采办监管/前两次无人飞行遗留异常等组织根因，且它自己也承认未掌握最终归零结论。", "cost": 0.110683}
