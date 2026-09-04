@@ -166,6 +166,10 @@ def do_arm(case, arm, s, cases):
 
 F1_JUDGE = """判断一份答案有没有说到某几个特定的要点。**只做匹配，不做质量评价。**
 
+每个要点给了两种写法：`[领域]` 是它在这个案例自己的语言里的说法，
+`[机制]` 是同一件事的领域中立说法。**任何一种被说到，就算命中** ——
+用更抽象的话说对了同一件事，不该被判成没说到。
+
 【情况】{situation}
 
 【要检查的要点】
@@ -187,7 +191,10 @@ F1_JUDGE = """判断一份答案有没有说到某几个特定的要点。**只�
 def do_f1(case, ans):
     if not ans.get("conditions") and not ans.get("reasoning"):
         return dict(id=case["id"], arm=ans["arm"], hits=[], extra=0, n=len(case["conditions"]), cost=0)
-    cl = "\n".join(f"{i+1}. {c}" for i, c in enumerate(case["conditions"]))
+    mech = _MECH.get(case["id"], [])
+    cl = "\n".join(
+        f"{i+1}. [领域] {c}" + (f"\n   [机制] {mech[i]}" if i < len(mech) and mech[i] else "")
+        for i, c in enumerate(case["conditions"]))
     cd = "\n".join(f"- {c}" for c in ans.get("conditions", [])) or "（没列条件）"
     txt, cost = claude(F1_JUDGE.format(situation=case["situation"], checklist=cl, conds=cd,
                                        reasoning=(ans.get("reasoning") or "")[:1500]))
@@ -195,6 +202,61 @@ def do_f1(case, ans):
     hits = [h for h in (d.get("hits") or []) if isinstance(h, int) and 1 <= h <= len(case["conditions"])]
     return dict(id=case["id"], arm=ans["arm"], hits=sorted(set(hits)),
                 extra=int(d.get("extra_count") or 0), n=len(case["conditions"]), cost=cost)
+
+
+_MECH = {}
+_mp = os.path.join(ROOT, "heldout/conditions_mech.json")
+if os.path.exists(_mp):
+    _MECH = json.load(open(_mp))
+
+
+LENIENT_JUDGE = """两份答案回答了同一个问题。你能看到真实情况。判断哪份更准确地抓住了**真正决定成败的东西**。
+
+【情况】{situation}
+【真实根因】{root}
+【真实采取的干预】{iv}（结果：{outcome}）
+【真正决定成败的条件】
+{conds}
+
+--- 答案 X ---
+{ax}
+
+--- 答案 Y ---
+{ay}
+
+**先逐条对证据，再下判断** —— 不要凭长度、语气或术语密度打分。
+一个用完全不同的话说对了同一件事的答案，跟用原话说的一样好。
+一个说了很多但没碰到要害的答案，不算好。
+
+只输出 JSON：
+{{"x_caught": ["X 抓住的要点，逐条"], "x_missed": ["X 漏掉的要点"],
+  "y_caught": [...], "y_missed": [...],
+  "winner": "X" 或 "Y" 或 "tie", "why": "一句话，必须指向具体要点"}}"""
+
+
+def do_lenient(case, a1, a2, rng):
+    """宽松版：给 ground truth 的整体判分，配对盲判，强制引用证据。
+
+    它跟逐元素判分的偏差方向相反（那个偏向用案例原话的，这个偏向更长更抽象的）。
+    两个都报：指向一致则结论稳；不一致说明效应就落在测量自身的偏差带里。
+    """
+    flip = rng.random() < 0.5
+    x, y = (a2, a1) if flip else (a1, a2)
+    fmt = lambda a: (f"机制：{a.get('mechanism','')[:700]}\n"
+                     f"方案/判断：{(a.get('proposal') or a.get('verdict') or '')[:500]}\n"
+                     f"条件：{'; '.join(a.get('conditions') or [])[:900]}\n"
+                     f"推理：{(a.get('reasoning') or '')[:900]}")
+    txt, cost = claude(LENIENT_JUDGE.format(
+        situation=case["situation"], root=case["root_cause"], iv=case["intervention"],
+        outcome=case["outcome"],
+        conds="\n".join(f"- {c}" for c in case["conditions"]),
+        ax=fmt(x), ay=fmt(y)))
+    d = jparse(txt) or {}
+    w = d.get("winner", "tie")
+    winner = "tie" if w not in ("X", "Y") else (
+        (a2["arm"] if flip else a1["arm"]) if w == "X" else (a1["arm"] if flip else a2["arm"]))
+    return dict(id=case["id"], pair=f"{a1['arm']}v{a2['arm']}", winner=winner,
+                why=d.get("why", ""), cost=cost)
 
 
 PAIR_JUDGE = """两份答案回答了同一个问题。判断哪份更接近真实情况。**你不知道它们来自哪里，也不该猜。**

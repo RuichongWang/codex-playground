@@ -11,7 +11,7 @@
 """
 import argparse, glob, json, os, subprocess, sys, time
 import concurrent.futures as cf
-from pk.eval3 import ROOT, jparse, claude, do_f1, parallel
+from pk.eval3 import ROOT, jparse, claude, do_f1, do_lenient, parallel
 from pk.eval3b import LIB_BLOCK, SKILL, make_variants
 
 PROMPT = """下面是一个真实发生过的情况。
@@ -133,6 +133,14 @@ def main():
 
     fj = [(lambda c=cmap[k[0]], v=v: do_f1(c, v), dict(id=k[0], arm=k[1])) for k, v in answers.items()]
     parallel(fj, a.workers, P("f1.jsonl"), lambda r: (r["id"], r["arm"]), "f1")
+
+    import random
+    rng = random.Random(11)
+    lj = [(lambda c=cmap[i], x=x, y=y: do_lenient(c, answers[(i, x)], answers[(i, y)], rng),
+           dict(id=i, pair=f"{x}v{y}"))
+          for i in cmap for x, y in (("C", "D"), ("C", "B"), ("C", "A"), ("B", "A"))
+          if (i, x) in answers and (i, y) in answers]
+    parallel(lj, a.workers, P("lenient.jsonl"), lambda r: (r["id"], r["pair"]), "lenient")
     subprocess.run([sys.executable, "-m", "pk.report4", "--out", a.out], cwd=ROOT)
 
 
