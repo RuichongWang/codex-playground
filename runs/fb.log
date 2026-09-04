@@ -6,3 +6,45 @@
   [manifold] Will the United States make it out of the group stage in the 2026 FIFA World Cup  → 实际 1.0
   [metaculus] Will Iran and U.S play against each other in the 2026 FIFA World Cup?  → 实际 0.0
   fb: 共 12，已完成 0，待跑 12
+    10/12  205s
+
+=== 结果 ===
+  A: n=6  Brier=0.2540  $0.85
+  C: n=6  Brier=0.3519  $4.12
+  市场价基线: n=3 Brier=0.0426
+
+  [A] Will China's year-over-year GDP growth rate for Q2 2026 equal or excee
+      预测 13  实际 0  市场 15  1轮 $0.14
+
+  [C] Will China's year-over-year GDP growth rate for Q2 2026 equal or excee
+      预测 14  实际 0  市场 15  11轮 $0.84
+
+  [A] Will Iran and U.S play against each other in the 2026 FIFA World Cup?
+      预测 12  实际 0  市场 27  1轮 $0.20
+
+  [C] Will Iran and U.S play against each other in the 2026 FIFA World Cup?
+      预测 22  实际 0  市场 27  8轮 $0.87
+
+  [A] Will there be more 'Explosions/Remote violence' in Romania for the 30 
+      预测 12  实际 100  市场 -1  1轮 $0.13
+
+  [C] Will there be more 'Explosions/Remote violence' in Romania for the 30 
+      预测 7  实际 100  市场 -1  9轮 $0.63
+
+  [A] Will the market yield on US treasury securities at 3-year constant mat
+      预测 48  实际 0  市场 -1  1轮 $0.12
+
+  [C] Will the market yield on US treasury securities at 3-year constant mat
+      预测 47  实际 0  市场 -1  7轮 $0.48
+
+  [A] What is the probability that the daily average temperature at the Fren
+      预测 68  实际 0  市场 -1  1轮 $0.13
+
+  [C] What is the probability that the daily average temperature at the Fren
+      预测 96  实际 0  市场 -1  11轮 $0.65
+
+  [A] Will the United States make it out of the group stage in the 2026 FIFA
+      预测 84  实际 100  市场 82  1轮 $0.13
+
+  [C] Will the United States make it out of the group stage in the 2026 FIFA
+      预测 81  实际 100  市场 82  8轮 $0.64
