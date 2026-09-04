@@ -2,3 +2,7 @@ __pycache__/
 *.pyc
 pk/demo_library.json
 runs/*.console
+
+# 全量轨迹每个约 600KB，120 个就是 75MB 进不可逆的 git 历史。
+# 提炼版（trace_digest.jsonl）才是需要留档的东西：工具调用序列 + 碰过的节点 id。
+runs/**/trace_*.jsonl
