@@ -109,7 +109,7 @@ def do_trap(case, ans):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="runs/stage4")
-    ap.add_argument("--arms", default="A,A2,C,D")
+    ap.add_argument("--arms", default="A,C")
     ap.add_argument("--limit", type=int, default=30)
     ap.add_argument("--workers", type=int, default=6)
     a = ap.parse_args()
@@ -138,7 +138,7 @@ def main():
     rng = random.Random(11)
     lj = [(lambda c=cmap[i], x=x, y=y: do_lenient(c, answers[(i, x)], answers[(i, y)], rng),
            dict(id=i, pair=f"{x}v{y}"))
-          for i in cmap for x, y in (("C", "D"), ("C", "A"), ("A", "A2"))
+          for i in cmap for x, y in (("C", "A"),)
           if (i, x) in answers and (i, y) in answers]
     parallel(lj, a.workers, P("lenient.jsonl"), lambda r: (r["id"], r["pair"]), "lenient")
     subprocess.run([sys.executable, "-m", "pk.report4", "--out", a.out], cwd=ROOT)

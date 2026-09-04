@@ -103,7 +103,7 @@ def make_variants(outdir):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="runs/stage3b")
-    ap.add_argument("--arms", default="A,B,C,D")
+    ap.add_argument("--arms", default="A,C")
     ap.add_argument("--limit", type=int, default=30)
     ap.add_argument("--workers", type=int, default=6)
     a = ap.parse_args()
