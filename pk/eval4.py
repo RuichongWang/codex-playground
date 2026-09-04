@@ -92,6 +92,10 @@ def run_arm(case, arm, dbs, outdir):
             continue
         if ev.get("type") == "result":
             meta = ev
+    # 限流失败长得像成功：subtype="success"、num_turns=1、cost=0，只有 is_error 和 result
+    # 文本能区分。不抛出的话，失败会被写成一条「没产出的正常记录」固化下来，续跑就再也不重试了。
+    if meta.get("is_error"):
+        raise RuntimeError(f"{case['id']}/{arm}: {(meta.get('result') or '')[:80]}")
     d = jparse(open(out).read()) if os.path.exists(out) else jparse(meta.get("result", ""))
     d = d or {}
     return dict(id=case["id"], arm=arm, mechanism=d.get("mechanism", ""),
