@@ -14,6 +14,9 @@ import concurrent.futures as cf
 from pk.eval3 import ROOT, jparse, claude, do_f1, do_lenient, parallel
 from pk.eval3b import LIB_BLOCK, SKILL, make_variants
 
+SINK_FILE = "想清楚之后，把答案写进文件 {out}，格式："
+SINK_STDOUT = "只输出 JSON，不要任何别的文字："
+
 PROMPT = """下面是一个真实发生过的情况。
 
 【情况】
@@ -26,12 +29,12 @@ PROMPT = """下面是一个真实发生过的情况。
    只列真正决定成败的条件，列一条没用的比漏一条更糟
 4. 你对自己方案能奏效的把握，0 到 100 的整数
 
-把答案写进文件 {out}：
+{sink}
 {{"mechanism": "机制诊断", "proposal": "你的干预方案",
   "conditions": ["决定它成败的条件一", "条件二"], "probability": 数字,
   "reasoning": "推理，尤其是你为什么选这个变量而不是别的"}}
 
-写完文件就结束。"""
+{tail}"""
 
 TRAP_JUDGE = """判断一份方案有没有走进一个已知的陷阱。**只做匹配，不评价好坏。**
 
@@ -73,7 +76,12 @@ def run_arm(case, arm, dbs, outdir):
     else:
         cmd += ["--allowed-tools", "", "--strict-mcp-config"]
     t0 = time.time()
-    p = subprocess.run(cmd, input=PROMPT.format(situation=case["situation"], lib=lib, out=out),
+    if arm.startswith("A"):
+        sink, tail = SINK_STDOUT, ""
+    else:
+        sink, tail = SINK_FILE.format(out=out), "\n写完文件就结束。"
+    p = subprocess.run(cmd, input=PROMPT.format(situation=case["situation"], lib=lib,
+                                                out=out, sink=sink, tail=tail),
                        cwd=ROOT, capture_output=True, text=True, timeout=1500, env=env)
     open(trace, "w").write(p.stdout)
     meta = {}
