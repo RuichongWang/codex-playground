@@ -74,3 +74,71 @@
 - [Redefining Elderly Care with Agentic AI (arXiv)](https://arxiv.org/pdf/2507.14912) ・ [AI-Care: Agentic System for Alzheimer's Care Coordination (arXiv)](https://arxiv.org/pdf/2605.08480) ・ [AI in AgeTech — Unite.ai](https://www.unite.ai/ai-in-elder-care-addressing-the-caregiver-shortage/)
 - [Mapping the AI Divide in Africa (arXiv)](https://arxiv.org/pdf/2606.30656) ・ [The African Languages Lab (arXiv)](https://arxiv.org/pdf/2510.05644) ・ [Low-Resource Languages in AI](https://www.digitaldividedata.com/blog/low-resource-languages-in-ai)
 - [OpenAI People-First AI Fund（5000 万美元）](https://openai.com/index/people-first-ai-fund/) ・ [AI Grants for Nonprofits 2026](https://www.whitelabel.ai/blog/ai-grants-for-nonprofits)
+
+---
+
+# 附：针对"纯技术背景 / 业余投入 / 开源 / 不为盈利"的具体路径
+
+补充日期：2026-09-05。前提条件确认为：地区未定、每周只有零散时间、纯技术背景没有领域人脉、目的不是赚钱。
+
+这四个条件叠起来，会**淘汰掉上面一半的方向**。诚实地说：
+
+- ❌ 需要长期运营的产品/SaaS —— 业余时间给不了 SLA，而弱势用户是最经不起"作者忙别的去了"的一群人。半途而废的公益产品比不做更糟。
+- ❌ 需要拿资助的项目 —— 资助方要治理方案、要交付承诺，这是全职的事。
+- ❌ 需要领域深度的垂直应用 —— 没有领域人脉，你做出来的东西大概率解错题。
+
+剩下的交集只有一类：**无运营负担、能积累、别人拿去就能用的公共品。** 而且不为钱这件事在这里是优势，不是劣势——公共品本来就没人愿意付钱做，所以才空着。
+
+## 首选：给"真实世界脏输入"做鲁棒性评测
+
+**这是我最推荐的方向。**
+
+问题诊断已经有人替你做完了。ICML 2026 AI4Law workshop 的论文《Legal Reasoning Is Not Lawyering》指出：现有法律 benchmark（LegalBench、LEXam、LegalBench-RAG）测的是**上界**——输入是法律专家已经清洗整理过的。但真实的自诉当事人输入是"**嘈杂的叙述、被埋没的事实、遗漏、民间法律假设、以及表层错误**"，需要测的是**下界**。作者在 LEXam 上做扰动实验证明了这个落差，并明确呼吁重新设计 benchmark，让"AI 促进司法可及性"这个说法**变得可被实证检验**。
+
+这正好解释了前面那个反直觉的数据：AI 辅助的自诉状看起来更专业，但驳回率更高。不是模型不够强，是**没人测过模型在真实脏输入下会怎样**。
+
+### 为什么这件事适合你
+
+| 你的约束 | 为什么这个方向匹配 |
+|---|---|
+| 业余时间 | 评测集做完就是做完了，没有用户等你回消息 |
+| 纯技术背景 | 主体是写扰动器 + 跑模型 + 出榜单，纯代码活 |
+| 没有领域人脉 | 可以先做出 v0 再拿着东西去找领域人验证——**有东西比有想法更容易约到人** |
+| 不为钱 | 评测集天然是公共品，没有商业模式，所以才没人做 |
+| 会伤害到人吗 | 不会。你不直接服务弱势用户，你是在给服务他们的人提供刹车 |
+
+### 可以这周末开始的 v0
+
+1. 挑一个已有的公开 benchmark（法律、医疗问诊、福利申请资格判断均可）。
+2. 写一组**真实世界扰动算子**：口语化改写、方言/非母语表达、删掉一个关键事实、时间线打乱、加错别字、混入大量无关叙述、加入错误的"民间法律/医学常识"前提。
+3. 跑几个主流模型，对比扰动前后的表现落差，公开代码 + 榜单。
+4. 落差本身就是结论。这个数字目前没人有。
+
+跑通一个领域之后，同一套扰动框架可以横向复制到福利申请、基层问诊、教育评估——这是可积累的。
+
+## 次选：直接加入已有社区（如果你更想要"跟人一起做"）
+
+纯技术背景没有领域接触时，**加入比立项高效得多**——社区本身就是你缺的那个人脉。
+
+- **Masakhane**（非洲语言 NLP）：1000+ 参与者、覆盖 30 个非洲国家，明确列出了多种参与方式（训模型并贡献代码、贡献数据、做数据/模型分析——这条**不需要技术经验**、帮忙整理文档），用 Colab notebook 降低门槛，有 Slack、每周会议和 GitHub。对应的问题是真的大：约 90% 非洲语言属于低资源语言，40% 的语言面临消失风险。
+- **DataKind**：3 万+ 数据科学志愿者社区。两种投入档位很清楚——**DataDives** 是 48 小时黑客松式活动（50–150 人规模），**DataCorps** 是 6–9 个月项目、每周 5–10 小时。当前在招募"消除贫困"主题的志愿者。这个 5–10 小时/周的档位基本就是为你这种情况设计的。
+
+## 备选：无障碍（a11y）的工程债
+
+如果想做马上有人受益、反馈最直接的事：**前 100 万个访问量最高的网站里，95.9% 的首页存在可检测的 WCAG 无障碍失败，平均每页约 56 个错误**，最常见的是低对比度文本（约 84% 的页面）。核心诊断是：这是个**集成问题**——无障碍标准从来没有被接进"写代码、评审、发布"的工作流里。
+
+对一个 agent 时代的技术人来说，这里有个很自然的切口：**把无障碍检查做成 agent 能在 PR 阶段自动执行并给出修复补丁的东西**，而不是又一个扫描器报告。WordPress 无障碍团队到 2026 年 6 月已有 1464 人承诺投入时间——说明这类工作有接得住的社区。
+
+## 一个明确的劝退：不要做"给残障人士的 AI 助手"
+
+这看起来是最典型的 AI for good，但已经是大厂免费产品的红海：微软 Seeing AI、Be My Eyes 的 AI 功能、Google Live Transcribe、Apple 的 Braille Access（把 iPhone/iPad/Mac/Vision Pro 变成盲文记录器）、OrCam MyEye、以及 Google 与三星 2026 年推出的集成 Gemini 的 AI 音频眼镜。个人业余项目在这里没有胜算。
+
+这个领域真正的空白不是技术，是"**残障人士被系统性排除在 AI 开发过程之外**"——那是参与机制问题，不是写代码能解决的。想在这个领域做事，正确姿势是去做上面那条 a11y 工程债，或者去支持由残障人士自己主导的项目。
+
+## 补充来源
+
+- [Legal Reasoning Is Not Lawyering: Rethinking Legal Benchmarks for Pro Se Access to Justice (arXiv, ICML 2026 AI4Law)](https://arxiv.org/pdf/2606.23716)
+- [Masakhane 官网](https://www.masakhane.io/) ・ [masakhane-community（从这里开始）](https://github.com/masakhane-io/masakhane-community) ・ [Masakhane 论文](https://arxiv.org/pdf/2003.11529)
+- [DataKind Volunteer](https://www.datakind.org/join-us/volunteer/) ・ [DataKind 社区](https://www.datakind.org/join-us/our-community/)
+- [Accessibility Best Practices for Your Project — Open Source Guides](https://opensource.guide/accessibility-best-practices-for-your-project/) ・ [The A11Y Project](https://www.a11yproject.com/)
+- [AI and Disability in 2026 综述](https://www.ameridisability.com/ai-and-disability-in-2026-a-comprehensive-guide-for-people-with-disabilities-caregivers-seniors-and-families) ・ [Cripping AI: Reimagining AI Through Lived Disability Experiences (arXiv)](https://arxiv.org/pdf/2605.02080)
