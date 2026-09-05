@@ -373,6 +373,14 @@ def report(outdir):
                   f"{pt/6:+.3f}（分数比例），95% CI [{lo/6:+.3f}, {hi/6:+.3f}]，n={n}")
             print("  " + ("✓ 下界 ≥ 0 ⇒ 判据 (ii) 成立：库替代了一档模型规模"
                           if ok else "✗ 下界 < 0 ⇒ 判据 (ii) 不成立"))
+            # (ii) 的已知弱点（§4.8）：没有 haiku 自比就分不清「库起作用」和「rubric 到顶」。
+            p2_, lo2, hi2, n2 = bootstrap_diff(p1, "haiku-4.5", "90", "haiku-4.5", "none")
+            if p2_ is not None:
+                print(f"  同题自比 haiku+库90 − haiku 裸跑：{p2_/6:+.3f}，"
+                      f"95% CI [{lo2/6:+.3f}, {hi2/6:+.3f}]，n={n2}")
+                if ok and lo2 <= 0:
+                    print("  ⚠️ 自比不显著为正 ⇒ (ii) 很可能是**天花板效应**（haiku 裸跑本来就≈opus 裸跑），"
+                          "\n     只能报成「没有反证」，不能报成「库替代了模型规模」。")
 
     # ---- 安慰剂（§4.5，只在 90 这一个点）----
     if "90blind" in libs_all:
