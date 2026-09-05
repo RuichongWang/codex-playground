@@ -8,6 +8,8 @@
     python -m pk.cli prescriptions P6 --satisfied C1,C2
     python -m pk.cli add-item --what "..." --source A --facts '{"周期":"一周"}'
     python -m pk.cli link --src I7 --dst P1 --why "..." --source A --novel false --same-as I1
+    python -m pk.cli domains                             # 有哪些语料域，屏蔽一个要付多大代价
+    python -m pk.cli --mask software patterns            # 假装这个库从没见过软件业
 """
 import argparse
 import json
@@ -17,6 +19,9 @@ import sys
 from pk.store import Store, POS, NEG
 
 DB = os.environ.get("PK_DB", "pk/library.json")
+
+# 屏蔽是只读操作：屏蔽完再写回去就等于把那个域从库里真删了，且不可逆。
+WRITE_CMDS = {"add-item", "add-pattern", "add-condition", "link", "prescribe", "batch", "apply"}
 
 
 def load(path):
@@ -39,6 +44,10 @@ def fmt(s, n):
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="pk.cli")
     ap.add_argument("--db", default=DB)
+    ap.add_argument("--mask", default=None,
+                    help="逗号分隔的语料域，加载后先把这些域的痕迹全部拿掉再操作（只读命令可用）")
+    ap.add_argument("--strict", action="store_true",
+                    help="连带删掉「提出者写过被屏蔽 item」的 pattern/条件，堵措辞泄露")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     q = sub.add_parser("search", help="按文字找节点")
@@ -52,6 +61,7 @@ def main(argv=None):
     p.add_argument("--limit", type=int, default=20)
     sub.add_parser("conditions", help="列所有条件")
     sub.add_parser("stats", help="库的规模和爆炸系数")
+    sub.add_parser("domains", help="列各语料域的 item 数，以及屏蔽它要连带删掉多少东西")
     p = sub.add_parser("catalog", help="一行一条列出全部 claim，供 grep")
     p.add_argument("--kind", default="pattern")
 
@@ -62,6 +72,7 @@ def main(argv=None):
     p.add_argument("--what", required=True); p.add_argument("--source", required=True)
     p.add_argument("--facts", default="{}"); p.add_argument("--intervention")
     p.add_argument("--outcome", default="unknown", choices=["worked", "failed", "unknown"])
+    p.add_argument("--domain", default=None, help="这条事件来自哪个语料域，供运行时屏蔽用")
 
     p = sub.add_parser("add-pattern")
     p.add_argument("--claim", required=True); p.add_argument("--source", required=True)
@@ -96,6 +107,21 @@ def main(argv=None):
     a = ap.parse_args(argv)
     s = load(a.db)
     dirty = True
+
+    if a.mask:
+        if a.cmd in WRITE_CMDS:
+            print(f"--mask 不能跟写命令一起用（{a.cmd}）：屏蔽后的库存回去就把那个域真删了",
+                  file=sys.stderr)
+            return 2
+        s, st = s.mask([d for d in a.mask.split(",") if d], strict=a.strict)
+        # 走 stderr：读命令的 stdout 是给 agent 解析的，别掺进来
+        if st["unknown"]:
+            print(f"⚠️ 这个库里没有域 {'/'.join(st['unknown'])}（打错了？它们一个节点都没屏蔽掉）",
+                  file=sys.stderr)
+        print(f"（已屏蔽 {'/'.join(st['masked'])}{'，strict' if st['strict'] else ''}："
+              f"删 事件{st['items']} pattern{st['patterns']} 条件{st['conditions']} "
+              f"link{st['links']} prescription{st['prescriptions']}；"
+              f"剩 事件{st['kept']['items']} pattern{st['kept']['patterns']}）", file=sys.stderr)
 
     if a.cmd == "search":
         if os.environ.get("PK_BLIND_SEARCH"):
@@ -138,6 +164,17 @@ def main(argv=None):
             top = max(pats, key=lambda n: s.credibility(n["id"])["events"])
             print(f"最大 pattern：{top['id']} 独立事件 {s.credibility(top['id'])['events']} — {top['claim']}")
         print(f"事件→pattern 的正 link 共 {reuse} 条"); dirty = False
+    elif a.cmd == "domains":
+        doms = s.domains()
+        print(f"{'域':16}{'事件':>5}{'屏蔽掉的pattern':>15}{'剩余pattern':>12}"
+              f"{'屏蔽掉的条件':>13}{'屏蔽掉的解法条目':>17}")
+        for d in sorted(doms):
+            _, st = s.mask([d], strict=a.strict)
+            print(f"{d:16}{doms[d]:>5}{st['patterns']:>15}{st['kept']['patterns']:>12}"
+                  f"{st['conditions']:>13}{st['prescriptions']:>17}")
+        print(f"\n共 {len(doms)} 个域 / {sum(doms.values())} 条事件。"
+              f"「屏蔽掉的 pattern」= 全部证据都落在这个域里、拿掉它就没有支撑的那些。")
+        dirty = False
     elif a.cmd == "catalog":
         for n in s.nodes.values():
             if n["kind"] != a.kind:
@@ -163,7 +200,7 @@ def main(argv=None):
             print(f"      分{sc['score']} 试过{sc['tried']} 独立成功{sc['worked_events']} 失败{sc['failed']}")
         dirty = False
     elif a.cmd == "add-item":
-        print(s.add_item(a.what, a.source, json.loads(a.facts), a.intervention, a.outcome))
+        print(s.add_item(a.what, a.source, json.loads(a.facts), a.intervention, a.outcome, a.domain))
     elif a.cmd == "add-pattern":
         print(s.add_pattern(a.claim, a.side, a.source, a.order))
     elif a.cmd == "add-condition":
@@ -181,7 +218,8 @@ def main(argv=None):
         items = spec.get("items") or ([dict(spec["item"], key="ITEM")] if spec.get("item") else [])
         for it in items:
             alias[it["key"]] = s.add_item(it["what"], src(it), it.get("facts") or {},
-                                          it.get("intervention"), it.get("outcome", "unknown"))
+                                          it.get("intervention"), it.get("outcome", "unknown"),
+                                          it.get("domain"))
             out.append(f"{it['key']} -> {alias[it['key']]}")
         for p_ in spec.get("patterns", []):
             alias[p_["key"]] = s.add_pattern(p_["claim"], p_["side"], src(p_), p_.get("order", 1))

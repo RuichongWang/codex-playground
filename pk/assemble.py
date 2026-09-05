@@ -16,8 +16,9 @@ def load_props(files):
     return out
 
 
-def build(props, mm):
-    """props: {aid: proposal}; mm: triage 的归并映射。返回 batch spec。"""
+def build(props, mm, domains=None):
+    """props: {aid: proposal}; mm: triage 的归并映射；domains: {aid: 这条事件来自哪个语料域}。
+    返回 batch spec。"""
     canon, to_existing = {}, {}
     for m in mm.get("merges", []):
         for d in m.get("drop", []):
@@ -53,7 +54,8 @@ def build(props, mm):
         spec["items"].append(dict(key=f"i_{aid}", source=aid, what=it.get("what", ""),
                                   facts=it.get("facts") or {},
                                   intervention=it.get("intervention"),
-                                  outcome=it.get("outcome", "unknown")))
+                                  outcome=it.get("outcome", "unknown"),
+                                  domain=(domains or {}).get(aid)))
 
     for aid, p in props.items():
         for node, bucket in ((n, "patterns") for n in p.get("patterns", [])):
@@ -90,7 +92,9 @@ def build(props, mm):
             e = dict(src=src, dst=dst, why=l["why"], source=aid, polarity=l.get("polarity", "+"))
             if s and src == f"i_{aid}":
                 e["novel"] = False
-                e["same_as"] = f"i_{s['same_as']}"
+                # triage 可以指向同批的某个 agent（"B1A2"），也可以指向库里已有的事件（"I12"）。
+                # 后者不能再套 i_ 前缀，否则写进去的是一条永远解析不出的悬空引用。
+                e["same_as"] = f"i_{s['same_as']}" if s["same_as"] in props else s["same_as"]
             spec["links"].append(e)
         for rx in p.get("prescriptions", []):
             ph = resolve(aid, rx["phenomenon"]) if is_local(aid, rx["phenomenon"]) else rx["phenomenon"]

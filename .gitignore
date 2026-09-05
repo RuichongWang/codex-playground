@@ -9,3 +9,4 @@ runs/**/trace_*.jsonl
 runs/**/trace_*.jsonl
 runs/**/ans_*.json
 runs/**/fb_*.json
+*.json.bak

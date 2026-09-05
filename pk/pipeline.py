@@ -190,7 +190,9 @@ def main():
         if os.path.exists(mmf):
             props = load_props([(p["aid"], p["out"]) for p in good])
             mm = json.load(open(mmf))
-            spec = build(props, mm)
+            # 语料文件名就是域名 —— 写入时就带上，日后测迁移才能按域屏蔽
+            doms = {p["aid"]: p["file"].replace(".json", "") for p in good}
+            spec = build(props, mm, doms)
             bad = verify(props, spec)
             print(f"  归并 {len(mm.get('merges',[]))} 组 / 映射到已有 {len(mm.get('map_to_existing',[]))} 条"
                   f" / 同情境 {len(mm.get('same_situation',[]))} 条")

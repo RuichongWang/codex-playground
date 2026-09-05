@@ -4,7 +4,8 @@
 不调 LLM —— agent 的判断在这里写成脚本，为的是让数据模型本身跑起来看得见。
 真实系统里这些判断由 pk/agent.py 里的 agent 自己做。
 
-没有 domain 标签。证据的单位是具体事件，独立性由 agent 在 link 时自报（novel=False 表示同情境）。
+证据的单位是具体事件，独立性由 agent 在 link 时自报（novel=False 表示同情境）。
+domain 不参与这里的任何计算 —— 它只是给 Store.mask 用的实验器材（见 store.py 模块头）。
 """
 from pk.store import Store, NEG
 

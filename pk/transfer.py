@@ -6,44 +6,11 @@
 """
 import argparse, glob, json, os, re
 from collections import Counter, defaultdict
+from pk.domain import item_domain
 from pk.store import Store
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NODE = re.compile(r"\b([PCIR]\d{1,4})\b")
-
-# 库里每个 item 属于哪个语料域。
-# 不能按 what 精确匹配 —— 提议 agent 是「用自己的话复述」的，跟原文对不上。
-# 用 bigram 模糊匹配取最佳。
-_CORPUS = []
-for _f in sorted(glob.glob(os.path.join(ROOT, "corpus*/*.json"))):
-    _dom = os.path.basename(_f).replace(".json", "")
-    for _r in json.load(open(_f)):
-        _txt = _r["what"] + " " + " ".join(f"{k}{v}" for k, v in (_r.get("facts") or {}).items())
-        _CORPUS.append((_dom, _txt))
-
-
-def _bg(t):
-    return {t[i:i + 2] for i in range(len(t) - 1)}
-
-
-_DOM_CACHE = {}
-
-
-def item_domain(node):
-    nid = node.get("id")
-    if nid in _DOM_CACHE:
-        return _DOM_CACHE[nid]
-    t = _bg((node.get("what") or "") + " " +
-            " ".join(f"{k}{v}" for k, v in (node.get("facts") or {}).items()))
-    best, score = "?", 0.0
-    for dom, txt in _CORPUS:
-        o = _bg(txt)
-        r = len(t & o) / max(1, len(t | o))
-        if r > score:
-            best, score = dom, r
-    out = best if score >= 0.12 else "?"
-    _DOM_CACHE[nid] = out
-    return out
 
 
 def cited_nodes(trace_path):

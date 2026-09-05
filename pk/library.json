@@ -19,7 +19,8 @@
    },
    "intervention": "两段：先靠人工绕过系统硬扛，不修系统也不回滚，到2000年11月基本止血；2001年春天把 i2 并进 SAP 的 ERP 里统一跑，同时给每个业务代表安排140到180小时培训，并把订单前置期从九个月逐步压到六个月。",
    "outcome": "worked",
-   "source": "B1A1"
+   "source": "B1A1",
+   "domain": "supplychain"
   },
   "I2": {
    "id": "I2",
@@ -41,7 +42,8 @@
    },
    "intervention": "在配置定稿后重做培训；重建报表与数据治理，恢复管理层对绩效与临床结果的可见度；按业务影响逐条修配置；把重建临床人员对系统的信任作为显性目标推进。",
    "outcome": "worked",
-   "source": "B1A2"
+   "source": "B1A2",
+   "domain": "healthcare"
   },
   "I3": {
    "id": "I3",
@@ -61,7 +63,8 @@
    },
    "intervention": "1) 先关掉 autoscaling 的缩容，保住现有容量不被回收；2) 请 AWS 手工给 Transit Gateway 扩容（这才是解掉根因的一步）；3) 修 provision-service 的 open files / 配额限制，让新实例能正常起来；4) 负载均衡切 panic mode，配合重试兜底摊平请求。",
    "outcome": "worked",
-   "source": "B1A3"
+   "source": "B1A3",
+   "domain": "software"
   },
   "I4": {
    "id": "I4",
@@ -80,7 +83,8 @@
    },
    "intervention": "2020年8月17日政府与 Ofqual 全面推翻算法结果，A-level 与 GCSE 一律改按教师评估成绩（CAG）发放，承担已知的分数通胀代价，不做逐案复核",
    "outcome": "worked",
-   "source": "B1A4"
+   "source": "B1A4",
+   "domain": "transport"
   },
   "I5": {
    "id": "I5",
@@ -100,7 +104,8 @@
    },
    "intervention": "临时雇大批人力做人工发薪兜底；成立由 Chesterman 主持的 Payroll System Commission of Inquiry 彻查采购与治理；议会向员工公开道歉。",
    "outcome": "failed",
-   "source": "B1A5"
+   "source": "B1A5",
+   "domain": "healthcare"
   },
   "P1": {
    "id": "P1",
@@ -586,7 +591,8 @@
    },
    "intervention": "引入变异方法学区分自然变异与人为变异，重排择期手术日程摊平人为波动，不新增床位和人员",
    "outcome": "worked",
-   "source": "B2A2"
+   "source": "B2A2",
+   "domain": "healthcare"
   },
   "I7": {
    "id": "I7",
@@ -604,7 +610,8 @@
    },
    "intervention": "全厂按来源+时间窗做无差别追溯性召回（不按检出阳性的批次筛选）并关停工厂；FDA/DOJ 刑事调查与起诉；随后在立法层面把供应商验证与环境监控改成强制要求。",
    "outcome": "worked",
-   "source": "B2A4"
+   "source": "B2A4",
+   "domain": "manufacturing"
   },
   "I8": {
    "id": "I8",
@@ -626,7 +633,8 @@
    },
    "intervention": "事发时 ERCOT 手动大规模甩负荷保住系统频率，避免全网黑启动级崩溃；事后 FERC/NERC 提出 9 条建议，要求把防冻从自愿最佳实践改为强制可靠性标准、把天然气生产与处理设施纳入防冻要求与关键负荷保护名单、并重新审视备用裕度的计算口径。",
    "outcome": "worked",
-   "source": "B2A3"
+   "source": "B2A3",
+   "domain": "energy"
   },
   "I9": {
    "id": "I9",
@@ -646,7 +654,8 @@
    },
    "intervention": "停课一周由内部人手重排路线止血；解除对 AlphaRoute 的依赖，组建学区内部排线团队手工排线；2024年4月起取消绝大部分磁石学校与传统学校的校车服务（影响约16000名学生），把路线做短、更贴近车场，并给司机约10天时间按最终方案预跑路线（上一年只有一半时间）。",
    "outcome": "worked",
-   "source": "B2A1"
+   "source": "B2A1",
+   "domain": "transport"
   },
   "I10": {
    "id": "I10",
@@ -667,7 +676,8 @@
    },
    "intervention": "FDA 把输液袋工厂列入电网与燃料优先恢复名单，并临时批准境外工厂产品进口；医院层面改用注射器推注与口服替代方案，并对剩余库存配给使用",
    "outcome": "worked",
-   "source": "B2A5"
+   "source": "B2A5",
+   "domain": "healthcare"
   },
   "P42": {
    "id": "P42",
@@ -1013,7 +1023,8 @@
    },
    "intervention": "先用削减班次的应急/过渡时刻表把运行图降到实际能兑现的水平（Northern 6月4日起每日砍约165班，GTR 7月15日起换过渡图）止血；服务稳定后再由 ORR 主导独立调查并重做时刻表变更流程的整改建议。",
    "outcome": "worked",
-   "source": "B3A1"
+   "source": "B3A1",
+   "domain": "transport"
   },
   "I12": {
    "id": "I12",
@@ -1036,7 +1047,8 @@
    },
    "intervention": "把『制造这个零件的能力』本身拆开复制出去（图纸+毛坯+专用工装+工程师），分发给大量拥有通用设备但从没做过这个零件的厂商，让它们各自改线小批量生产，用家数弥补每家的低产能与低良率；动员走既有长期关系，价格与合同整体后置到窗口之外结算；同时爱信自己重建产线。事后削减零件变型数量。",
    "outcome": "worked",
-   "source": "B3A5"
+   "source": "B3A5",
+   "domain": "supplychain"
   },
   "I13": {
    "id": "I13",
@@ -1059,7 +1071,8 @@
    },
    "intervention": "三条时间尺度不同的线并行：立即向同行与客户借调设备与工程人力；数周尺度做全球紧急调拨与加急采购替换设备、并把部分产品临时转外部代工；数周到数月尺度抢修复产自身产线。同时对同类电镀设备做耐热与过流保护整改。",
    "outcome": "worked",
-   "source": "B3A4"
+   "source": "B3A4",
+   "domain": "manufacturing"
   },
   "I14": {
    "id": "I14",
@@ -1078,7 +1091,8 @@
    },
    "intervention": "西南航空宣布投入约13亿美元用于运维与技术升级，重点改造机组调度与恢复排班系统，并按交通部同意令设立旅客赔付基金",
    "outcome": "unknown",
-   "source": "B3A3"
+   "source": "B3A3",
+   "domain": "transport"
   },
   "I15": {
    "id": "I15",
@@ -1101,7 +1115,8 @@
    },
    "intervention": "运营线：把北部最多350家门店的配送合同退回给上一任供应商 Bidvest，把 Rugby 单仓的负载压到它磨合期的真实产能之下（不是让 DHL 给 Rugby 扩产能，也不是全量回退）。品牌线：在履约尚未恢复时就登整版报纸广告，用自嘲方式公开认错（FCK）。",
    "outcome": "worked",
-   "source": "B3A2"
+   "source": "B3A2",
+   "domain": "supplychain"
   },
   "P66": {
    "id": "P66",
@@ -1418,7 +1433,8 @@
    },
    "intervention": "不回滚、也没有回滚路径，改为与原厂商 SAP 和集成商 Accenture 一起就地返工重做实施，历时约三年到2002年8月才宣布完成。",
    "outcome": "unknown",
-   "source": "B4A1"
+   "source": "B4A1",
+   "domain": "supplychain"
   },
   "I17": {
    "id": "I17",
@@ -1440,7 +1456,8 @@
    },
    "intervention": "先用人工录入加大面积限流/取消把空域安全稳住，同时定位并隔离那份无法解析的飞行计划数据、重新拉起主备系统；业务稳住之后才做结构性修改（改同名航路点的处理逻辑），并由 CAA 独立评审给出应急预案、值班资源、通报时效与旅客安置方面的34条建议。",
    "outcome": "worked",
-   "source": "B4A5"
+   "source": "B4A5",
+   "domain": "transport"
   },
   "I18": {
    "id": "I18",
@@ -1463,7 +1480,8 @@
    },
    "intervention": "先带外恢复（跟云厂商一起重启或替换受影响实例）→ 逐区域恢复控制面 → 再修单个集群；数据上先保实时、历史延后回补。业务稳住之后才做治本：关掉遗留安全更新通道，改 systemd-networkd 配置使其重启时保留 Cilium 管理的路由表，并全量审计还存在哪些同类遗留自动更新通道。",
    "outcome": "worked",
-   "source": "B4A2"
+   "source": "B4A2",
+   "domain": "software"
   },
   "I19": {
    "id": "I19",
@@ -1487,7 +1505,8 @@
    },
    "intervention": "13:04 先把 Workers KV 和 Access 绕到旧版代理，止住下游连带损失；14:24 停掉坏特征文件的生成与分发，切断产物流水线；14:30 手工分发一份已知良好的特征文件并重启核心代理进程；随后逐个重启处于劣化状态的下游服务。",
    "outcome": "worked",
-   "source": "B4A4"
+   "source": "B4A4",
+   "domain": "software"
   },
   "I20": {
    "id": "I20",
@@ -1511,7 +1530,8 @@
    },
    "intervention": "事中：主动全网停机断网，按『可能被触及的全集』隔离而不是逐台甄别；业务整体退回纸质流程降级运行。事后（业务稳住之后才开始）：聘 PwC 做覆盖整体架构而非仅覆盖本次事件链的独立复盘并公开报告；新设 CISO 岗位作为这份缺口清单的收件人；重建安全运营中心与告警立案-结案流程。",
    "outcome": "worked",
-   "source": "B4A3"
+   "source": "B4A3",
+   "domain": "healthcare"
   },
   "P91": {
    "id": "P91",
@@ -1897,7 +1917,8 @@
    },
    "intervention": "全球停售停产并做两轮召回（第二轮覆盖原机与替换机全集）；随后把电池验证收回自己做，上线『8 点电池安全检查』（含 X 光、拆解、充放电、加速使用测试），并整体收紧电池设计余量与供应商准入标准；根因结论交 UL、Exponent、TÜV Rheinland 三方独立复核后公布。",
    "outcome": "worked",
-   "source": "B5A2"
+   "source": "B5A2",
+   "domain": "manufacturing"
   },
   "I22": {
    "id": "I22",
@@ -1918,7 +1939,8 @@
    },
    "intervention": "第一步先把新加的容量撤掉，让机队规模退回越界之前；第二步按每小时几百台的节奏分批重启前端机队重建 shard-map 缓存——不敢一次性全量重启，因为全机队同时冷启动会对后端形成一次自造的洪峰；事故稳住之后另开窗口做结构性修复：加配置让机器 bootstrap 时直接从元数据源拉取而不再向同类机器索取，并调高线程上限。",
    "outcome": "worked",
-   "source": "B5A1"
+   "source": "B5A1",
+   "domain": "software"
   },
   "I23": {
    "id": "I23",
@@ -1943,7 +1965,8 @@
    },
    "intervention": "ESO 提高持有的调频响应量（把储备定额从『最大单一损失』口径提到能覆盖共因同时损失的水平），并加速分布式电源失压（loss of mains）保护改造，把 vector shift 判据换成不易被系统级扰动误触发的判据；同时 Ofgem 通过与三家公司和解、合计 1,050 万英镑进赔付基金，把整改义务和钱绑在一起。",
    "outcome": "worked",
-   "source": "B5A5"
+   "source": "B5A5",
+   "domain": "energy"
   },
   "I24": {
    "id": "I24",
@@ -1967,7 +1990,8 @@
    },
    "intervention": "按顺序试过：换单节点硬件（无效）→ 换 128 核 + 更快 SSD 的机器（无效，NUMA 争用反而更糟）→ 用快照整体重置集群（无效，重新加载后又劣化）→ 砍掉非核心服务减少 Consul 用量（无效）→ 退回 64 核机器（无效）→ 10-30 15:51 彻底关掉 streaming 特性（有效，延迟立刻回到 300ms）；之后压制问题 leader 不再被选上，并对 BoltDB 做 compact。",
    "outcome": "worked",
-   "source": "B5A4"
+   "source": "B5A4",
+   "domain": "software"
   },
   "I25": {
    "id": "I25",
@@ -1988,7 +2012,8 @@
    },
    "intervention": "西班牙政府宣布一揽子措施：加强系统运行监视、扩大可承担电压调节的资源范围（含可再生能源）、加快电网规划审批、增加储能与互联投资、修补网络安全漏洞；ENTSO-E 专家组于 2026 年 3 月发布最终报告，建议强化运行规程、系统行为监测与各主体间数据交换和协调。",
    "outcome": "unknown",
-   "source": "B5A3"
+   "source": "B5A3",
+   "domain": "energy"
   },
   "P120": {
    "id": "P120",
@@ -2320,7 +2345,8 @@
    },
    "intervention": "NTSB 向 FAA 与波音发出安全建议，要求整改拆件记录流程及相应培训与监督；FAA 此前已对 737 产线设产量上限并加强现场监察。",
    "outcome": "unknown",
-   "source": "B6A5"
+   "source": "B6A5",
+   "domain": "manufacturing"
   },
   "I27": {
    "id": "I27",
@@ -2340,7 +2366,8 @@
    },
    "intervention": "三条不同时间尺度的线同时开：(a) 当日/数日——CAISO 于 8月20日交易日临时暂停虚拟报价（convergence bidding），8月22日随系统条件恢复；(b) 数月——CPUC 启动紧急可靠性规则程序，要求三大投资者所有制公用事业为 2021 年夏天额外签供给侧容量合同，并专门征集『净负荷高峰时段可用』的需求侧资源；(c) 年内——CAISO 加快市场规则修改，于 2021年6月前落地。",
    "outcome": "worked",
-   "source": "B6A1"
+   "source": "B6A1",
+   "domain": "energy"
   },
   "I28": {
    "id": "I28",
@@ -2364,7 +2391,8 @@
    },
    "intervention": "FERC/NERC 联合调查组给出 27 条建议：改进次日研究与系统运行限值的确定、扩大建模范围（纳入邻区与低电压等级设备）、增强跨区实时可观测性与运行协调；随后以罚款和解（APS 325 万美元）加各主体附整改计划的方式把整改义务落地。",
    "outcome": "unknown",
-   "source": "B6A4"
+   "source": "B6A4",
+   "domain": "energy"
   },
   "I29": {
    "id": "I29",
@@ -2385,7 +2413,8 @@
    },
    "intervention": "召回可能接触过受影响托盘的全部批次（不按检出 TBA 的批次筛选），并把木质托盘整类从运输与存放环节移除、换用不携带该处理剂的替代材料；FDA 随后把这条风险从单厂问题升格为全行业强制关注项（行业指南、致业界函、检查指引）。",
    "outcome": "worked",
-   "source": "B6A3"
+   "source": "B6A3",
+   "domain": "manufacturing"
   },
   "I30": {
    "id": "I30",
@@ -2405,7 +2434,8 @@
    },
    "intervention": "开业前的账实对账失败被记录下来，但没有推迟开业，也没有先停掉自动补货去洗数据；2013到2015年的实际做法是让闭环继续跑，靠运营团队每天人工处理错单错货。",
    "outcome": "failed",
-   "source": "B6A2"
+   "source": "B6A2",
+   "domain": "supplychain"
   },
   "P145": {
    "id": "P145",
