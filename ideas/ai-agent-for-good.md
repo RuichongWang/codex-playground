@@ -218,3 +218,46 @@ DPGA 自己也提到一个和 agent 时代直接相关的痛点：**AI 爬虫无
 - [Tech To The Rescue](https://techtotherescue.org/) ・ [AI for Changemakers](https://techtotherescue.org/ai-for-changemakers/cohort-disaster-management/)
 - [Develop for Good（仅限学生）](https://www.developforgood.org/for-students)
 - [DPGs for Responsible AI 合集](https://www.digitalpublicgoods.net/ai-collection) ・ [DPGA GitHub](https://github.com/dpgalliance)
+
+---
+
+# 附三：Omdena 的真实时间投入（重要修正）
+
+补充日期：2026-09-05。查证结论：**Omdena 的 8 周 AI Innovation Challenge 不是业余项目量级，接近半份兼职。**
+
+## 查到的数字
+
+Omdena 官方页面的表述（来自搜索引擎索引的 Collaborator Onboarding 与相关页面）：
+
+- 8 周 core challenge 是「与机构合作解决真实问题的专业项目」，**要求每周 15 小时以上**，并且要有「持续贡献、每周考评、投入度、创造力和积极性」。
+- 申请者被要求具备**每周约 20 小时的最低可用时间**；官方也说明这是个近似值，实际投入随承担的角色差别很大。
+- 结构：平均每个任务组有 5–10 人活跃参与，**每个任务组每周都要汇报工作**。
+
+**证据强度说明**：这两个具体数字（15+ / 20 小时）出自 Omdena 的 collaborator onboarding 页面，但这些 URL 现在直接访问返回 404（页面已移除或迁移），我只能通过搜索引擎索引的内容确认，**没能在实时页面上二次验证**。官方博客《How to Get Selected》在实时页面上只有定性表述：「Omdena projects are real-world projects…」「我们要找的是**能够每天投入**项目的人」「你的进度会被项目团队**按周考评**」——这个定性描述与 15–20 小时/周是一致的。
+
+按周考评 + 期望每天都能投入 + 每周组内汇报 —— 这套机制本身就说明了强度，不是"周末抽空写点代码"能对付的。
+
+## 这对你意味着什么
+
+| | 每周投入 | 时长 | 是否适合业余 |
+|---|---|---|---|
+| Omdena AI Innovation Challenge | **15–20h** | 8 周 | ❌ 太重 |
+| Omdena Local Chapter | 未公开明确要求 | **4 周** | ⚠️ 可能可行，需确认 |
+| DataKind DataCorps | **5–10h** | 6–9 个月 | ✅ 强度合适，但周期长 |
+| DataKind DataDives | 集中 48 小时 | 一个周末 | ✅ 最轻，可先试水 |
+| Open Referral 提 PR | 自定 | 自定 | ✅ 完全自由 |
+
+**Local Chapter 是 Omdena 内部值得看的轻量档**：每期 **4 周**（而非 8 周），团队规模 80–100 人，由 Chapter Lead 组织、每年跑 3 期以上的开源 AI 项目。官方没有公开写明个人的周投入要求——但 4 周 + 百人团队 + 开源属性，强度显著低于 core challenge。**申请前直接问清楚周投入，这是最省事的做法。**
+
+## 修正后的建议顺序
+
+1. **Open Referral 提 PR** —— 完全自定节奏，随时能开始，没有任何承诺。
+2. **DataKind DataDives**（48 小时黑客松）—— 用一个周末试水"跟社区一起做"是什么感觉，成本最低。
+3. **Omdena Local Chapter**（4 周）—— 如果确认周投入可接受。
+4. **DataKind DataCorps**（5–10h/周 × 6–9 月）—— 强度和你匹配，但要能承诺半年以上。
+5. **Omdena AI Innovation Challenge**（15–20h/周 × 8 周）—— 除非你能腾出接近半份兼职的时间，否则报名反而是对团队不负责，因为要按周考评、每周汇报。
+
+## 补充来源
+
+- [Omdena FAQs](https://www.omdena.com/faqs) ・ [How to Get Selected for an Omdena AI Challenge](https://www.omdena.com/blog/how-to-get-selected-for-an-omdena-ai-challenge) ・ [Through The Looking Glass: 一个 Omdena 挑战的深度记录](https://www.omdena.com/blog/the-looking-glass) ・ [Omdena Local Chapters](https://www.omdena.com/local-chapters) ・ [Local Chapter Lead 申请页（含 4 周项目制说明）](https://omdena.com/application-page-omdena-chapter-lead/)
+- [DataKind Volunteer（DataDives / DataCorps 档位）](https://www.datakind.org/join-us/volunteer/)
