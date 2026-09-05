@@ -142,3 +142,79 @@
 - [DataKind Volunteer](https://www.datakind.org/join-us/volunteer/) ・ [DataKind 社区](https://www.datakind.org/join-us/our-community/)
 - [Accessibility Best Practices for Your Project — Open Source Guides](https://opensource.guide/accessibility-best-practices-for-your-project/) ・ [The A11Y Project](https://www.a11yproject.com/)
 - [AI and Disability in 2026 综述](https://www.ameridisability.com/ai-and-disability-in-2026-a-comprehensive-guide-for-people-with-disabilities-caregivers-seniors-and-families) ・ [Cripping AI: Reimagining AI Through Lived Disability Experiences (arXiv)](https://arxiv.org/pdf/2605.02080)
+
+---
+
+# 附二：agent 方向的公益技术社区盘点（含口碑）
+
+补充日期：2026-09-05。问题：DataKind 偏数据科学，有没有 agent 向的社区可以加入？
+
+## 结论排序
+
+| 社区 | agent 相关度 | 投入门槛 | 现在能否直接加入 | 备注 |
+|---|---|---|---|---|
+| **Omdena** | ★★★★★ 当前就有明说的 agent 项目 | 8 周挑战制 | ✅ 可直接申请 | 多数角色无薪，管理偏松散 |
+| **Open Referral / HSDS** | ★★★★☆ agent 的底层基础设施 | 自定，纯开源 | ✅ | 最被低估，最有积累 |
+| **DataKind** | ★★★☆☆ 已做 LLM+人审编排 | DataCorps 6–9 月 / 每周 5–10h | ✅ | 血统是 DS，但架构在往 agent 走 |
+| **Tech To The Rescue** | ★★★☆☆ | 项目制 | ⏳ 2026 开放公开申请 | 主要匹配科技公司做 pro-bono |
+| **Develop for Good** | ★★☆☆☆ | 学期制 | ❌ **仅限在校大学生** | 非学生直接排除 |
+
+## 1. Omdena —— agent 方向最直接的落点
+
+**为什么排第一**：这是唯一一个此刻就有公开在跑的、明确的 agent 项目的志愿社区。当前列在项目页上的包括：
+
+- **CarbonAgents** —— 多 agent 碳管理系统，含"合规 agent"自动生成符合欧盟 CSRD 和美国 SEC 要求的报告
+- **Creating Specialized AI Agents for Disaster Management & Mitigation** —— 灾害管理与供应链韧性的专用 agent
+- **AutoDev** —— 实验性验证一个自主 agent 能否在 8 周内作为真实 Omdena 软件项目的**活跃参与者**
+
+模式是 8 周挑战、全球组队、30K+ AI 从业者社区，去项目页挑开放申请的项目、填表即可。
+
+**必须知道的口碑**（先看清楚再投入）：
+- **绝大多数角色是无薪的**，参与者本身是志愿者。对你"不为钱"的前提来说这不是问题，但要心里有数。
+- Glassdoor 上评价两极：一边是"提升技术、和全球团队协作的极好环境"，另一边直接说 **"Very chaotic, and not suitable for everyone"（非常混乱，不适合所有人）**；共性评价是**你必须是个自驱者（self-starter）**。
+- 参与者构成以学生/应届/转行者/想攒作品集的人为主，意味着队友水平参差。抱着"来当技术主力、顺便交朋友"的心态去，比抱着"来学东西"的心态更合适。
+
+## 2. Open Referral / HSDS —— 我认为最被低估的 agent 切口
+
+**逻辑很简单：agent 要帮人找到社会服务，前提是存在一份结构化、可查询、不过期的服务目录。这份目录目前是烂的。**
+
+- **HSDS**（Human Services Data Specification）是社区资源目录的开放数据标准，2019 年获 AIRS（信息与转介系统联盟）正式背书，2022 年 Open Referral UK 成为**英国政府官方数据标准**。
+- 现实运作规模：Ontario 211 用联邦式数据系统聚合了 **40+ 家本地机构**产出的资源目录数据。
+- 他们已经有一个开源的 **Resource Record-Matcher** —— AI 驱动的目录数据协作工具。
+
+对纯技术背景的人来说，这块的活非常对口：跨机构记录匹配与去重、脏数据规整、过期条目检测、把非结构化的机构网页转成 HSDS。这些正是 LLM/agent 的甜区，而且**有现成的标准可依，不需要你自己定义问题**——这对没有领域人脉的人是巨大的优势。
+
+## 3. DataKind —— 血统是 DS，但架构其实在往 agent 走
+
+你的判断是对的，但没有完全对。DataKind 与 Save the Children、Microsoft 合作的 **Humanitarian Data Insights Project (HDIP)** 的架构，本质就是一套 agent + human-in-the-loop：**用 LLM 生成执行分析的代码，把分析"recipes"存进数据库，经人工审核验证后发布到 library，再通过聊天界面/网站/报告对外提供**。他们也做过用 Prompt flow 编排 LLM 应用的培训，聚焦人道救援场景。
+
+不过要诚实说明：上面这个项目的公开资料主要是 2024 年的，我没有搜到 DataKind 在 2026 年明确以 "agent" 命名的新项目。**如果你走 DataKind，值得在申请时直接问他们当前有没有 agent 向的 DataCorps 项目。**
+
+投入档位：DataDives 是 48 小时黑客松（50–150 人），DataCorps 是 6–9 个月、每周 5–10 小时。
+
+## 4. Tech To The Rescue —— 值得盯，但个人参与路径要确认
+
+AI for Changemakers 加速器的目标是让 100 家非营利拿到 AI 战略与方案，覆盖教育、气候、环境、健康、经济机会五个领域，靠 pro-bono 匹配技术志愿者做实施。2025 年已与 100+ 社会影响力组织合作，**公开申请在 2026 年开放**。
+
+注意：它的主要匹配对象是**科技公司**做 pro-bono 伙伴，个人志愿者的参与通道需要去官网确认。
+
+## 5. 找项目的元资源：DPGA
+
+**Digital Public Goods Alliance**（联合国背书）维护开源软件、数据集、AI 模型、内容的"数字公共品"目录，专门有一个 **DPGs for Responsible AI** 合集。它本身不是志愿社区，但**是一份高质量的选题清单**——里面的项目大多是缺工程手的开源项目，可以直接去提 PR。（2025 年维基百科和 Wikidata 被正式认定为 DPG；2026 年 DPGA 参与新德里 AI Impact Summit。）
+
+DPGA 自己也提到一个和 agent 时代直接相关的痛点：**AI 爬虫无节制的自动抓取正在让本就资源紧张、多由志愿者维护的开源项目的基础设施成本暴涨**。这本身也是个可做的题。
+
+## 建议的行动顺序
+
+1. **本周**：去 Omdena 项目页看有没有正在开放申请的 agent 项目，投一个。8 周成本最低，用一期来验证"跟社区一起做"是否适合你。
+2. **同时**：去 Open Referral 的 GitHub 逛一圈，找一个记录匹配/数据清洗相关的 issue 提 PR。这条不需要申请、不需要等，随时能开始。
+3. **如果 Omdena 那期体验好**：再考虑 DataKind DataCorps 这种 6–9 个月的重承诺，或盯 Tech To The Rescue 2026 的公开申请。
+
+## 补充来源
+
+- [Omdena 项目页](https://www.omdena.com/projects) ・ [Omdena Developers](https://www.omdena.com/developers) ・ [Creating Specialized AI Agents for Disaster Management](https://www.omdena.com/projects/creating-specialized-ai-agents-for-disaster-management-mitigation) ・ [CarbonAgents](https://www.omdena.com/projects/building-carbonagents-ai-powered-carbon-management-solution) ・ [AutoDev](https://www.omdena.com/projects/autodev-building-an-autonomous-ai-software-engineer-for-live-project-environments) ・ [Omdena Glassdoor 评价](https://www.glassdoor.com/Reviews/Omdena-Reviews-E3656171.htm) ・ [Forbes 对 Omdena 志愿模式的报道](https://www.forbes.com/sites/jonyounger/2020/08/14/more-ways-for-freelancers-to-prosper-ai-freelancers-at-omdenacom-team-up-to-solve-tough-social-and-economic-challenges/)
+- [Open Referral](https://openreferral.org/) ・ [HSDS 2.0.1 规范文档](https://docs.openreferral.org/en/v2.0.1/hsds/) ・ [Open Referral 数据转换工具包](https://openreferral.org/introducing-open-referrals-data-transformation-toolkit/) ・ [Open Referral 加拿大合作（Ontario 211）](https://openreferral.org/new-partnerships-up-north-open-referral-in-canada/)
+- [DataKind Humanitarian Data Insights Project](https://www.datakind.org/2024/08/06/humanitarian-data-insights-project-using-generative-ai-to-streamline-data-access-and-use-for-humanitarian-action/) ・ [DataKind Volunteer](https://www.datakind.org/join-us/volunteer/)
+- [Tech To The Rescue](https://techtotherescue.org/) ・ [AI for Changemakers](https://techtotherescue.org/ai-for-changemakers/cohort-disaster-management/)
+- [Develop for Good（仅限学生）](https://www.developforgood.org/for-students)
+- [DPGs for Responsible AI 合集](https://www.digitalpublicgoods.net/ai-collection) ・ [DPGA GitHub](https://github.com/dpgalliance)
