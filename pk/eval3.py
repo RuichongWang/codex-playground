@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""阶段 3：迁移实验。四个 arm × 30 个 held-out 案例，加污染探针和两套判分。
+"""阶段 3：迁移实验。四个 arm × 30 个 held-out 案例，加污染探针。
 
   A 裸模型   B 只有 item（case-based）   C 全库   D 张冠李戴的库（活性安慰剂）
 
@@ -210,54 +210,10 @@ if os.path.exists(_mp):
     _MECH = json.load(open(_mp))
 
 
-LENIENT_JUDGE = """两份答案回答了同一个问题。你能看到真实情况。判断哪份更准确地抓住了**真正决定成败的东西**。
-
-【情况】{situation}
-【真实根因】{root}
-【真实采取的干预】{iv}（结果：{outcome}）
-【真正决定成败的条件】
-{conds}
-
---- 答案 X ---
-{ax}
-
---- 答案 Y ---
-{ay}
-
-**先逐条对证据，再下判断** —— 不要凭长度、语气或术语密度打分。
-一个用完全不同的话说对了同一件事的答案，跟用原话说的一样好。
-一个说了很多但没碰到要害的答案，不算好。
-
-只输出 JSON：
-{{"x_caught": ["X 抓住的要点，逐条"], "x_missed": ["X 漏掉的要点"],
-  "y_caught": [...], "y_missed": [...],
-  "winner": "X" 或 "Y" 或 "tie", "why": "一句话，必须指向具体要点"}}"""
-
-
-def do_lenient(case, a1, a2, rng):
-    """宽松版：给 ground truth 的整体判分，配对盲判，强制引用证据。
-
-    它跟逐元素判分的偏差方向相反（那个偏向用案例原话的，这个偏向更长更抽象的）。
-    两个都报：指向一致则结论稳；不一致说明效应就落在测量自身的偏差带里。
-    """
-    flip = rng.random() < 0.5
-    x, y = (a2, a1) if flip else (a1, a2)
-    fmt = lambda a: (f"机制：{a.get('mechanism','')[:700]}\n"
-                     f"方案/判断：{(a.get('proposal') or a.get('verdict') or '')[:500]}\n"
-                     f"条件：{'; '.join(a.get('conditions') or [])[:900]}\n"
-                     f"推理：{(a.get('reasoning') or '')[:900]}")
-    txt, cost = claude(LENIENT_JUDGE.format(
-        situation=case["situation"], root=case["root_cause"], iv=case["intervention"],
-        outcome=case["outcome"],
-        conds="\n".join(f"- {c}" for c in case["conditions"]),
-        ax=fmt(x), ay=fmt(y)))
-    d = jparse(txt) or {}
-    w = d.get("winner", "tie")
-    winner = "tie" if w not in ("X", "Y") else (
-        (a2["arm"] if flip else a1["arm"]) if w == "X" else (a1["arm"] if flip else a2["arm"]))
-    return dict(id=case["id"], pair=f"{a1['arm']}v{a2['arm']}", winner=winner,
-                why=d.get("why", ""), cost=cost)
-
+# 宽松版判分（LENIENT_JUDGE / do_lenient）已删除 —— 见 docs/experiment-plan.md
+# 变更记录 v0.5：双判分放弃，改为单 judge + 冻结 rubric + 翻转率检查。
+# 阶段 3 本身没用过它（阶段 3 用的是下面的 PAIR_JUDGE），删掉它是为了
+# 不让一套已被预注册排除的判分方式留在库里等着被再次调用。
 
 PAIR_JUDGE = """两份答案回答了同一个问题。判断哪份更接近真实情况。**你不知道它们来自哪里，也不该猜。**
 

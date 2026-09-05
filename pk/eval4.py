@@ -11,7 +11,7 @@
 """
 import argparse, glob, json, os, subprocess, sys, time
 import concurrent.futures as cf
-from pk.eval3 import ROOT, jparse, claude, do_f1, do_lenient, parallel
+from pk.eval3 import ROOT, jparse, claude, do_f1, parallel
 from pk.eval3b import LIB_BLOCK, SKILL, make_variants
 
 SINK_FILE = "想清楚之后，把答案写进文件 {out}，格式："
@@ -146,13 +146,9 @@ def main():
     fj = [(lambda c=cmap[k[0]], v=v: do_f1(c, v), dict(id=k[0], arm=k[1])) for k, v in answers.items()]
     parallel(fj, a.workers, P("f1.jsonl"), lambda r: (r["id"], r["arm"]), "f1")
 
-    import random
-    rng = random.Random(11)
-    lj = [(lambda c=cmap[i], x=x, y=y: do_lenient(c, answers[(i, x)], answers[(i, y)], rng),
-           dict(id=i, pair=f"{x}v{y}"))
-          for i in cmap for x, y in (("C", "A"),)
-          if (i, x) in answers and (i, y) in answers]
-    parallel(lj, a.workers, P("lenient.jsonl"), lambda r: (r["id"], r["pair"]), "lenient")
+    # 宽松版（第二套 rubric）已删除 —— 见 docs/experiment-plan.md 变更记录 v0.5：
+    # 两套 rubric 方向相反时给不出单一结论，多一套只是多一个研究者自由度。
+    # 判分从此是单 judge + 冻结 rubric（第四阶段 §4.2），judge 噪声改用翻转率量（§4.3）。
     subprocess.run([sys.executable, "-m", "pk.report4", "--out", a.out], cwd=ROOT)
 
 

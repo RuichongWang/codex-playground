@@ -10,3 +10,6 @@ runs/**/trace_*.jsonl
 runs/**/ans_*.json
 runs/**/fb_*.json
 *.json.bak
+
+# slope runner 的冒烟输出，是从冻结快照派生的，可重生成
+runs/slope_smoke/

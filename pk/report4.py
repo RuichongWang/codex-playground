@@ -71,20 +71,9 @@ def main():
             rows["F1"][m] = v / len(common)
         print(f"{'F1':22}" + "".join(f"{rows['F1'][m]:>10.3f}" for m in arms))
 
-    len_rows = load(P("lenient.jsonl"))
-    if len_rows:
-        print(f"\n{'─'*70}\n宽松版判分（给 ground truth、配对盲判、强制引证）")
-        agg = defaultdict(lambda: defaultdict(int))
-        for r in len_rows:
-            agg[r["pair"]][r["winner"]] += 1
-        for k in sorted(agg):
-            x, y = k.split("v")
-            v = agg[k]
-            print(f"  {k:8} {x} 胜 {v[x]:>2} / {y} 胜 {v[y]:>2} / 平 {v['tie']:>2}"
-                  f"   p={sign(v[x], v[y]):.3f}" + ("  ✱" if sign(v[x], v[y]) < 0.05 else ""))
-        print("\n  两套判分方向一致则结论稳；相反则效应落在测量自身的偏差带里。")
-
-    cost = sum(r.get("cost", 0) for f in ("answers", "trap", "f1", "lenient")
+    # 宽松版判分（第二套 rubric）已删除，见 docs/experiment-plan.md 变更记录 v0.5。
+    # 单 judge 是现在的口径；judge 自身噪声用翻转率量（pk/slope.py --flip），不靠第二套 rubric。
+    cost = sum(r.get("cost", 0) for f in ("answers", "trap", "f1")
                for r in load(P(f + ".jsonl")))
     print(f"\n累计 ${cost:.2f}")
 
