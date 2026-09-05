@@ -1,0 +1,76 @@
+# AI / Agent for Good：机会图谱与选题建议
+
+> 整理日期：2026-09-05。所有数据均标注来源，注意时效性。
+
+## 一、先把"不均衡"拆成三层，别混为一谈
+
+"AI 发展迅猛但各行业不均衡"是对的，但这句话里其实叠了三个不同的问题，对应完全不同的行动：
+
+| 层次 | 现象 | 证据 | 谁该解决 |
+|---|---|---|---|
+| **能力不均衡** | AI 对文本/代码/结构化推理很强，对物理世界、长尾数据很弱 | 长时程 agent 在 2026 才刚跨过"自主工作数小时"的阈值 | 实验室 |
+| **采用不均衡** | 有钱有数据的行业先用 | 美国信息业 39.7% vs 零售 ~14%，全国均值 19.8%（Census, 2026-05）；全球用量与人均 GDP 强相关，新加坡 4.6× 预期、印尼/尼日利亚远低于预期 | 市场 |
+| **供给不均衡** | 有些人群/场景**根本没有商业买家** | 罕见病、法援、照护、低资源语言 | ← **这一层才是 for good 的真空** |
+
+**结论：impact 最大的位置 = 技术已经够用 × 采用率接近零 × 没有人愿意付钱。** 三个条件的交集很窄，但正因为窄才轮得到你做。
+
+## 二、2026 的新变量：长时程 agent 让"行政流程"第一次可攻
+
+以前的 AI4Good 大多是"知识型"的——给弱势群体一个问答机器人。但这些人群缺的常常不是知识，是**跑完流程的时间和精力**。
+
+2026 的变化在于：agent 的任务时长大约每 4–7 个月翻一番，2026 被普遍认为是长时程 agent 主流化的一年，能自主工作数小时、自己发现并修正错误。这意味着"替人跑完一套吃人的行政流程"从演示变成了可交付。
+
+→ **最被低估的方向不是"给弱势群体一个聊天机器人"，而是"替一线工作者/家属跑完行政流程"。**
+
+## 三、三条硬教训（先看这个，能省一年）
+
+1. **95% 的 AI pilot 到不了生产**，且成功案例的投入比例大约是 **10% 算法 / 20% 基建 / 70% 人和流程**。Demo 崩在真实的、脏的、割裂的数据上。
+2. **直接把 AI 交到终端弱势用户手里，可能是有害的伪赋能。** 最扎心的证据：AI 辅助的自诉状看起来比历史上的 pro se 文书更专业，但**驳回率更高、胜诉率并没有提升**。斯坦福 Legal Design Lab 拿盖茨基金会的钱做的 Justice AI Co-Pilots，服务对象是**法援律师和工作人员**，不是当事人——这个选择是有道理的。
+3. **缺口常常不在模型，在分发和成本。** 中国罕见病 AI 已经很能打：DeepRare 表型诊断首位准确率 57.18%，比此前国际最佳模型高 23.79 个百分点，确诊周期从平均 4.26 年压缩到"周"级；"协和·太初"已进临床。但基层医院的原话是："我们能看到好工具，却难以全面推广，购置成本对基层医院而言是不小的负担。" 再造一个模型的 impact，很可能远小于让基层免费用上现有模型。
+
+## 四、四个候选方向（按"技术够用 × 无人在做 × 可验证"排序）
+
+### A. 行政负担杀手（最看好）
+- **问题规模**：预计 2026 年有多达 **520 万美国成年人因行政障碍（而非不符合资格）失去 Medicaid**；SNAP 的低领取率被研究界直接定义为"行政负担的空间投影"——交通不便、教育程度低的地区，在资格完全相同的情况下领取率系统性更低。申请要经历数小时电话排队、数天到数周的邮件等待。
+- **已有玩家**：Anthropic × Code for America 在做 caseworker 侧的 SNAP Policy Navigator 及一套 Claude 工具；Nava Labs × Benefits Data Trust 在做 navigator 侧的 WIC/SNAP/Medicaid 资格识别。
+- **空白**：这些几乎全部集中在美国联邦项目。**其他地区的等价物基本是空白**——低保/医保异地报销/残疾证办理/大病救助/公租房申请/工伤认定。这类问题的本质是"规则复杂度 × 申请人认知负担"，正好是 LLM 的甜区。
+
+### B. 一线工作者的副驾驶（而非终端用户的聊天机器人）
+- 对象：社工、乡村医生、特教老师、法援律师、护工、基层疾控。
+- 共同特征：极度缺人 + 大量非核心文书 + **本人有专业判断力，天然是合格的 human-in-the-loop**。
+- 这条路径规避了教训 2，也最容易做出可证伪的指标（每例节省分钟数、错误率、结案周期）。
+
+### C. 照护缺口（体量最大、最真实、也最难）
+- 美国预计到 2030 年缺 15.1 万带薪照护者 + 380 万无偿家庭照护者，2040 年扩大到 35.5 万 / 1100 万；65 岁以上阿尔茨海默及相关痴呆患者约 690 万，2060 年预计 1390 万；照护者平均每周 21 小时以上、持续 4 年以上。
+- **agent 能做的不是替代照护（物理世界仍然不行），而是照护协调**：预约、用药提醒、保险与报销、多方沟通、文书。学界已有 AI-Care 这类面向阿尔茨海默照护任务协调的 agentic 系统。家庭照护者的行政+情绪负担是明确的真空地带。
+
+### D. 语言与长尾数据（最像公共品，最需要非营利来做）
+- 约 **90% 的非洲语言属于低资源语言**；全球 ~7000 种语言中，被 NLP 认真研究的不到 20 种；40% 的语言面临消失风险。主流 LLM 训练语料 90% 以上是英语。
+- 这不是产品机会，是**基础设施机会**：高质量数据集和评测集比模型更稀缺、更长效。中国的方言与少数民族语言同理。适合"开源 + 学术"路径，可验证、可积累、可发表。
+
+## 五、我会劝退的方向
+
+- ❌ 再做一个"给 XX 群体的 ChatGPT 套壳"——见教训 2，可能帮倒忙。
+- ❌ 依赖捐赠、需要持续人工运营的 web app——没有可持续运营主体的，基本活不过两年。
+- ❌ 需要自研硬件的（照护机器人等）——除非本来就有硬件背景。
+- ❌ 从"平台"起步。永远从"替代一个具体的、此刻有人正在手工重复做的动作"起步。
+
+## 六、方法论：先找人，再找题
+
+1. **先找组织，不要先找问题。** 成败 70% 在人和流程。去找一个已经在做这件事、但缺技术的机构，当他们的技术合伙人；不要自己凭空立项。
+2. **定一个可证伪的指标**："申请通过率 +X%"、"确诊周期 −Y 周"、"每例文书节省 Z 分钟"，而不是"帮助了多少人"。
+3. **从最脏的那段流程切入**，不要从最性感的那段切入。
+4. **资金与资源**：OpenAI 的 People-First AI Fund 承诺 5000 万美元支持非营利；2026 年这类支持普遍是"现金 + 模型额度 + 工程支持"的组合。注意：资助方现在会问"你如何治理 AI"，整合了伦理、数据保护与运营准备度的提案明显跑赢一次性的 pilot 点子。
+
+## 七、参考来源
+
+- [The AI Adoption Gap Is Real: May 2026 Census Data](https://www.mattbritton.com/blog-posts/the-ai-adoption-gap-is-real-what-the-may-2026-census-data-reveals-about-u-s-business)
+- [Anthropic Economic Index: Uneven geographic and sector adoption (arXiv)](https://arxiv.org/pdf/2511.15080) ・ [Learning curves 报告](https://www.anthropic.com/research/economic-index-march-2026-report)
+- [A new Moore's Law for AI agents — AI Digest](https://theaidigest.org/time-horizons) ・ [2026: This is AGI — Sequoia](https://sequoiacap.com/article/2026-this-is-agi)
+- [Overcoming the AI Pilot Trap — Argano](https://argano.com/insights/articles/overcoming-the-ai-pilot-trap.html) ・ [Pilot Purgatory — Velosio](https://www.velosio.com/blog/pilot-purgatory-why-ai-initiatives-fail-to-reach-production/)
+- [Artificial Access to Justice: AI and the Surge in Pro Se Litigation (SSRN)](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6864398) ・ [Justice AI Co-Pilots — Stanford Legal Design Lab](https://justiceinnovation.law.stanford.edu/justice-ai-co-pilots) ・ [AI for Legal Help 2026 Class Report](https://justiceinnovation.law.stanford.edu/ai-for-legal-help-2026-class-report-scoping-building-and-testing-new-legal-aid-tech-systems/)
+- [Closing the SNAP Gap (arXiv)](https://arxiv.org/pdf/2511.00080) ・ [Anthropic × Code for America — Nextgov](https://www.nextgov.com/artificial-intelligence/2026/05/anthropic-and-nonprofit-partner-streamline-benefits-administration-ai/413455/) ・ [Nava Labs 公共福利 AI 试点](https://www.navapbc.com/case-studies/ai-tools-public-benefits) ・ [AI-first Medicaid 政策简报 (PMC)](https://pmc.ncbi.nlm.nih.gov/articles/PMC12663265/)
+- [从四年到四周：中国罕见病"确诊难"加速破局](https://news.qq.com/rain/a/20260228A03IAZ00) ・ [可溯源 AI 诊断系统 DeepRare — 中新网](https://www.chinanews.com.cn/jk/2026/02-19/10574196.shtml) ・ [AI 诊疗（下）：还有几道坎要过 — 新华网](https://www.news.cn/health/20260616/b21ee1ef64f5405994e112fec597e347/c.html)
+- [Redefining Elderly Care with Agentic AI (arXiv)](https://arxiv.org/pdf/2507.14912) ・ [AI-Care: Agentic System for Alzheimer's Care Coordination (arXiv)](https://arxiv.org/pdf/2605.08480) ・ [AI in AgeTech — Unite.ai](https://www.unite.ai/ai-in-elder-care-addressing-the-caregiver-shortage/)
+- [Mapping the AI Divide in Africa (arXiv)](https://arxiv.org/pdf/2606.30656) ・ [The African Languages Lab (arXiv)](https://arxiv.org/pdf/2510.05644) ・ [Low-Resource Languages in AI](https://www.digitaldividedata.com/blog/low-resource-languages-in-ai)
+- [OpenAI People-First AI Fund（5000 万美元）](https://openai.com/index/people-first-ai-fund/) ・ [AI Grants for Nonprofits 2026](https://www.whitelabel.ai/blog/ai-grants-for-nonprofits)
