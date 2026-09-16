@@ -1,0 +1,34 @@
+# -*- coding: utf-8 -*-
+u"""R7 的执行器:遍历规矩册,每条跑一次必红用例和一次绿对照。
+
+**必红用例没红 = 判红。** 一条永远绿的用例证明不了执行器还活着;
+一条因为错的理由而通过的检查,比没有检查更糟。
+"""
+import sys
+
+import redcases
+from done.rules import RULES, check_cap
+
+
+def main(argv=None):
+    check_cap()
+    bad = []
+    for r in RULES:
+        red = getattr(redcases, r[u"必红"])()
+        green = getattr(redcases, r[u"绿对照"])()
+        mark = u"绿"
+        if red is not True:
+            bad.append((r[u"id"], u"必红用例没红 —— 执行器 %s 今天拦不住它该拦的" % r[u"执行器"]))
+            mark = u"红"
+        if green is not True:
+            bad.append((r[u"id"], u"绿对照没绿 —— %s 在正常那条路上误伤" % r[u"执行器"]))
+            mark = u"红"
+        print(u"%s %-3s %-34s 执行器 %s" % (mark, r[u"id"], r[u"规矩"], r[u"执行器"]))
+    for rid, why in bad:
+        sys.stderr.write(u"红 %s:%s\n" % (rid, why))
+    print(u"\n规矩 %d 条(上限 %d),红 %d" % (len(RULES), 7, len(bad)))
+    return 1 if bad else 0
+
+
+if __name__ == u"__main__":
+    sys.exit(main())
