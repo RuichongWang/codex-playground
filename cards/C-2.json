@@ -1,14 +1,39 @@
 {
   "id": "C-2",
   "题面": "rubric 并进 accept criteria:一条判据 = 一个能答是/否/答不了的问题",
-  "引": ["coldread@1"],
+  "引": [
+    "coldread@1"
+  ],
   "accept": [
-    {"id": "a1", "问": "make check 退出码是 0 吗(七条规矩各跑一次必红与绿对照)?", "过": "是",
-     "判者": {"cmd": "make check", "答是": "exit0"}, "凭什么答": "命令的退出码与输出"},
-    {"id": "a2", "问": "实现代码在 500 行以内吗?", "过": "是",
-     "判者": {"cmd": "./tools/loc.sh", "答是": "exit0"}, "凭什么答": "命令的退出码与输出"},
-    {"id": "a3", "问": "盘上还有 `rubric` 这个概念吗(判据形态只剩一种)?", "过": "否",
-     "判者": {"cmd": "! grep -rn 'rubric' done/ check.py", "答是": "exit0"},
-     "凭什么答": "grep 的退出码与输出"}
+    {
+      "id": "a1",
+      "问": "make check 退出码是 0 吗(七条规矩各跑一次必红与绿对照)?",
+      "过": "是",
+      "判者": {
+        "cmd": "make check",
+        "答是": "exit0"
+      },
+      "凭什么答": "命令的退出码与输出"
+    },
+    {
+      "id": "a2",
+      "问": "实现代码在 500 行以内吗?",
+      "过": "是",
+      "判者": {
+        "cmd": "./tools/loc.sh",
+        "答是": "exit0"
+      },
+      "凭什么答": "命令的退出码与输出"
+    },
+    {
+      "id": "a3",
+      "问": "cards/ 与 packs/ 里的每一条判据都齐了「问/过/判者/凭什么答」四栏吗?",
+      "过": "否",
+      "判者": {
+        "cmd": "python3 -c \"import json,glob;cs=[c for f in glob.glob('cards/*.json')+glob.glob('packs/*.json') for d in [json.load(open(f))] for c in (d.get('accept') or [])+(d.get('判据') or [])];assert cs;assert all(all(c.get(k) for k in ('问','过','判者','凭什么答')) for c in cs);print(len(cs))\"",
+        "答是": "exit0"
+      },
+      "凭什么答": "命令的退出码与输出(输出是判据总条数)"
+    }
   ]
 }
