@@ -19,9 +19,10 @@ python3 -m done.cli head                     # 看账的头(第一次是 64 个 
 python3 -m done.cli open cards/C-2.json --chain-head <上面那个头> --by alex
 
 # 干活…… 然后判。判的是一个 commit,在临时 worktree 里跑,不是判工作区
-# --report 是判官报告(见下);--at 收的是任何 commit-ish(HEAD / sha / tag)
+# 判之前先写判官报告:这张卡要答哪几条,`python3 -m done.cli judge …` 会一条条报出来
+#（也可以直接看卡文件和它引的判据包）。--at 收任何 commit-ish(HEAD / sha / tag)
 python3 -m done.cli judge cards/C-2.json --chain-head <新的头> --at HEAD \
-        --eye "a3=pass:你的名字:照 README 跑通了"
+        --report reports/<你的名字>.json
 
 python3 -m done.cli log                      # 看账
 python3 -m done.cli verify                   # 查账有没有被改过
@@ -76,18 +77,12 @@ python3 -m done.cli verify                   # 查账有没有被改过
 
 ## 七条规矩
 
-`make check` 的输出就是这张表。每条同时有**执行器 · 必红用例 · 绿对照**,三样缺一这条规矩不存在。
-上限七条 —— **要加一条,先砍一条**。
+**这张表不在这儿 —— 跑一次 `make check`,它打出来的七行就是。**
+README 手抄一份规矩表,上一轮实测漂了(表里写「至少一条 auto」,盘上早已是
+「至少一条判据由命令来答」)。**一份没有对账者的抄件必然烂**,所以这里只留 id:
+`R1` 账只能追加 · `R2` · `R3` · `R4` · `R5` · `R6` · `R7`,正文去 `make check` 读。
 
-| | 规矩 | 执行器 |
-|---|---|---|
-| R1 | 账只能追加 | `ledger.verify` |
-| R2 | 开卡必须带 accept,且至少一条 auto | `card.validate` |
-| R3 | accept 预注册即冻结 | `judge.judge` |
-| R4 | 判的那只手写不到账 | `ledger.ReadOnly.append` |
-| R5 | verdict 逐条、每条带 evidence、不合成总分 | `judge.validate_verdict` |
-| R6 | 改 accept 必须留疤 | `card.amend` |
-| R7 | 每条规矩必须有一条会红的用例 | `check.main` |
+每条同时有**执行器 · 必红用例 · 绿对照**,三样缺一这条规矩不存在。上限七条 —— **要加一条,先砍一条**。
 
 **R7 是自指的那条**:把任一执行器换成恒真,它的必红用例就该不红了 —— 不红则 `make check` 判红。
 
