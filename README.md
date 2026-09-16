@@ -19,8 +19,9 @@ python3 -m done.cli head                     # 看账的头(第一次是 64 个 
 python3 -m done.cli open cards/C-1.json --chain-head <上面那个头> --by alex
 
 # 干活…… 然后判。判的是一个 commit,在临时 worktree 里跑,不是判工作区
+# --eye 的值带空格,必须整个用引号包起来;--at 收的是任何 commit-ish(HEAD / sha / tag)
 python3 -m done.cli judge cards/C-1.json --chain-head <新的头> --at HEAD \
-        --eye a3=pass:alex:照 README 跑通了
+        --eye "a3=pass:你的名字:照 README 跑通了"
 
 python3 -m done.cli log                      # 看账
 python3 -m done.cli verify                   # 查账有没有被改过
@@ -33,11 +34,14 @@ python3 -m done.cli verify                   # 查账有没有被改过
 
 ## 卡长什么样
 
+`cards/C-1.json` 就是真的那张,下面是它逐字的样子(三条,别的卡照这个写):
+
 ```json
 {"id": "C-1", "题面": "把 done v0 建出来", "accept": [
   {"id":"a1","判据":"make check 全绿","档":"auto","怎么验":{"cmd":"make check","期望":"exit0"}},
+  {"id":"a2","判据":"实现代码不超过 500 行","档":"auto","怎么验":{"cmd":"./tools/loc.sh","期望":"exit0"}},
   {"id":"a3","判据":"没读过设计的人 5 分钟跑通","档":"eye",
-   "靠什么兜":{"谁":"alex","看什么":"只照 README 从零跑一遍"}}
+   "靠什么兜":{"谁":"冷读者(没读过设计的人)","看什么":"从零 clone 一份,只照 README 跑一遍"}}
 ]}
 ```
 
