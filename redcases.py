@@ -14,10 +14,12 @@ from done import judge as J
 from done import ledger as L
 from done import rules as R
 
-AUTO = {u"id": u"a1", u"判据": u"跑得通", u"档": u"auto",
-        u"怎么验": {u"cmd": u"true", u"期望": u"exit0"}}
-EYE = {u"id": u"a2", u"判据": u"读起来清楚", u"档": u"eye",
-       u"靠什么兜": {u"谁": u"alex", u"看什么": u"从头读一遍"}}
+AUTO = {u"id": u"a1", u"问": u"跑得通吗?", u"过": u"是",
+        u"判者": {u"cmd": u"true", u"答是": u"exit0"}, u"凭什么答": u"退出码"}
+EYE = {u"id": u"a2", u"问": u"打开过源文件吗?", u"过": u"否",
+       u"判者": u"读者", u"凭什么答": u"它用过的命令清单"}
+REPORT = {u"a2": {u"答": u"否", u"引文": u"cat README.md",
+                  u"证据": u"ls\ncat README.md\nmake check", u"judge": u"t"}}
 
 
 class Sandbox(object):
@@ -88,16 +90,16 @@ def _open(s):
     C.open_card(s.ledger, s.cardfile, u"t", s.head())
 
 
-def _judge(s, eye=None):
+def _judge(s, reports=None):
     return J.judge(s.ledger, s.cardfile, s.repo, u"HEAD", s.head(),
-                   eye or {u"a2": {u"pass": True, u"by": u"alex", u"note": u"看过"}})
+                   reports if reports is not None else REPORT)
 
 
 def r3_red():
     with Sandbox() as s:
         _open(s)
         a = dict(AUTO)
-        a[u"判据"] = u"改松了"
+        a[u"问"] = u"改松了吗?"
         s.write([a, dict(EYE)])
         return _red(lambda: _judge(s))
 
@@ -116,8 +118,8 @@ def r4_red():
             return False
         # 第二半:auto 命令在 worktree 里写 .done/ledger.jsonl,真账必须纹丝不动
         a = dict(AUTO)
-        a[u"怎么验"] = {u"cmd": u"mkdir -p .done && echo x >> .done/ledger.jsonl",
-                        u"期望": u"exit0"}
+        a[u"判者"] = {u"cmd": u"mkdir -p .done && echo x >> .done/ledger.jsonl",
+                      u"答是": u"exit0"}
         s.write([a, dict(EYE)])
         _open(s)
         before = s.head()
@@ -136,12 +138,18 @@ def r4_green():
 def r5_red():
     no_ev = {u"lines": [{u"id": u"a1", u"passed": True}]}
     agg = {u"score": 0.85, u"lines": [{u"id": u"a1", u"passed": True, u"evidence": {u"exit": 0}}]}
-    return _red(lambda: J.validate_verdict(no_ev)) and _red(lambda: J.validate_verdict(agg))
+    faked = {u"lines": [{u"id": u"a2", u"判者": u"读者", u"答": u"否", u"passed": True,
+                         u"evidence": {u"引文": u"我编的", u"引文在证据里": False}}]}
+    return (_red(lambda: J.validate_verdict(no_ev))
+            and _red(lambda: J.validate_verdict(agg))
+            and _red(lambda: J.validate_verdict(faked)))
 
 
 def r5_green():
-    return J.validate_verdict({u"lines": [{u"id": u"a1", u"passed": True,
-                                           u"evidence": {u"exit": 0}}]})
+    return J.validate_verdict({u"lines": [
+        {u"id": u"a1", u"判者": u"cmd", u"答": u"是", u"passed": True, u"evidence": {u"exit": 0}},
+        {u"id": u"a2", u"判者": u"读者", u"答": u"否", u"passed": True,
+         u"evidence": {u"引文": u"cat README.md", u"引文在证据里": True}}]})
 
 
 # ── R6 改 accept 必须留疤 ────────────────────────────────────────────
@@ -149,7 +157,7 @@ def r6_red():
     with Sandbox() as s:
         _open(s)
         a = dict(AUTO)
-        a[u"判据"] = u"换了"
+        a[u"问"] = u"换了吗?"
         s.write([a, dict(EYE)])
         return _red(lambda: C.amend(s.ledger, s.cardfile, u"", u"t", s.head()))
 
@@ -161,7 +169,7 @@ def r6_green():
         if len(C.effective_verdicts(s.ledger, u"C-t")) != 1:
             return False
         a = dict(AUTO)
-        a[u"判据"] = u"换了"
+        a[u"问"] = u"换了吗?"
         s.write([a, dict(EYE)])
         C.amend(s.ledger, s.cardfile, u"原判据说不清", u"t", s.head())
         return C.effective_verdicts(s.ledger, u"C-t") == []

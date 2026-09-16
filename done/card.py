@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
-u"""卡:accept criteria 在干活之前就定死,落账即冻结(R2 · R3 · R6)。"""
+u"""卡:一组判据,在干活之前就定死,落账即冻结(R2 · R3 · R6)。
+
+**一条判据 = 一个只能答「是 / 否 / 答不了」的问题 + 凭什么答 + 哪边算过。**
+判者只有两种:一条命令,或者一个读者。没有 rubric 这个概念,它并进来了。
+"""
 import hashlib
+import io
 import json
+import os
 
 from done.ledger import Refused, append, canon, read
 
-档表 = (u"auto", u"eye")
-# 「谁」这一格写成下面这些,等于没写 —— 一个不指向具体人的兜底不是兜底。
-无人词 = (u"人工", u"人工复核", u"人", u"相关人员", u"大家", u"以后再说", u"tbd")
+答域 = (u"是", u"否", u"答不了")
 
 
 def spec_hash(accept):
@@ -15,47 +19,66 @@ def spec_hash(accept):
 
 
 def load(path):
-    with open(path, u"rb") as f:
-        return json.loads(f.read().decode(u"utf-8"))
+    return json.loads(io.open(path, encoding=u"utf-8").read())
+
+
+def expand(card, packs=u"packs"):
+    u"""把引的判据包摊开,和本卡自己那几条并在一起。
+
+    `spec_hash` 算的是展开之后那一份,所以**包的内容一改而版本没升,判的时候当场对不上**
+    —— 包只能靠升版本演进,改不动老卡。
+    """
+    out = []
+    for ref in card.get(u"引") or ():
+        name, _, ver = ref.partition(u"@")
+        p = os.path.join(packs, name + u".json")
+        if not os.path.exists(p):
+            raise Refused(u"pack-missing", u"找不到判据包 %s" % ref)
+        pk = load(p)
+        if unicode_(pk.get(u"version")) != ver:
+            raise Refused(u"pack-version", u"%s 引的是 v%s,盘上是 v%s —— 包只能升版本"
+                          % (name, ver, pk.get(u"version")))
+        out.extend(pk[u"判据"])
+    out.extend(card.get(u"accept") or [])
+    return out
+
+
+def unicode_(x):
+    return u"%s" % x
 
 
 def validate(accept):
-    u"""一张卡的 accept 合不合法。至少一条 auto,否则 done 退化成自评(R2)。"""
+    u"""判据合不合法。至少一条由命令来答,否则 done 退化成自评(R2)。"""
     if not isinstance(accept, list) or not accept:
-        raise Refused(u"accept-empty", u"一张卡必须至少有一条 accept")
-    seen = set()
-    autos = 0
+        raise Refused(u"accept-empty", u"一张卡必须至少有一条判据")
+    seen, cmds = set(), 0
     for c in accept:
         cid = c.get(u"id")
-        if not cid:
-            raise Refused(u"accept-id", u"每条 accept 要有 id")
-        if cid in seen:
-            raise Refused(u"accept-id", u"id 重了:%s" % cid)
+        if not cid or cid in seen:
+            raise Refused(u"accept-id", u"判据要有 id,且不许重:%s" % cid)
         seen.add(cid)
-        if not c.get(u"判据"):
-            raise Refused(u"accept-claim", u"%s 没写判据" % cid)
-        arch = c.get(u"档")
-        if arch not in 档表:
-            raise Refused(u"accept-arch", u"%s 的档要是 auto 或 eye" % cid)
-        if arch == u"auto":
-            autos += 1
-            v = c.get(u"怎么验") or {}
-            if not v.get(u"cmd"):
-                raise Refused(u"accept-cmd", u"%s 是 auto,要给一条 cmd" % cid)
-            if not v.get(u"期望") and not v.get(u"stdout_contains"):
-                raise Refused(u"accept-expect", u"%s 要写期望:exit0 或 stdout_contains" % cid)
-        else:
-            d = c.get(u"靠什么兜") or {}
-            who, what = (d.get(u"谁") or u"").strip(), (d.get(u"看什么") or u"").strip()
-            if not who or not what:
-                raise Refused(u"accept-eye", u"%s 是 eye,要写「谁」和「看什么」" % cid)
-            if who.lower() in 无人词:
-                raise Refused(u"accept-eye-nobody",
-                              u"%s 的「谁」写成了 %s —— 不指向一个具体的人,等于没写" % (cid, who))
-    if autos == 0:
-        raise Refused(u"no-auto",
-                      u"一张卡至少要有一条 auto —— 全是 eye 的卡,done 就退化成自评")
+        for k in (u"问", u"过", u"判者", u"凭什么答"):
+            if not c.get(k):
+                raise Refused(u"accept-field", u"%s 缺「%s」" % (cid, k))
+        if c[u"过"] not in (u"是", u"否"):
+            raise Refused(u"accept-side", u"%s 的「过」要是「是」或「否」" % cid)
+        j = c[u"判者"]
+        if isinstance(j, dict):
+            if not j.get(u"cmd"):
+                raise Refused(u"accept-cmd", u"%s 的判者是命令,要给 cmd" % cid)
+            cmds += 1
+        elif j != u"读者":
+            raise Refused(u"accept-judge", u"%s 的判者要么是 {cmd: …},要么是「读者」" % cid)
+    if cmds == 0:
+        raise Refused(u"no-cmd",
+                      u"一张卡至少要有一条由命令来答 —— 全靠读者的卡,done 就退化成自评")
     return True
+
+
+def accept_of(card_file, packs=u"packs"):
+    a = expand(load(card_file), packs)
+    validate(a)
+    return a
 
 
 def registered(ledger_path, card_id):
@@ -72,26 +95,26 @@ def registered(ledger_path, card_id):
     return cur
 
 
-def open_card(ledger_path, card_file, by, chain_head):
+def open_card(ledger_path, card_file, by, chain_head, packs=u"packs"):
     card = load(card_file)
-    validate(card[u"accept"])
+    a = accept_of(card_file, packs)
     if registered(ledger_path, card[u"id"]) is not None:
         raise Refused(u"card-already-open", u"%s 已经开过了,要改走 amend" % card[u"id"])
-    body = {u"card": card[u"id"], u"题面": card.get(u"题面", u""),
-            u"spec_hash": spec_hash(card[u"accept"]), u"by": by}
+    body = {u"card": card[u"id"], u"题面": card.get(u"题面", u""), u"引": card.get(u"引", []),
+            u"spec_hash": spec_hash(a), u"条数": len(a), u"by": by}
     return append(ledger_path, u"open", body, chain_head)
 
 
-def amend(ledger_path, card_file, why, by, chain_head):
-    u"""改 accept 要留疤:落一行,且这张卡此前的 verdict 当场作废(R6)。"""
+def amend(ledger_path, card_file, why, by, chain_head, packs=u"packs"):
+    u"""改判据要留疤:落一行,且这张卡此前的 verdict 当场作废(R6)。"""
     card = load(card_file)
-    validate(card[u"accept"])
+    a = accept_of(card_file, packs)
     old = registered(ledger_path, card[u"id"])
     if old is None:
         raise Refused(u"card-not-open", u"%s 还没开过" % card[u"id"])
-    new = spec_hash(card[u"accept"])
+    new = spec_hash(a)
     if new == old:
-        raise Refused(u"amend-noop", u"accept 一个字都没动,不用 amend")
+        raise Refused(u"amend-noop", u"判据一个字都没动,不用 amend")
     if not (why or u"").strip():
         raise Refused(u"amend-why", u"改判据必须写为什么")
     body = {u"card": card[u"id"], u"old_spec_hash": old, u"new_spec_hash": new,
@@ -102,10 +125,6 @@ def amend(ledger_path, card_file, why, by, chain_head):
 def effective_verdicts(ledger_path, card_id):
     u"""这张卡**现在还算数**的判决:spec_hash 不等于当前注册值的,一律不算(R6 的作废)。"""
     cur = registered(ledger_path, card_id)
-    out = []
-    for r in read(ledger_path):
-        b = r.get(u"body") or {}
-        if r.get(u"kind") == u"verdict" and b.get(u"card") == card_id \
-                and b.get(u"spec_hash") == cur:
-            out.append(r)
-    return out
+    return [r for r in read(ledger_path)
+            if r.get(u"kind") == u"verdict" and (r.get(u"body") or {}).get(u"card") == card_id
+            and (r.get(u"body") or {}).get(u"spec_hash") == cur]
