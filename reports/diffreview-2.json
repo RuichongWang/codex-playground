@@ -1,0 +1,10 @@
+{
+ "judge": "改动审阅人-2",
+ "answers": {
+  "a5": {
+   "答": "是",
+   "引文": "ensure_ascii=False)[:160]))",
+   "证据": "diff --git a/done/cli.py b/done/cli.py\nindex 1b5e24f..722adc5 100644\n--- a/done/cli.py\n+++ b/done/cli.py\n@@ -67,7 +67,7 @@ def main(argv=None):\n         elif a.cmd == u\"log\":\n             for r in L.read(a.ledger):\n                 print(u\"#%d %-7s %s\" % (r[u\"seq\"], r[u\"kind\"],\n-                                        json.dumps(r[u\"body\"], ensure_ascii=False)[:160]))\n+                                        json.dumps(r[u\"body\"], ensure_ascii=False)))\n         elif a.cmd == u\"open\":\n             _print(C.open_card(a.ledger, a.cardfile, a.by, a.chain_head))\n         elif a.cmd == u\"amend\":"
+  }
+ }
+}
