@@ -2,7 +2,8 @@
   "id": "C-2",
   "题面": "rubric 并进 accept criteria:一条判据 = 一个能答是/否/答不了的问题",
   "引": [
-    "coldread@2"
+    "coldread@2",
+    "reviewable@1"
   ],
   "accept": [
     {
