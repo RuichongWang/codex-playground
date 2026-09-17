@@ -1,0 +1,20 @@
+{
+ "judge": "冷读判官-2(只看日志)",
+ "answers": {
+  "cr1": {
+   "答": "是",
+   "引文": "Cloning into '/tmp/coldrun-4'...",
+   "证据": "$ git clone /home/user/codex-playground /tmp/coldrun-4 && cd /tmp/coldrun-4\nCloning into '/tmp/coldrun-4'...\ndone."
+  },
+  "cr3": {
+   "答": "是",
+   "引文": "bash: line 1: 上面那个头: No such file or directory",
+   "证据": "$ python3 -m done.cli open cards/C-2.json --chain-head <上面那个头> --by alex\nbash: line 1: 上面那个头: No such file or directory"
+  },
+  "cr4": {
+   "答": "是",
+   "引文": "> `cards/C-1.json` 是历史",
+   "证据": "> `cards/C-1.json` 是历史:它在 `b686dee` 上按当时的判据形态判过 PASSED,**不追溯改**。\n\n## 七条规矩\n\n**这张表不在这儿 —— 跑一次 `make check`,它打出来的七行就是。**\nREADME 手抄一份规矩表,上一轮实测漂了(表里写「至少一条 auto」,盘上早已是\n「至少一条判据由命令来答」)。**一份没有对账者的抄件必然烂**,所以这里只留 id:\n`R1` 账只能追加 · `R2` · `R3` · `R4` · `R5` · `R6` · `R7`,正文去 `make check` 读。\n\n每条同时有**执行器 · 必红用例 · 绿对照**,三样缺一这条规矩不存在。上限七条 —— **要加一条,先砍一条**。\n\n**R7 是自指的那条**:把任一执行器换成恒真,它的必红用例就该不红了 —— 不红则 `make check` 判红。\n\n---\n\n### 别的分支\n\n`claude/pattern-hierarchy-experiment` —— 跨行业 pattern 库实验(与本主题独立)。\n\n$ make check\n实现代码 421 行 / 上限 500\n绿 R1  账只能追加                              执行器 ledger.verify\n绿 R2  至少一条判据由命令来答                        执行器 card.validate\n绿 R3  判据预注册即冻结                           执行器 judge.judge\n绿 R4  判的那只手写不到账                          执行器 ledger.ReadOnly.append\n绿 R5  逐条 · 带证据 · 引文对得上 · 不合成             执行器 judge.validate_verdict\n绿 R6  改判据必须留疤                            执行器 card.amend\n绿 R7  每条规矩必须有一条会红的用例                     执行器 check.main\n\n规矩 7 条(上限 7),红 0\n\n$ python3 -m done.cli head\n0000000000000000000000000000000000000000000000000000000000000000\n\n$ ls\nCLAUDE.md\nMakefile\nREADME.md\n__pycache__\ncards\ncheck.py\ndocs\ndone\npacks\nredcases.py\nreports\ntools\n\n$ ls cards packs reports\ncards:\nC-2.json\narchive\n\npacks:\ncoldread.json\nreviewable.json\n"
+  }
+ }
+}
