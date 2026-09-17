@@ -123,6 +123,8 @@ def judge(ledger_path, card_file, repo, at, chain_head, reports=None, packs=u"pa
             if isinstance(j, dict) and j.get(u"cmd"):
                 rc, out = _sh(j[u"cmd"], wt)
                 ans = _cmd_answer(j, rc, out)
+                if c[u"过"] == u"没找到":   # 全量扫描类:退出码 0 = 没找到
+                    ans = u"没找到" if ans == u"是" else u"找到"
                 ev = {u"exit": rc, u"out_sha": _sha(out), u"out_head": out[:200]}
                 who = u"cmd"
             else:

@@ -15,6 +15,10 @@ from done.ledger import Refused, append, canon, read
 # 「过」写成「没找到」的,是一条**找反例**的判据:答域换成 找到 / 没找到 / 答不了。
 # 为什么要分开:「有没有哪一条…」答「是」只要举一个反例,答「否」要穷举 ——
 # 而报告只装得下一段引文,于是「否」结构上是个免费答案。实测被这么过过一次。
+#
+# **命令也可以答这类判据,而且答得最硬** —— 一次全量扫描就是最彻底的搜。
+# (上一版规定只许人答,理由是「命令不会搜」,那是错的,`tools/deps.py` 当场反证。)
+# 约定:这类判据由命令答时,退出码 0 = 没找到,非 0 = 找到。
 
 
 def spec_hash(accept):
@@ -65,8 +69,6 @@ def validate(accept):
                 raise Refused(u"accept-field", u"%s 缺「%s」" % (cid, k))
         if c[u"过"] not in (u"是", u"否", u"没找到"):
             raise Refused(u"accept-side", u"%s 的「过」要是「是」「否」或「没找到」" % cid)
-        if c[u"过"] == u"没找到" and isinstance(c[u"判者"], dict) and c[u"判者"].get(u"cmd"):
-            raise Refused(u"accept-find", u"%s 是找反例的判据,命令不会「搜」—— 要人来找" % cid)
         j = c[u"判者"]
         if isinstance(j, dict) and j.get(u"cmd"):
             cmds += 1
