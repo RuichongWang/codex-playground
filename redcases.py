@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-u"""必红用例与绿对照。**不计入 500 行硬顶** —— 否则那条硬顶会奖励少写用例。
+u"""必红用例与绿对照。每条规矩一红一绿,缺一条这条规矩就不存在。
 
 约定:必红用例返回 True = 「它确实红了」;绿对照返回 True = 「正常那条路走通了」。
 """
@@ -12,6 +12,7 @@ import tempfile
 from done import card as C
 from done import judge as J
 from done import ledger as L
+from done import reflect as RF
 from done import rules as R
 
 AUTO = {u"id": u"a1", u"问": u"跑得通吗?", u"过": u"是",
@@ -207,9 +208,9 @@ def r7_green():
 # ── 沉淀那一步(不是规矩,不计入七条)────────────────────────────────
 def reflect_red():
     u"""三种该被拦住的:不选、「不写」却不说为什么、「写」却只记事不猜。"""
-    return (_red(lambda: J.validate_note({u"by": u"t"}))
-            and _red(lambda: J.validate_note({u"by": u"t", u"写不写": u"不写", u"为什么不写": u"没"}))
-            and _red(lambda: J.validate_note({u"by": u"t", u"写不写": u"写",
+    return (_red(lambda: RF.validate_note({u"by": u"t"}))
+            and _red(lambda: RF.validate_note({u"by": u"t", u"写不写": u"不写", u"为什么不写": u"没"}))
+            and _red(lambda: RF.validate_note({u"by": u"t", u"写不写": u"写",
                                               u"事件": {u"what": u"出了一件事"}})))
 
 
@@ -223,7 +224,7 @@ def reflect_green():
     with Sandbox() as s:
         _open(s)
         _judge(s)
-        row = J.reflect(s.ledger, s.cardfile, s.head(),
+        row = RF.reflect(s.ledger, s.cardfile, s.head(),
                         {u"by": u"t", u"写不写": u"不写",
                          u"为什么不写": u"这一轮没有新东西,是上一轮那条的又一次"})
         if row[u"kind"] != u"reflect":
@@ -231,12 +232,12 @@ def reflect_green():
         # 没判过的卡不许沉淀
         with Sandbox() as s2:
             _open(s2)
-            if not _red(lambda: J.reflect(s2.ledger, s2.cardfile, s2.head(),
+            if not _red(lambda: RF.reflect(s2.ledger, s2.cardfile, s2.head(),
                                           {u"by": u"t", u"写不写": u"不写",
                                            u"为什么不写": u"还没判过就想沉淀"})):
                 return False
-    return (J.validate_note({u"by": u"t", u"写不写": u"不写",
+    return (RF.validate_note({u"by": u"t", u"写不写": u"不写",
                              u"为什么不写": u"这一轮碰到的是上一轮那条的又一次,没有新东西"})
-            and J.validate_note({u"by": u"t", u"写不写": u"写",
+            and RF.validate_note({u"by": u"t", u"写不写": u"写",
                                  u"事件": {u"what": u"检查报了错却仍然判过"},
                                  u"挂到": [{u"pattern": u"P280", u"为什么": u"同一个形"}]}))

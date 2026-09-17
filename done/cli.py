@@ -7,6 +7,7 @@ import sys
 
 from done import card as C
 from done import judge as J
+from done import reflect as RF
 from done import ledger as L
 
 LEDGER = u".done/ledger.jsonl"
@@ -77,7 +78,7 @@ def main(argv=None):
         elif a.cmd == u"reflect":
             n = json.loads(io.open(a.note, encoding=u"utf-8").read())
             n.setdefault(u"by", a.by)
-            _print(J.reflect(a.ledger, a.cardfile, a.chain_head, n))
+            _print(RF.reflect(a.ledger, a.cardfile, a.chain_head, n))
         elif a.cmd == u"judge":
             _print(J.judge(a.ledger, a.cardfile, a.repo, a.at, a.chain_head, _reports(a.report)))
         else:

@@ -1,0 +1,20 @@
+{
+ "judge": "冷读判官-3(只看日志)",
+ "answers": {
+  "cr1": {
+   "答": "是",
+   "引文": "Cloning into '/tmp/coldrun-5'...",
+   "证据": "$ git clone /home/user/codex-playground /tmp/coldrun-5 && cd /tmp/coldrun-5\nCloning into '/tmp/coldrun-5'...\ndone."
+  },
+  "cr3": {
+   "答": "找到",
+   "引文": "bash: line 1: 甲: No such file or directory",
+   "证据": "$ python3 -m done.cli judge cards/C-2.json --chain-head \"$H\" --at HEAD \\\n        --report reports/<甲>.json --report reports/<乙>.json\nbash: line 1: 甲: No such file or directory"
+  },
+  "cr4": {
+   "答": "找到",
+   "引文": "下面每一行都可以直接贴进终端",
+   "证据": "**下面每一行都可以直接贴进终端**(链头用变量接,不用手抄):\n$ python3 -m done.cli judge cards/C-2.json --chain-head \"$H\" --at HEAD \\\n        --report reports/<甲>.json --report reports/<乙>.json\nbash: line 1: 甲: No such file or directory"
+  }
+ }
+}

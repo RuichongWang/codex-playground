@@ -109,6 +109,12 @@ def judge(ledger_path, card_file, repo, at, chain_head, reports=None, packs=u"pa
     if sh != cur:
         raise Refused(u"accept-drifted",
                       u"判据跟开卡时冻住的那一份对不上。要改走 amend,改完旧 verdict 作废")
+    缺 = [c for c in accept
+         if not (isinstance(c[u"判者"], dict) and c[u"判者"].get(u"cmd"))
+         and not (reports or {}).get(c[u"id"])]
+    if 缺:   # **一次报全** —— 一次报一条,人得来回跑五趟才问得清要交几份
+        raise Refused(u"reader-missing", u"还缺 %d 份判官报告:%s" % (len(缺), u" · ".join(
+            u"%s(要「%s」答:%s)" % (c[u"id"], c[u"判者"][u"读者"], c[u"问"]) for c in 缺)))
     commit = _resolve(repo, at)
     tmp = tempfile.mkdtemp(prefix=u"done-wt-")
     wt = os.path.join(tmp, u"t")
@@ -142,43 +148,3 @@ def judge(ledger_path, card_file, repo, at, chain_head, reports=None, packs=u"pa
     validate_verdict(body)
     return append(ledger_path, u"verdict", body, chain_head)
 
-
-def reflect(ledger_path, card_file, chain_head, note):
-    u"""卡判完之后的一步:由一个 agent 看完这一轮,**自己决定要不要往库里写**。
-
-    **「不写」是正常结果,不是失败** —— 绝大多数轮次本来就没什么值得记的,
-    自动沉淀只会把库灌满废话。但「不写」必须落账并写明理由:
-    一个正确的零和一次根本没跑过,在盘面上完全同形。
-
-    这一步**不产生 done**,所以它不占规矩位;真正写进库的动作归 pattern 那一侧。
-    """
-    card = load(card_file)
-    cid = card[u"id"]
-    if not [r for r in read(ledger_path)
-            if r.get(u"kind") == u"verdict" and (r.get(u"body") or {}).get(u"card") == cid]:
-        raise Refused(u"no-verdict", u"%s 还没判过,没什么可沉淀的" % cid)
-    validate_note(note)
-    body = dict(note)
-    body[u"card"] = cid
-    return append(ledger_path, u"reflect", body, chain_head)
-
-
-def validate_note(n):
-    u"""沉淀报告的形状。写与不写二选一,两边各自要交的东西不同。"""
-    if not (n or {}).get(u"by"):
-        raise Refused(u"reflect-by", u"沉淀报告要写明是谁做的")
-    w = (n or {}).get(u"写不写")
-    if w not in (u"写", u"不写"):
-        raise Refused(u"reflect-choice", u"「写不写」要么「写」要么「不写」")
-    if w == u"不写":
-        why = (n.get(u"为什么不写") or u"").strip()
-        if len(why) < 10:
-            raise Refused(u"reflect-why",
-                          u"「不写」也要写明为什么 —— 一个正确的零和一次没跑过,盘面上同形")
-        return True
-    if not ((n.get(u"事件") or {}).get(u"what") or u"").strip():
-        raise Refused(u"reflect-what", u"要写就得有一件具体的事:发生了什么")
-    if not (n.get(u"挂到") or n.get(u"新猜测")):
-        raise Refused(u"reflect-link",
-                      u"要么挂到库里已有的猜测上,要么提一条新的 —— 只记事不猜,库长不起来")
-    return True

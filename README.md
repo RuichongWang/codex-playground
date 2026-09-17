@@ -23,7 +23,7 @@ python3 -m done.cli open cards/C-2.json --chain-head "$H" --by 你的名字
 # 每人一份,--report 传几次就是几份。不确定要答哪几条,就先跑一次 judge,它会报出来。
 H=$(python3 -m done.cli head)
 python3 -m done.cli judge cards/C-2.json --chain-head "$H" --at HEAD \
-        --report reports/<甲>.json --report reports/<乙>.json
+        --report reports/judge-a.json --report reports/judge-b.json
 
 python3 -m done.cli log
 python3 -m done.cli verify
@@ -31,10 +31,10 @@ python3 -m done.cli verify
 # 判完之后可以多走一步:让一个 agent 看完这一轮,自己决定要不要往记忆库里写一条。
 # **「不写」是正常结果** —— 绝大多数轮次本来就没什么值得记的。但不写也要说为什么。
 H=$(python3 -m done.cli head)
-python3 -m done.cli reflect cards/C-2.json --chain-head "$H" --note reports/<沉淀>.json
+python3 -m done.cli reflect cards/C-2.json --chain-head "$H" --note reports/reflect-a.json
 ```
 
-沉淀报告 `reports/<沉淀>.json`,写与不写二选一:
+沉淀报告(文件名随便起,放 `reports/` 下),写与不写二选一:
 
 ```json
 {"by":"沉淀-1","写不写":"不写","为什么不写":"这一轮碰到的是上一轮那条的又一次,没有新东西"}
@@ -62,7 +62,7 @@ python3 -m done.cli reflect cards/C-2.json --chain-head "$H" --note reports/<沉
 {"id":"a1","问":"make check 退出码是 0 吗?","过":"是",
  "判者":{"cmd":"make check","答是":"exit0"},"凭什么答":"命令的退出码与输出"}
 
-{"id":"x1","问":"这次改动里有行为变了而说明书没跟着改的吗?","过":"否",
+{"id":"x1","问":"找出这次改动里一处行为变了而说明书没跟着改的地方","过":"没找到",
  "判者":{"读者":"改动审阅人"},"凭什么答":"这次改动的原文,以及说明书对应的那几段"}
 ```
 
@@ -72,6 +72,8 @@ python3 -m done.cli reflect cards/C-2.json --chain-head "$H" --note reports/<沉
   **答「没找到」必须写清 `搜了什么`**,而且账上会记一句:**没找到 ≠ 没有,只是这一轮没逮着。**
 - **判者是人的时候要写明「哪一个人」**(冷读者?改动审阅人?)。不写明就会问出一个他结构上答不了的问题 —— 实测过:只许看说明书的人,对着「看这次改动」那条只能答「答不了」。
 - **读者那一档要交一份报告**,每条 `{答, 引文, 证据}`,而 **`引文` 必须是 `证据` 的逐字子串**。
+  **`证据` 允许是几段拼起来的**,但每一段必须逐字、并标明出处 —— 要证明「说明书里这句现在是假的」,
+  那句话和打脸它的输出天生隔着几百行,强求一段连续原文等于逼诚实的判官交不出证据。
   于是「判官照没照判据答」是机械可查的;人只剩一件事要抽查:**这条判据是不是在要求判官形成看法,而不是找到证据。**
 - **一张卡至少一条由命令来答。** 全靠读者的卡开不了 —— 否则 `done` 退化成自评。
 - 一条判据从 `{"读者":…}` 换成 `{"cmd":…}` 叫**毕业**,可数。
