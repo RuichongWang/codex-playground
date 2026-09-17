@@ -17,7 +17,7 @@ from done import rules as R
 AUTO = {u"id": u"a1", u"问": u"跑得通吗?", u"过": u"是",
         u"判者": {u"cmd": u"true", u"答是": u"exit0"}, u"凭什么答": u"退出码"}
 EYE = {u"id": u"a2", u"问": u"打开过源文件吗?", u"过": u"否",
-       u"判者": u"读者", u"凭什么答": u"它用过的命令清单"}
+       u"判者": {u"读者": u"冷读者"}, u"凭什么答": u"它用过的命令清单"}
 REPORT = {u"a2": {u"答": u"否", u"引文": u"cat README.md",
                   u"证据": u"ls\ncat README.md\nmake check", u"judge": u"t"}}
 

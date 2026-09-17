@@ -63,12 +63,12 @@ def validate(accept):
         if c[u"过"] not in (u"是", u"否"):
             raise Refused(u"accept-side", u"%s 的「过」要是「是」或「否」" % cid)
         j = c[u"判者"]
-        if isinstance(j, dict):
-            if not j.get(u"cmd"):
-                raise Refused(u"accept-cmd", u"%s 的判者是命令,要给 cmd" % cid)
+        if isinstance(j, dict) and j.get(u"cmd"):
             cmds += 1
-        elif j != u"读者":
-            raise Refused(u"accept-judge", u"%s 的判者要么是 {cmd: …},要么是「读者」" % cid)
+        elif not (isinstance(j, dict) and j.get(u"读者")):
+            raise Refused(u"accept-judge",
+                          u"%s 的判者要么是 {cmd: …},要么是 {读者: 哪一个读者} —— "
+                          u"得写明是谁,不然会问出一个他结构上答不了的问题" % cid)
     if cmds == 0:
         raise Refused(u"no-cmd",
                       u"一张卡至少要有一条由命令来答 —— 全靠读者的卡,done 就退化成自评")

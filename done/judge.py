@@ -41,8 +41,8 @@ def _cmd_answer(j, rc, out):
 def _reader_line(c, rep):
     a = (rep or {}).get(c[u"id"])
     if not a:
-        raise Refused(u"reader-missing", u"%s 要读者判 —— 问的是:%s(凭 %s)"
-                      % (c[u"id"], c[u"问"], c[u"凭什么答"]))
+        raise Refused(u"reader-missing", u"%s 要「%s」来判 —— 问的是:%s(凭 %s)"
+                      % (c[u"id"], c[u"判者"][u"读者"], c[u"问"], c[u"凭什么答"]))
     ans, q, e = a.get(u"答"), a.get(u"引文") or u"", a.get(u"证据") or u""
     if ans not in (u"是", u"否", u"答不了"):
         raise Refused(u"answer-domain", u"%s 的答要是 是/否/答不了,给的是 %s" % (c[u"id"], ans))
@@ -103,7 +103,7 @@ def judge(ledger_path, card_file, repo, at, chain_head, reports=None, packs=u"pa
     try:
         for c in accept:
             j = c[u"判者"]
-            if isinstance(j, dict):
+            if isinstance(j, dict) and j.get(u"cmd"):
                 rc, out = _sh(j[u"cmd"], wt)
                 ans = _cmd_answer(j, rc, out)
                 ev = {u"exit": rc, u"out_sha": _sha(out), u"out_head": out[:200]}
@@ -111,7 +111,7 @@ def judge(ledger_path, card_file, repo, at, chain_head, reports=None, packs=u"pa
             else:
                 ans = (reports or {}).get(c[u"id"], {}).get(u"答")
                 ev = _reader_line(c, reports)
-                who = u"读者"
+                who = j[u"读者"]
             lines.append({u"id": c[u"id"], u"判者": who, u"答": ans,
                           u"passed": ans == c[u"过"], u"evidence": ev})
     finally:

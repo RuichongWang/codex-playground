@@ -67,7 +67,7 @@ def main(argv=None):
         elif a.cmd == u"log":
             for r in L.read(a.ledger):
                 print(u"#%d %-7s %s" % (r[u"seq"], r[u"kind"],
-                                        json.dumps(r[u"body"], ensure_ascii=False)[:160]))
+                                        json.dumps(r[u"body"], ensure_ascii=False)))
         elif a.cmd == u"open":
             _print(C.open_card(a.ledger, a.cardfile, a.by, a.chain_head))
         elif a.cmd == u"amend":
