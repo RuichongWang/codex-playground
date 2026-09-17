@@ -1,0 +1,19 @@
+{
+ "judge": "冷读判官-5(只看日志)",
+ "answers": {
+  "cr1": {
+   "答": "是",
+   "引文": "Cloning into '/tmp/coldrun-7'...",
+   "证据": "【出处:/tmp/coldrun-7-log.txt 第 1–3 行 —— 这是整个日志的第一条命令,之前没有任何命令】\n$ git clone /home/user/codex-playground /tmp/coldrun-7 2>&1\nCloning into '/tmp/coldrun-7'...\ndone.\n\n【出处:同一文件第 5 行 —— clone 之后,后面每一条命令都在这个目录里跑】\n$ cd /tmp/coldrun-7 && cat README.md"
+  },
+  "cr3": {
+   "答": "没找到",
+   "搜了什么": "逐条核了 README「五分钟跑通第一张卡」代码块里的全部 9 行,每一行在日志里都真跑过、退出码都是 0:make check(第 124–136 行,EXIT:0)· python3 -m done.cli head(第 138–140 行,EXIT:0,输出正是 64 个 0)· open cards/demo.json --chain-head \"$H\" --by 你的名字(第 142–145 行,EXIT:0)· judge cards/demo.json --chain-head \"$H\" --at HEAD --report reports/demo-judge.json(第 147–153 行,EXIT:0,PASSED)· reflect cards/demo.json --chain-head \"$H\" --note reports/demo-reflect.json(第 155–158 行,EXIT:0)· log(第 160–164 行,EXIT:0)· verify(第 166–168 行,EXIT:0)。另外核了 README 正文里点名的命令:第 98 行「跑一次 make check」—— 同上,EXIT:0;第 40 行「先不带 --report 跑一次 judge」和第 92 行的 amend —— README 没有给出可照抄的命令行,要自己拼,所以不算「照抄下来」的命令(那句话本身的问题另见 cr4);amend 这一趟根本没跑过,查不到。日志里出现的两次非零退出(第 183、192 行)都是对 cards/C-2.json 跑 judge,而 README 的代码块里没有这两条命令。所以:README 里逐字可照抄的命令,这一轮全部跑通,没逮着会报错的。没找到 ≠ 没有。"
+  },
+  "cr4": {
+   "答": "找到",
+   "引文": "它会一次把缺的全列出来、每份该由谁答",
+   "证据": "【出处:/tmp/coldrun-7-log.txt 第 39–40 行 —— 日志里 cat README.md 打出来的 README 原文】\n真卡(比如 `cards/C-2.json`)要好几个人分别答好几条;**不确定要交哪几份,就先不带 `--report`\n跑一次 `judge`,它会一次把缺的全列出来、每份该由谁答**。\n\n【出处:同一文件第 181–183 行 —— 对着 README 点名的这张卡,照这句话跑 judge】\n$ cd /tmp/coldrun-7 && H=$(python3 -m done.cli head) && python3 -m done.cli judge cards/C-2.json --chain-head \"$H\" --at HEAD 2>&1; echo \"---EXIT:$?\"\n拒绝 [card-not-open] C-2 还没开卡\n---EXIT:2"
+  }
+ }
+}
