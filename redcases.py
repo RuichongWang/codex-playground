@@ -241,3 +241,39 @@ def reflect_green():
             and RF.validate_note({u"by": u"t", u"写不写": u"写",
                                  u"事件": {u"what": u"检查报了错却仍然判过"},
                                  u"挂到": [{u"pattern": u"P280", u"为什么": u"同一个形"}]}))
+
+
+# ── 记忆库的订正通道(不是规矩,不计入七条)──────────────────────────
+import importlib.util as _u
+_s = _u.spec_from_file_location(u"correct", u"tools/correct.py")
+CO = _u.module_from_spec(_s); _s.loader.exec_module(CO)
+
+_库 = {u"I1": {u"kind": u"item", u"what": u"原来那句话"}}
+_好提案 = [{u"节点": u"I1", u"栏": u"what", u"改前": u"原来那句话", u"改后": u"原来那一句话",
+           u"为什么": u"少一个字,读起来卡"}]
+_好评审 = {u"评审者": u"测试", u"逐条": [{u"序号": 0, u"通过": True, u"理由": u"只动措辞",
+                                     u"三问": dict((q, u"合格") for q in CO.三问)}]}
+
+
+def _红(fn):
+    try:
+        fn()
+    except CO.拒:
+        return True
+    return False
+
+
+def correct_red():
+    u"""四种该被拦住的:没评审 · 评审没过 · 三问没答全 · 「改前」跟库里对不上。"""
+    差评 = {u"评审者": u"测试", u"逐条": [dict(_好评审[u"逐条"][0], 通过=False, 理由=u"加强了主张")]}
+    缺问 = {u"评审者": u"测试", u"逐条": [dict(_好评审[u"逐条"][0], 三问={CO.三问[0]: u"合格"})]}
+    旧本 = [dict(_好提案[0], 改前=u"我手上那份旧的")]
+    return (_红(lambda: CO.校(_好提案, {u"评审者": u"测试", u"逐条": []}, _库))
+            and _红(lambda: CO.校(_好提案, 差评, _库))
+            and _红(lambda: CO.校(_好提案, 缺问, _库))
+            and _红(lambda: CO.校(旧本, _好评审, _库)))
+
+
+def correct_green():
+    u"""一份合格的提案 + 一份三问全合格的评审,过。"""
+    return CO.校(_好提案, _好评审, _库)

@@ -32,6 +32,11 @@ def main(argv=None):
     # 这一行以前是写死的「绿」—— 用例真红了屏幕上照样印绿,只有退出码是对的。
     print(u"%s 沉淀  写不写二选一,不写也要说为什么          (不是规矩,不计数)"
           % (u"红" if 坏 else u"绿"))
+    坏2 = [名 for 名, fn in ((u"必红", redcases.correct_red), (u"绿对照", redcases.correct_green))
+          if fn() is not True]
+    bad.extend((u"订正", u"%s 没过" % 名) for 名 in 坏2)
+    print(u"%s 订正  改得动,但每处都要过一次纯模型评审        (不是规矩,不计数)"
+          % (u"红" if 坏2 else u"绿"))
     for rid, why in bad:
         sys.stderr.write(u"红 %s:%s\n" % (rid, why))
     print(u"\n规矩 %d 条(上限 %d),红 %d" % (len(RULES), 7, len(bad)))
