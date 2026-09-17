@@ -1,0 +1,9 @@
+{
+  "judge": "代码审阅人-1",
+  "answers": {
+    "a6": {
+      "答": "没找到",
+      "搜了什么": "逐个打开了 done/ 与 tools/ 下全部 11 个文件加 check.py、redcases.py、Makefile,对每个文件先读开头自述、再列出里面所有函数、再看这些函数之间有没有互相调用(不共用内部函数的两堆就是搭伙)。done/ledger.py:只有账本身——canon/_hash/read/head/verify/append 加一个写不了的只读句柄 ReadOnly,外加 Refused 这个 7 行异常类,而 append 自己就在用它。done/card.py:卡与判据——spec_hash/expand/validate/accept_of/registered/open_card/amend/effective_verdicts,全部经 accept_of 与 registered 两个枢纽串成一条链;唯一不在自述里的是 expand 那段判据包版本校验(约 20/137 行),但它是 accept_of 的第一步,不是另一摊事。done/judge.py:只有判——跑命令、开临时工作树、收读者报告、validate_verdict,自述四句话把这四样都点到了。done/reflect.py:只有沉淀,上一轮刚从 judge.py 拆出来的那半。done/rules.py:只有那张七条规矩的表加一个上限检查。done/cli.py:只有命令行——读报告文件、打印一行账、argparse 分发,_reports 与 _print 都只被 main 调。done/__init__.py:三行版本号。check.py:只有一件事——把七条规矩的红绿用例各跑一遍。redcases.py:只有红绿用例本身,Sandbox 这个临时仓夹具被其中大多数共用。tools/deps.py:只查循环依赖。tools/readme_cmds.py:只查说明书里的命令认不认得,抽命令只服务于 main。tools/loc.sh 只报行数、tools/diffsize.sh 只卡手册涨幅,各自一件事。另外顺着依赖看了一遍方向:7 个模块 6 条边,零环,没有两个模块互相够着对方的情况。顺带记两处小东西(都不构成搭伙):card.py 第 14 行的 答域 常量现在没人用,是死代码;check.py 第 32 行那句「绿 沉淀」是写死的,沉淀用例真红了它照样打印绿,只有退出码是对的。"
+    }
+  }
+}

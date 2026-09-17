@@ -1,0 +1,10 @@
+{
+ "judge": "改动审阅人-4",
+ "answers": {
+  "a5": {
+   "答": "找到",
+   "引文": "**下面每一行都可以直接贴进终端**(链头用变量接,不用手抄):",
+   "证据": "【出处一 · git show 0e99704:README.md,「五分钟跑通第一张卡」标题下第一句】\n**下面每一行都可以直接贴进终端**(链头用变量接,不用手抄):\n\n【出处二 · git diff 0e99704^ 0e99704,README.md 的 @@ -23,7 +23,7 @@ 那一处 —— 这次改动把判官报告的占位符换成了 judge-a / judge-b】\n python3 -m done.cli judge cards/C-2.json --chain-head \"$H\" --at HEAD \\\n-        --report reports/<甲>.json --report reports/<乙>.json\n+        --report reports/judge-a.json --report reports/judge-b.json\n\n【出处三 · 同一份 diff,README.md 的 @@ -31,10 +31,10 @@ 那一处 —— 沉淀那行换成了 reflect-a】\n-python3 -m done.cli reflect cards/C-2.json --chain-head \"$H\" --note reports/<沉淀>.json\n+python3 -m done.cli reflect cards/C-2.json --chain-head \"$H\" --note reports/reflect-a.json\n\n【出处四 · 同一份 diff,这次提交在 reports/ 下唯一新增的文件;judge-a.json / judge-b.json / reflect-a.json 都没有被这次改动加进来,仓库里也不存在,于是这两行照抄进终端会直接崩】\ndiff --git a/reports/coldjudge-3.json b/reports/coldjudge-3.json\nnew file mode 100644"
+  }
+ }
+}
