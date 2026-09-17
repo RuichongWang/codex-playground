@@ -1,0 +1,20 @@
+{
+ "judge": "冷读判官-4(只看日志)",
+ "answers": {
+  "cr1": {
+   "答": "是",
+   "引文": "Cloning into '/tmp/coldrun-6'...",
+   "证据": "[出处 日志 1-3 行]\n$ git clone /home/user/codex-playground /tmp/coldrun-6 && cd /tmp/coldrun-6\nCloning into '/tmp/coldrun-6'...\ndone.\n\n[出处 日志 284-294 行,终端 git status]\n$ git status\nOn branch claude/codex-pattern-extraction-kxpwsd\nYour branch is up to date with 'origin/claude/codex-pattern-extraction-kxpwsd'.\n\nUntracked files:\n  (use \"git add <file>...\" to include in what will be committed)\n\treports/judge-a.json\n\treports/judge-b.json\n\treports/judge-c.json\n\nnothing added to commit but untracked files present (use \"git add\" to track)"
+  },
+  "cr3": {
+   "答": "找到",
+   "引文": "FileNotFoundError: [Errno 2] No such file or directory: 'reports/judge-a.json'",
+   "证据": "[出处 日志 30-31 行,README「五分钟跑通第一张卡」代码块]\npython3 -m done.cli judge cards/C-2.json --chain-head \"$H\" --at HEAD \\\n        --report reports/judge-a.json --report reports/judge-b.json\n\n[出处 日志 164-177 行,把上面那条原样贴进终端的结果]\n$ python3 -m done.cli judge cards/C-2.json --chain-head \"$H\" --at HEAD --report reports/judge-a.json --report reports/judge-b.json\nTraceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/tmp/coldrun-6/done/cli.py\", line 93, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File \"/tmp/coldrun-6/done/cli.py\", line 83, in main\n    _print(J.judge(a.ledger, a.cardfile, a.repo, a.at, a.chain_head, _reports(a.report)))\n                                                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/coldrun-6/done/cli.py\", line 20, in _reports\n    d = json.loads(io.open(f, encoding=u\"utf-8\").read())\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: 'reports/judge-a.json'"
+  },
+  "cr4": {
+   "答": "找到",
+   "引文": "**下面每一行都可以直接贴进终端**",
+   "证据": "[出处 日志 19 行,README「五分钟跑通第一张卡」开头那句]\n**下面每一行都可以直接贴进终端**(链头用变量接,不用手抄):\n\n[出处 日志 30-31 行,该句所辖代码块里的一行]\npython3 -m done.cli judge cards/C-2.json --chain-head \"$H\" --at HEAD \\\n        --report reports/judge-a.json --report reports/judge-b.json\n\n[出处 日志 164-177 行,原样贴进终端的结果]\n$ python3 -m done.cli judge cards/C-2.json --chain-head \"$H\" --at HEAD --report reports/judge-a.json --report reports/judge-b.json\nTraceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/tmp/coldrun-6/done/cli.py\", line 93, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File \"/tmp/coldrun-6/done/cli.py\", line 83, in main\n    _print(J.judge(a.ledger, a.cardfile, a.repo, a.at, a.chain_head, _reports(a.report)))\n                                                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/coldrun-6/done/cli.py\", line 20, in _reports\n    d = json.loads(io.open(f, encoding=u\"utf-8\").read())\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: 'reports/judge-a.json'\n\n[出处 日志 38-39 行,同一代码块里的另一行]\nH=$(python3 -m done.cli head)\npython3 -m done.cli reflect cards/C-2.json --chain-head \"$H\" --note reports/reflect-a.json\n\n[出处 日志 341-351 行,原样贴进终端的结果]\n$ python3 -m done.cli reflect cards/C-2.json --chain-head \"$H\" --note reports/reflect-a.json\nTraceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/tmp/coldrun-6/done/cli.py\", line 93, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File \"/tmp/coldrun-6/done/cli.py\", line 79, in main\n    n = json.loads(io.open(a.note, encoding=u\"utf-8\").read())\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: 'reports/reflect-a.json'"
+  }
+ }
+}

@@ -11,44 +11,28 @@
 
 ## 五分钟跑通第一张卡
 
-**下面每一行都可以直接贴进终端**(链头用变量接,不用手抄):
+用 `cards/demo.json` —— **教程专用的演示卡**,只有两条验收条件(一条命令答、一条人答),
+配套的两份示例报告仓里现成带着。**下面每一行都可以直接贴进终端,从头到尾跑得通。**
 
 ```bash
 make check                                   # 七条规矩各跑一次会报错的例子 + 正常通过的例子
 H=$(python3 -m done.cli head)                # 账的头,第一次是 64 个 0
 
-python3 -m done.cli open cards/C-2.json --chain-head "$H" --by 你的名字
+python3 -m done.cli open cards/demo.json --chain-head "$H" --by 你的名字
 
-# 判之前要先写判官报告。一张卡可能要好几个人来答(比如「冷读者」和「改动审阅人」),
-# 每人一份,--report 传几次就是几份。不确定要答哪几条,就先跑一次 judge,它会报出来。
 H=$(python3 -m done.cli head)
-python3 -m done.cli judge cards/C-2.json --chain-head "$H" --at HEAD \
-        --report reports/judge-a.json --report reports/judge-b.json
+python3 -m done.cli judge cards/demo.json --chain-head "$H" --at HEAD --report reports/demo-judge.json
+
+H=$(python3 -m done.cli head)
+python3 -m done.cli reflect cards/demo.json --chain-head "$H" --note reports/demo-reflect.json
 
 python3 -m done.cli log
 python3 -m done.cli verify
-
-# 判完之后可以多走一步:让一个 agent 看完这一轮,自己决定要不要往记忆库里写一条。
-# **「不写」是正常结果** —— 绝大多数轮次本来就没什么值得记的。但不写也要说为什么。
-H=$(python3 -m done.cli head)
-python3 -m done.cli reflect cards/C-2.json --chain-head "$H" --note reports/reflect-a.json
 ```
 
-沉淀报告(文件名随便起,放 `reports/` 下),写与不写二选一:
-
-```json
-{"by":"沉淀-1","写不写":"不写","为什么不写":"这一轮碰到的是上一轮那条的又一次,没有新东西"}
-
-{"by":"沉淀-1","写不写":"写",
- "事件":{"what":"检查报了错却仍然判过","outcome":"failed"},
- "挂到":[{"pattern":"P280","为什么":"同一个形:那道关卡不携带信息"}]}
-```
-
-**要写就不能只记事** —— 必须挂到库里已有的一条猜测上,或者提一条新的。只记事不猜,库长不起来。
-这一步**不产生"完成"**,所以它不占那七条规矩的位置。
-
-**沉淀之前先跑 `log`。** 以前几轮沉淀过什么都在账里 —— 不看的话每一轮都会从零重猜,
-把上一轮已经写过的东西再写一遍,而且没有任何东西会发现。
+**那两份示例报告是教程用的样本** —— 真干活的时候,每一份都得由真的判官写。
+真卡(比如 `cards/C-2.json`)要好几个人分别答好几条;**不确定要交哪几份,就先不带 `--report`
+跑一次 `judge`,它会一次把缺的全列出来、每份该由谁答**。
 
 `--chain-head` 每次都要传:**写入之前你必须先看过账的头。**
 它挡的是**静默**篡改,不是有决心的对手 —— 这一点没有夸大。
