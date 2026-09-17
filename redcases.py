@@ -214,7 +214,27 @@ def reflect_red():
 
 
 def reflect_green():
-    u"""两条正常的路:老实说不写,以及写一条挂到已有猜测上。"""
+    u"""三条正常的路 —— 最后那条**真的走一遍 reflect 本身**。
+
+    头两条只验形状。上一版只有它们,于是 `reflect` 里一个没导入的名字整条路都没人走过,
+    第一次真跑当场崩 —— 那正是本轮沉淀提出的那条猜测:一道为某次失败新建的检查,
+    进表用的是整类失败的名字,实际只覆盖那一次已经显形的形状。
+    """
+    with Sandbox() as s:
+        _open(s)
+        _judge(s)
+        row = J.reflect(s.ledger, s.cardfile, s.head(),
+                        {u"by": u"t", u"写不写": u"不写",
+                         u"为什么不写": u"这一轮没有新东西,是上一轮那条的又一次"})
+        if row[u"kind"] != u"reflect":
+            return False
+        # 没判过的卡不许沉淀
+        with Sandbox() as s2:
+            _open(s2)
+            if not _red(lambda: J.reflect(s2.ledger, s2.cardfile, s2.head(),
+                                          {u"by": u"t", u"写不写": u"不写",
+                                           u"为什么不写": u"还没判过就想沉淀"})):
+                return False
     return (J.validate_note({u"by": u"t", u"写不写": u"不写",
                              u"为什么不写": u"这一轮碰到的是上一轮那条的又一次,没有新东西"})
             and J.validate_note({u"by": u"t", u"写不写": u"写",

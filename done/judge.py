@@ -12,7 +12,7 @@ import subprocess
 import tempfile
 
 from done.card import accept_of, load, registered, spec_hash
-from done.ledger import Refused, append
+from done.ledger import Refused, append, read
 
 禁合成 = (u"score", u"总分", u"percent", u"百分比", u"weight", u"加权")
 
