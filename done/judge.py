@@ -44,8 +44,20 @@ def _reader_line(c, rep):
         raise Refused(u"reader-missing", u"%s 要「%s」来判 —— 问的是:%s(凭 %s)"
                       % (c[u"id"], c[u"判者"][u"读者"], c[u"问"], c[u"凭什么答"]))
     ans, q, e = a.get(u"答"), a.get(u"引文") or u"", a.get(u"证据") or u""
-    if ans not in (u"是", u"否", u"答不了"):
-        raise Refused(u"answer-domain", u"%s 的答要是 是/否/答不了,给的是 %s" % (c[u"id"], ans))
+    找 = c[u"过"] == u"没找到"
+    域 = (u"找到", u"没找到", u"答不了") if 找 else (u"是", u"否", u"答不了")
+    if ans not in 域:
+        raise Refused(u"answer-domain", u"%s 的答要是 %s,给的是 %s"
+                      % (c[u"id"], u"/".join(域), ans))
+    if 找 and ans == u"没找到":
+        # **没找到不等于没有。**所以这一格不收「证据」,收的是「你搜了什么」——
+        # 让这一轮花没花力气留在明处,人抽查的时候看的就是它。
+        搜 = (a.get(u"搜了什么") or u"").strip()
+        if len(搜) < 10:
+            raise Refused(u"no-search",
+                          u"%s 答「没找到」要写清你搜了什么 —— 没找到不等于没有" % c[u"id"])
+        return {u"搜了什么": 搜[:300], u"judge": a.get(u"judge", u""),
+                u"注": u"没找到 ≠ 没有,只是这一轮没逮着"}
     inside = bool(q) and q in e
     if ans != u"答不了" and not inside:
         raise Refused(u"quote-not-in-evidence",
@@ -75,8 +87,13 @@ def validate_verdict(body):
         if not ev:
             raise Refused(u"no-evidence", u"%s 没有 evidence —— 没有 evidence 的判决不许落账"
                           % ln.get(u"id"))
-        if ln.get(u"判者") == u"读者" and ln.get(u"答") != u"答不了" \
-                and not ev.get(u"引文在证据里"):
+        if ln.get(u"判者") == u"cmd" or ln.get(u"答") == u"答不了":
+            continue
+        if ln.get(u"答") == u"没找到":
+            if not ev.get(u"搜了什么"):
+                raise Refused(u"no-search",
+                              u"%s 答「没找到」却没写搜了什么 —— 那是个免费答案" % ln.get(u"id"))
+        elif not ev.get(u"引文在证据里"):
             raise Refused(u"quote-not-in-evidence",
                           u"%s 的引文不在证据里 —— 这一条不算答过" % ln.get(u"id"))
     return True

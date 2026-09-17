@@ -138,18 +138,24 @@ def r4_green():
 def r5_red():
     no_ev = {u"lines": [{u"id": u"a1", u"passed": True}]}
     agg = {u"score": 0.85, u"lines": [{u"id": u"a1", u"passed": True, u"evidence": {u"exit": 0}}]}
-    faked = {u"lines": [{u"id": u"a2", u"判者": u"读者", u"答": u"否", u"passed": True,
+    faked = {u"lines": [{u"id": u"a2", u"判者": u"冷读者", u"答": u"否", u"passed": True,
                          u"evidence": {u"引文": u"我编的", u"引文在证据里": False}}]}
+    # 「没找到」不写搜了什么 —— 那正是那个免费答案
+    lazy = {u"lines": [{u"id": u"a9", u"判者": u"冷读者", u"答": u"没找到", u"passed": True,
+                        u"evidence": {u"judge": u"t"}}]}
     return (_red(lambda: J.validate_verdict(no_ev))
             and _red(lambda: J.validate_verdict(agg))
-            and _red(lambda: J.validate_verdict(faked)))
+            and _red(lambda: J.validate_verdict(faked))
+            and _red(lambda: J.validate_verdict(lazy)))
 
 
 def r5_green():
     return J.validate_verdict({u"lines": [
         {u"id": u"a1", u"判者": u"cmd", u"答": u"是", u"passed": True, u"evidence": {u"exit": 0}},
-        {u"id": u"a2", u"判者": u"读者", u"答": u"否", u"passed": True,
-         u"evidence": {u"引文": u"cat README.md", u"引文在证据里": True}}]})
+        {u"id": u"a2", u"判者": u"冷读者", u"答": u"否", u"passed": True,
+         u"evidence": {u"引文": u"cat README.md", u"引文在证据里": True}},
+        {u"id": u"a9", u"判者": u"冷读者", u"答": u"没找到", u"passed": True,
+         u"evidence": {u"搜了什么": u"逐条核了 README 里全部 5 条命令"}}]})
 
 
 # ── R6 改 accept 必须留疤 ────────────────────────────────────────────
