@@ -27,7 +27,25 @@ python3 -m done.cli judge cards/C-2.json --chain-head "$H" --at HEAD \
 
 python3 -m done.cli log
 python3 -m done.cli verify
+
+# 判完之后可以多走一步:让一个 agent 看完这一轮,自己决定要不要往记忆库里写一条。
+# **「不写」是正常结果** —— 绝大多数轮次本来就没什么值得记的。但不写也要说为什么。
+H=$(python3 -m done.cli head)
+python3 -m done.cli reflect cards/C-2.json --chain-head "$H" --note reports/<沉淀>.json
 ```
+
+沉淀报告 `reports/<沉淀>.json`,写与不写二选一:
+
+```json
+{"by":"沉淀-1","写不写":"不写","为什么不写":"这一轮碰到的是上一轮那条的又一次,没有新东西"}
+
+{"by":"沉淀-1","写不写":"写",
+ "事件":{"what":"检查报了错却仍然判过","outcome":"failed"},
+ "挂到":[{"pattern":"P280","为什么":"同一个形:那道关卡不携带信息"}]}
+```
+
+**要写就不能只记事** —— 必须挂到库里已有的一条猜测上,或者提一条新的。只记事不猜,库长不起来。
+这一步**不产生"完成"**,所以它不占那七条规矩的位置。
 
 `--chain-head` 每次都要传:**写入之前你必须先看过账的头。**
 它挡的是**静默**篡改,不是有决心的对手 —— 这一点没有夸大。

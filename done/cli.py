@@ -42,7 +42,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(prog=u"done")
     ap.add_argument(u"--ledger", default=LEDGER)
     sub = ap.add_subparsers(dest=u"cmd")
-    for name in (u"open", u"amend", u"judge"):
+    for name in (u"open", u"amend", u"judge", u"reflect"):
         s = sub.add_parser(name)
         s.add_argument(u"cardfile")
         s.add_argument(u"--chain-head", required=True)
@@ -53,6 +53,8 @@ def main(argv=None):
             s.add_argument(u"--at", default=u"HEAD")
             s.add_argument(u"--repo", default=u".")
             s.add_argument(u"--report", action=u"append")
+        if name == u"reflect":
+            s.add_argument(u"--note", required=True)
     sub.add_parser(u"head")
     sub.add_parser(u"verify")
     sub.add_parser(u"log")
@@ -72,6 +74,10 @@ def main(argv=None):
             _print(C.open_card(a.ledger, a.cardfile, a.by, a.chain_head))
         elif a.cmd == u"amend":
             _print(C.amend(a.ledger, a.cardfile, a.why, a.by, a.chain_head))
+        elif a.cmd == u"reflect":
+            n = json.loads(io.open(a.note, encoding=u"utf-8").read())
+            n.setdefault(u"by", a.by)
+            _print(J.reflect(a.ledger, a.cardfile, a.chain_head, n))
         elif a.cmd == u"judge":
             _print(J.judge(a.ledger, a.cardfile, a.repo, a.at, a.chain_head, _reports(a.report)))
         else:

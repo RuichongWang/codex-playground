@@ -24,6 +24,12 @@ def main(argv=None):
             bad.append((r[u"id"], u"绿对照没绿 —— %s 在正常那条路上误伤" % r[u"执行器"]))
             mark = u"红"
         print(u"%s %-3s %-34s 执行器 %s" % (mark, r[u"id"], r[u"规矩"], r[u"执行器"]))
+    # 沉淀那一步不产生 done,所以它不占规矩位 —— 但没有「会报错的例子」的东西不许进,
+    # 所以它在这儿单独跑一遍,只是不算进规矩数。
+    for 名, fn in ((u"必红", redcases.reflect_red), (u"绿对照", redcases.reflect_green)):
+        if fn() is not True:
+            bad.append((u"沉淀", u"%s 没过" % 名))
+    print(u"绿 沉淀  写不写二选一,不写也要说为什么          (不是规矩,不计数)")
     for rid, why in bad:
         sys.stderr.write(u"红 %s:%s\n" % (rid, why))
     print(u"\n规矩 %d 条(上限 %d),红 %d" % (len(RULES), 7, len(bad)))

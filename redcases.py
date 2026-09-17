@@ -202,3 +202,21 @@ def r7_green():
         if r[u"必红"] not in here or r[u"绿对照"] not in here:
             return False
     return True
+
+
+# ── 沉淀那一步(不是规矩,不计入七条)────────────────────────────────
+def reflect_red():
+    u"""三种该被拦住的:不选、「不写」却不说为什么、「写」却只记事不猜。"""
+    return (_red(lambda: J.validate_note({u"by": u"t"}))
+            and _red(lambda: J.validate_note({u"by": u"t", u"写不写": u"不写", u"为什么不写": u"没"}))
+            and _red(lambda: J.validate_note({u"by": u"t", u"写不写": u"写",
+                                              u"事件": {u"what": u"出了一件事"}})))
+
+
+def reflect_green():
+    u"""两条正常的路:老实说不写,以及写一条挂到已有猜测上。"""
+    return (J.validate_note({u"by": u"t", u"写不写": u"不写",
+                             u"为什么不写": u"这一轮碰到的是上一轮那条的又一次,没有新东西"})
+            and J.validate_note({u"by": u"t", u"写不写": u"写",
+                                 u"事件": {u"what": u"检查报了错却仍然判过"},
+                                 u"挂到": [{u"pattern": u"P280", u"为什么": u"同一个形"}]}))
