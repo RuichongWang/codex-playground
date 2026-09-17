@@ -101,13 +101,21 @@ def registered(ledger_path, card_id):
     return cur
 
 
-def open_card(ledger_path, card_file, by, chain_head, packs=u"packs"):
+def open_card(ledger_path, card_file, by, chain_head, packs=u"packs", 查库=None):
+    u"""开卡。
+
+    `查库` 是开工前那一步的记录:**这类活别处踩过什么坑**。
+    它不是验收条件(干活之前的事没法验收),但它落账 —— 于是「库到底有没有被用上」
+    是可数的,不是靠感觉。**查了什么都没查到,照样要记**:
+    一次空手而归和一次根本没查,不记下来在账面上完全同形。
+    """
     card = load(card_file)
     a = accept_of(card_file, packs)
     if registered(ledger_path, card[u"id"]) is not None:
         raise Refused(u"card-already-open", u"%s 已经开过了,要改走 amend" % card[u"id"])
     body = {u"card": card[u"id"], u"题面": card.get(u"题面", u""), u"引": card.get(u"引", []),
-            u"spec_hash": spec_hash(a), u"条数": len(a), u"by": by}
+            u"spec_hash": spec_hash(a), u"条数": len(a), u"by": by,
+            u"查库": 查库 or {u"查了没有": u"没查"}}
     return append(ledger_path, u"open", body, chain_head)
 
 

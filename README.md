@@ -19,6 +19,9 @@ make check                                   # 七条规矩各跑一次会报错
 H=$(python3 -m done.cli head)                # 账的头,第一次是 64 个 0
 
 python3 -m done.cli open cards/demo.json --chain-head "$H" --by 你的名字
+# 干真活的时候,开卡前先查一次记忆库(这类活别处踩过什么坑),把结果带上:
+#   --查库 reports/<查库记录>.json   内容:{"查了什么": "...", "查到的": "...", "用上了": true/false}
+# 不传就记「没查」。**查了什么都没查到也要记** —— 空手而归和根本没查,不记下来在账上同形。
 
 H=$(python3 -m done.cli head)
 python3 -m done.cli judge cards/demo.json --chain-head "$H" --at HEAD --report reports/demo-judge.json
@@ -113,6 +116,10 @@ README 手抄一份规矩表,上一轮实测漂了(表里写「至少一条 auto
 
 它和上面那套验收是同一件东西的**软硬两面**:
 每次验收产出一条带硬结局的经历写回库里(软),而一条被反复撞上的猜测凝固成判据包里的一条(硬)。
+
+**开卡前先查它**(见上面那条 `--查库`)。查了什么、查到没有、用上没有,都落进账里 ——
+于是「这个库到底有没有被用上」是一个**数得出来**的东西,不是一种感觉:
+`python3 tools/lookupstat.py`。
 
 细节看 [`pattern/NOTES.md`](pattern/NOTES.md)。
 **2026-09-17:原来那六个「永远不许看」的领域已由 Alex 解除,全域可看** ——

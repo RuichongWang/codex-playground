@@ -50,6 +50,9 @@ def main(argv=None):
         s.add_argument(u"--by", default=u"")
         if name == u"amend":
             s.add_argument(u"--why", required=True)
+        if name == u"open":
+            s.add_argument(u"--查库", dest=u"lookup",
+                           help=u"开工前查记忆库的记录文件(json);不传就记「没查」")
         if name == u"judge":
             s.add_argument(u"--at", default=u"HEAD")
             s.add_argument(u"--repo", default=u".")
@@ -72,7 +75,8 @@ def main(argv=None):
                 print(u"#%d %-7s %s" % (r[u"seq"], r[u"kind"],
                                         json.dumps(r[u"body"], ensure_ascii=False)))
         elif a.cmd == u"open":
-            _print(C.open_card(a.ledger, a.cardfile, a.by, a.chain_head))
+            q = json.loads(io.open(a.lookup, encoding=u"utf-8").read()) if a.lookup else None
+            _print(C.open_card(a.ledger, a.cardfile, a.by, a.chain_head, 查库=q))
         elif a.cmd == u"amend":
             _print(C.amend(a.ledger, a.cardfile, a.why, a.by, a.chain_head))
         elif a.cmd == u"reflect":
