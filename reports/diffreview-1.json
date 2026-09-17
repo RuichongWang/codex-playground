@@ -1,0 +1,10 @@
+{
+ "judge": "改动审阅人-1",
+ "answers": {
+  "a5": {
+   "答": "是",
+   "引文": "\"判者\": {\"cmd\": \"./tools/diffsize.sh\", \"答是\": \"exit0\"}",
+   "证据": "diff --git a/packs/reviewable.json b/packs/reviewable.json\nnew file mode 100644\nindex 0000000..de33c8f\n--- /dev/null\n+++ b/packs/reviewable.json\n@@ -0,0 +1,10 @@\n+{\n+  \"id\": \"reviewable\",\n+  \"version\": 1,\n+  \"说明\": \"读得动一包:一次改动大到没人能认真读的时候,后面所有人判的条件都变成走过场。\",\n+  \"判据\": [\n+    {\"id\": \"rv1\", \"问\": \"这次改动在 300 行以内吗(不算证据文件)?\", \"过\": \"是\",\n+     \"判者\": {\"cmd\": \"./tools/diffsize.sh\", \"答是\": \"exit0\"},\n+     \"凭什么答\": \"命令的退出码与输出(输出是改动行数与文件数)\"}\n+  ]\n+}\ndiff --git a/tools/diffsize.sh b/tools/diffsize.sh\nnew file mode 100755\nindex 0000000..232886b\n--- /dev/null\n+++ b/tools/diffsize.sh\n@@ -0,0 +1,12 @@\n+#!/usr/bin/env bash\n+# 这次改动大到没法认真读了吗?\n+# 上限 300 行,是按本仓前八次改动定的 —— 41/47/92/134/194/469/754,\n+# 300 恰好把最后那两次(建 v0、大改造)拦下来,而那两次确实大到读不动。\n+# reports/ 是证据文件(判官交的日志原文,动辄上万字),不算改动量。\n+set -u\n+CAP=300\n+BASE=\"${1:-HEAD^}\"\n+N=$(git diff --numstat \"$BASE\" HEAD -- . ':(exclude)reports' | awk '{a+=$1;d+=$2} END {print a+d+0}')\n+F=$(git diff --name-only \"$BASE\" HEAD -- . ':(exclude)reports' | wc -l)\n+echo \"这次改动 ${N} 行 / ${F} 个文件,上限 ${CAP} 行\"\n+[ \"$N\" -le \"$CAP\" ] || { echo \"太大了,拆成几次 —— 读不动的改动等于没人读\" >&2; exit 1; }\n"
+  }
+ }
+}
