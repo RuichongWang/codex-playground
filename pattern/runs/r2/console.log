@@ -1,0 +1,46 @@
+以 runs/r2/library_round1_frozen.json 为基线开跑
+30 条 / 1 批 × 30
+
+=== 批 1/1 — 30 个 agent 并行提议（只读快照 runs/r2/snap_b1.json）===
+  复用已有提议，跳过
+  B1A1 0s $0.00 turns=0 ok
+  B1A10 0s $0.00 turns=0 ok
+  B1A11 0s $0.00 turns=0 ok
+  B1A12 0s $0.00 turns=0 ok
+  B1A13 0s $0.00 turns=0 ok
+  B1A14 0s $0.00 turns=0 ok
+  B1A15 0s $0.00 turns=0 ok
+  B1A16 0s $0.00 turns=0 ok
+  B1A17 0s $0.00 turns=0 ok
+  B1A18 0s $0.00 turns=0 ok
+  B1A19 0s $0.00 turns=0 ok
+  B1A2 0s $0.00 turns=0 ok
+  B1A20 0s $0.00 turns=0 ok
+  B1A21 0s $0.00 turns=0 ok
+  B1A22 0s $0.00 turns=0 ok
+  B1A23 0s $0.00 turns=0 ok
+  B1A24 0s $0.00 turns=0 ok
+  B1A25 0s $0.00 turns=0 ok
+  B1A26 0s $0.00 turns=0 ok
+  B1A27 0s $0.00 turns=0 ok
+  B1A28 0s $0.00 turns=0 ok
+  B1A29 0s $0.00 turns=0 ok
+  B1A3 0s $0.00 turns=0 ok
+  B1A30 0s $0.00 turns=0 ok
+  B1A4 0s $0.00 turns=0 ok
+  B1A5 0s $0.00 turns=0 ok
+  B1A6 0s $0.00 turns=0 ok
+  B1A7 0s $0.00 turns=0 ok
+  B1A8 0s $0.00 turns=0 ok
+  B1A9 0s $0.00 turns=0 ok
+  并行墙钟 0.0s
+  triage 651.3s $2.99 turns=15 ok
+  归并 3 组 / 映射到已有 3 条 / 同情境 1 条
+  ✓ 断言通过：写入的每一句都是提议原文
+  写入：prescription R135 / 归并记账 6 条
+事件 60 / pattern 234 / 条件 114 / link 957 / prescription 135
+爆炸系数 pattern/事件 = 3.90  （接近 1 = 各猜各的，从不汇聚）
+最大 pattern：P43 独立事件 41 — 资源告急的真实自变量常常是负载的时间形状，而不是产能的上限；而只看总量或平均利用率的度量把时间形状整个抹掉了，因此在没有按来源和时间分解负载之前，任何容量诊断都只能得出『加容量』这一个答案——不是因为它对，是因为其它答案在这套度量里不可见。
+事件→pattern 的正 link 共 540 条
+
+累计 $2.99

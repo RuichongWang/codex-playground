@@ -1,0 +1,2 @@
+{"id": "HO-culture-01", "identified": false, "root_cause_match": false, "why": "模型自述认不出", "cost": 0}
+{"id": "HO-culture-02", "identified": true, "root_cause_match": true, "why": "猜测准确指向大英博物馆希腊罗马部内部盗窃案（Gradel举报、Higgs、Fischer辞职、约2000件），根因也同样落在小件器物长期未登记未影像化导致无法比对、缺乏定期盘点、以及馆方把举报当声誉问题作草率内部自查这几点上。", "cost": 0.08589899999999999}
