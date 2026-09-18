@@ -49,15 +49,19 @@ def 历史里的判据组():
             文 = _跑([u"git", u"show", u"%s:%s" % (提交, 路)])
             if not 文:
                 continue
-            for 组 in _抠判据(路, 文):
+            for 组 in 抠判据(路, 文):
                 键 = json.dumps(组, sort_keys=True, ensure_ascii=False)
                 if 键 in 见过:
                     continue
                 见过.add(键)
-                yield (u"%s %s" % (提交[:7], 路), 组)
+                # 没有「问」这一栏的是这套栏目存在之前的老格式,由 card.validate 拒 ——
+                # 不是这道门的事。数进来只会让某条检查的读数虚高(真发生过:虚高到 13)。
+                组 = [c for c in 组 if isinstance(c, dict) and c.get(u"问")]
+                if 组:
+                    yield (u"%s %s" % (提交[:7], 路), 组)
 
 
-def _抠判据(路, 文):
+def 抠判据(路, 文):
     u"""一份文件里可能有卡(accept)、判据包(判据)、或说明书里散落的范例。"""
     if 路.endswith(u".json"):
         try:

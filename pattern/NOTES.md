@@ -92,11 +92,18 @@
 
 ## 目录
 
+下面这些都相对 `pattern/`（**除了最后一行 —— 那个技能目录在仓库根上，不在 `pattern/` 里面**）。
+`tools/notesdirs.py` 对着盘上实际的目录核这一块：少列一个、或者列了个不存在的，它就红。
+**手抄一份目录树必漂,这一块自己就漂过两处**（技能目录的位置写错了，`ph/` 整个没提）。
+
 ```
 pk/          库本身（store/cli/assemble）+ 各阶段的实验 harness
+ph/          取检索那一路的实现（domain/retrieve/judge/eval）
 docs/        设计文档与实验计划（含预注册与变更记录）
-corpus*/     进库的语料（第 1–3 轮）
+corpus/      进库的语料（第 1 轮）
+corpus2/     进库的语料（第 2 轮）
+corpus3/     进库的语料（第 3 轮）
 heldout/     held-out 测试集 + 保留域声明
 runs/        各轮产出与库快照
-.claude/skills/pattern-library/   教 agent 怎么走这个库
+<仓库根>/.claude/skills/pattern-library/   教 agent 怎么走这个库
 ```

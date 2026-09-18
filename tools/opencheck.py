@@ -6,13 +6,14 @@ u"""跑开卡体检:对盘上每一张真卡放行,对每一种它声称拦得�
   老用法上(库里 P106)。所以这道检查加进去的同时,得当场证明它没误伤盘上任何一张卡。
 - **对坏样卡全红** —— 一条永远不红的检查证明不了自己还活着。这里每种毛病配一张坏样卡,
   而且要求它**恰好被对应那一条**拦下,不是随便红一下就算。
-- **每条检查在历史里真逮着过** —— 上面那一条其实是自证:坏样卡是为了让检查变红现编的。
-  所以还要问一遍真历史(`tools/openreplay.py` 重放全部提交里的每一版判据、
-  和账上每一条查库记录):**名册上命中 0 次的检查不许留着**。
-  第一版有两条检查就是这么被删掉的 —— 手写的「它对应账上第几次」经不起逐条核。
+- **历史读数只印,不拦** —— `tools/openreplay.py` 重放全部提交里的每一版判据、
+  和账上每一条查库记录,数每条检查逮着过几次。这个数当过一阵闸门(命中 0 次的不许留),
+  当场删错了两条真检查:**「从没逮着过」只说明这类坏法还没发生过**,
+  而入口检查本来就是为还没发生的事设的。闸在上面第一条 —— **它有没有逮错过**。
 
 用法:
     python3 tools/opencheck.py --self      对盘上真卡 + 内置坏样卡各跑一遍
+    python3 tools/opencheck.py --栏名      印出开工前查库那一栏认哪几个栏名
     python3 tools/opencheck.py 某张卡.json  单查一张卡
 """
 import glob
@@ -23,18 +24,27 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from done.opencheck import 检查册, 查查库, 查判据  # noqa: E402
-from tools.openreplay import 数  # noqa: E402
+from done.opencheck import 检查册, 查库栏, 查查库, 查判据, 查判据带名  # noqa: E402
+from tools.openreplay import 抠判据, 数, 说明书  # noqa: E402
 
 好命令 = {u"id": u"g1", u"问": u"跑得通吗?", u"过": u"是",
          u"判者": {u"cmd": u"true", u"答是": u"exit0"}, u"凭什么答": u"退出码"}
 
-# 每一项:这种毛病叫什么 · 一张犯了它的坏样卡 · 拦它那句话里必有的字眼 · 它对应账上哪一次
+# 每一项:这种毛病叫什么 · 一张犯了它的坏样卡 · 拦它那句话里必有的字眼 · 为什么它值得拦
 坏样 = [
+    (u"找反例的问法,「过」却写成「是」",
+     [好命令, {u"id": u"b1", u"问": u"找出一处循环依赖", u"过": u"是",
+              u"判者": {u"cmd": u"true", u"答是": u"exit0"}, u"凭什么答": u"输出"}],
+     u"「过」只能是「没找到」",
+     u"判决那一步的答域是照「过」定的 —— 这么写,「找到了环」才算过,跟写卡人的意思反过来"),
+    (u"是非问,「过」却写成「没找到」",
+     [好命令, {u"id": u"b2", u"问": u"退出码是 0 吗?", u"过": u"没找到",
+              u"判者": {u"cmd": u"true", u"答是": u"exit0"}, u"凭什么答": u"输出"}],
+     u"只能是「是」或「否」", u"同上的另一半:「没找到」根本不在是非问的答域里"),
     (u"答域不明(既不是找反例也不是是非问)",
      [好命令, {u"id": u"b3", u"问": u"这次改得怎么样", u"过": u"是",
               u"判者": {u"cmd": u"true", u"答是": u"exit0"}, u"凭什么答": u"输出"}],
-     u"答域不明", u"历史上最常见的一种,旧卡与判据包里数得出十几处"),
+     u"答域不明", u"两种问法都不是,判的人不知道该答什么(这类还没在盘上真发生过)"),
     (u"人来答的找反例判据,没交代怎么算搜过",
      [好命令, {u"id": u"b4", u"问": u"找出一句假话", u"过": u"没找到",
               u"判者": {u"读者": u"说明书审阅人"}, u"凭什么答": u"README.md 全篇"}],
@@ -43,7 +53,7 @@ from tools.openreplay import 数  # noqa: E402
      [好命令, {u"id": u"b5", u"问": u"找出一处改动没跟上的地方", u"过": u"没找到",
               u"判者": {u"读者": u"改动审阅人"},
               u"凭什么答": u"库里那几条条目的原文;答「没找到」就写清你比了哪几条"}],
-     u"名字和取材对不上", u"旧卡里真出现过一条:判者名不副实,他结构上答不了"),
+     u"名字和取材对不上", u"旧卡里真出现过一条:判者名不副实,他结构上只能答「答不了」"),
 ]
 
 坏查库 = [
@@ -56,15 +66,36 @@ from tools.openreplay import 数  # noqa: E402
 ]
 
 
-def 真卡():
-    坏 = []
-    for f in sorted(glob.glob(os.path.join(u"cards", u"*.json"))):
-        c = json.loads(io.open(f, encoding=u"utf-8").read())
-        抱怨 = 查判据(c.get(u"accept") or [])
-        print(u"  %s %s" % (u"绿" if not 抱怨 else u"红", f))
-        for b in 抱怨:
-            print(u"      %s" % b)
-            坏.append(f)
+def 盘上的():
+    u"""现在盘上每一条判据:卡 · 判据包 · 说明书里的范例。
+
+    **判据包一开始不在这个名单里,于是一处误伤在盘上活了一整轮没人发现** ——
+    `packs/coldread.json` 里一句标准是非问被判成「答域不明」,只因为问号后面跟了
+    括号补语。误伤的网漏掉哪一块,哪一块就没有网。
+    `cards/archive/` 不在名单里:那是历史,明说过不追溯改。
+    """
+    for f in sorted(glob.glob(os.path.join(u"cards", u"*.json"))
+                    + glob.glob(os.path.join(u"packs", u"*.json"))):
+        for 组 in 抠判据(f, io.open(f, encoding=u"utf-8").read()):
+            yield f, 组
+    for 名 in 说明书:
+        if os.path.exists(名):
+            for 组 in 抠判据(名, io.open(名, encoding=u"utf-8").read()):
+                yield 名, 组
+
+
+def 没误伤():
+    u"""这道门的闸:对现在盘上的每一条判据都得放行,一处误伤就红。"""
+    坏, 看过 = [], {}
+    for 出处, 组 in 盘上的():
+        for 名, 话 in 查判据带名([c for c in 组 if c.get(u"问")]):
+            坏.append((出处, 名, 话))
+        看过[出处] = 看过.get(出处, 0) + len(组)
+    for 出处 in sorted(看过):
+        print(u"  %s %s(%d 条)" % (u"红" if any(x[0] == 出处 for x in 坏) else u"绿",
+                                  出处, 看过[出处]))
+    for 出处, 名, 话 in 坏:
+        print(u"      [%s] %s" % (名, 话))
     return 坏
 
 
@@ -85,39 +116,40 @@ def 样卡():
     return 坏
 
 
-def 真逮过():
-    u"""名册上每一条检查,都得在仓库历史里真逮着过至少一次。
+def 历史读数():
+    u"""名册上每一条检查在全部历史里逮着过几次。**这是读数,不是闸门。**
 
-    坏样卡是现编的,所以它只证明检查还活着,不证明它值得存在。这一条问的是后者。
+    它当过一阵闸门(命中 0 次的不许留),而那个闸门当场删错了两条真检查 ——
+    「从没逮着过」只说明这类坏法还没发生过,而入口检查本来就是为还没发生的事设的。
+    闸门在 `没误伤()` 那一边。
     """
     命中 = 数()
-    坏 = []
     for 名 in 检查册:
         次, 例 = 命中.get(名, (0, []))
-        print(u"  %s %s  历史命中 %d 次%s"
-              % (u"逮过" if 次 else u"零命中", 名, 次,
-                 (u",例如 " + 例[0]) if 例 else u" —— 它凭什么留着?"))
-        if not 次:
-            坏.append(名)
-    return 坏
+        print(u"  %-14s 历史命中 %d 次%s"
+              % (名, 次, (u",例如 " + 例[0]) if 例 else u"(这类坏法还没发生过)"))
 
 
 def main(argv=None):
     argv = argv if argv is not None else sys.argv[1:]
+    if argv and argv[0] == u"--栏名":
+        # 说明书别再手抄这份清单了 —— 抄一次漂一次,这个仓已经栽过四轮。
+        print(u"\n".join(查库栏))
+        return 0
     if argv and argv[0] != u"--self":
         c = json.loads(io.open(argv[0], encoding=u"utf-8").read())
         抱怨 = 查判据(c.get(u"accept") or [])
         for b in 抱怨:
             sys.stderr.write(u"%s\n" % b)
         return 1 if 抱怨 else 0
-    print(u"盘上的真卡(一张都不许误伤):")
-    a = 真卡()
+    print(u"现在盘上的每一条判据(卡 · 判据包 · 说明书范例,一处都不许误伤):")
+    a = 没误伤()
     print(u"坏样卡(每种毛病都得被对应那一条拦下):")
     b = 样卡()
-    print(u"名册上每条检查在历史里逮着过几次(零命中的不许留):")
-    c = 真逮过()
-    print(u"\n误伤 %d 张,漏掉 %d 种,零命中 %d 条" % (len(a), len(b), len(c)))
-    return 1 if (a or b or c) else 0
+    print(u"每条检查在全部历史里逮着过几次(读数,不是闸):")
+    历史读数()
+    print(u"\n误伤 %d 处,漏掉 %d 种" % (len(a), len(b)))
+    return 1 if (a or b) else 0
 
 
 if __name__ == u"__main__":

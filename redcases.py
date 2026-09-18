@@ -18,6 +18,7 @@ from done import reflect as RF
 from done import rules as R
 from tools import doc_cards as DC
 from tools import ledgerkept as LK
+from tools import notesdirs as ND
 
 AUTO = {u"id": u"a1", u"问": u"跑得通吗?", u"过": u"是",
         u"判者": {u"cmd": u"true", u"答是": u"exit0"}, u"凭什么答": u"退出码"}
@@ -83,7 +84,14 @@ def r1_green():
 
 # ── R2 至少一条 auto ─────────────────────────────────────────────────
 def r2_red():
-    return _red(lambda: C.validate([dict(EYE)]))
+    # 两种红都要:一张全靠读者的卡,和一条没写明是哪一个读者的判据。
+    # 后者是补上来的:设计文档一直写着「只写『读者』会被当场拒」,而拒的只有裸字符串,
+    # 写成 {"读者":"读者"} 照收 —— **说明书划的边界和代码划的边界差了一格**,
+    # 差的那一格正好是这条检查存在的理由。
+    没名字 = dict(EYE)
+    没名字[u"判者"] = {u"读者": u"读者"}
+    return (_red(lambda: C.validate([dict(EYE)]))
+            and _red(lambda: C.validate([dict(AUTO), 没名字])))
 
 
 def r2_green():
@@ -361,13 +369,17 @@ def doccards_green():
 # 账上改过 14 次判据,12 次是判据自己写坏了。这几种能在开卡那一刻看出来。
 
 def opencheck_red():
-    u"""三种写坏的判据 + 两种写坏的查库记录,一个都不许漏;
-    外加一条:名册上凭空多一条历史零命中的检查,自检那一步必须红。
+    u"""五种写坏的判据 + 两种写坏的查库记录,一个都不许漏;
+    外加一条:把认问法那条正则贴死回句尾,自检那一步必须当场报误伤。
     """
     from done import opencheck as OC
     好 = {u"id": u"g1", u"问": u"跑得通吗?", u"过": u"是",
          u"判者": {u"cmd": u"true", u"答是": u"exit0"}, u"凭什么答": u"退出码"}
     坏 = [
+        {u"id": u"b1", u"问": u"找出一处环", u"过": u"是",
+         u"判者": {u"cmd": u"true"}, u"凭什么答": u"输出"},
+        {u"id": u"b2", u"问": u"退出码是 0 吗?", u"过": u"没找到",
+         u"判者": {u"cmd": u"true"}, u"凭什么答": u"输出"},
         {u"id": u"b3", u"问": u"这次改得怎么样", u"过": u"是",
          u"判者": {u"cmd": u"true"}, u"凭什么答": u"输出"},
         {u"id": u"b4", u"问": u"找出一句假话", u"过": u"没找到",
@@ -382,19 +394,20 @@ def opencheck_red():
     if not (OC.查查库({u"查了什么": u"搜过", u"自造的栏": 1, u"用上了": u"有"})
             and OC.查查库({u"查了什么": u"搜过"})):
         return False
-    # 名册上凭空加一条从没逮着过东西的检查 —— 自检那一步得当场红。
-    # 这一条守的是「坏样卡是现编的,证明不了这条检查值得存在」那道闸。
+    # 最后一条守的是这道门自己的闸:**它有没有逮错过**。
+    # 把认是非问那条正则贴死回句尾(第一版就是这么写的),盘上 packs/coldread.json 里
+    # 那句「…从零开始的吗?(只问这个 —— …)」当场被判答域不明 —— 那正是真发生过的误伤,
+    # 而当时自检只扫 cards/,判据包不在网里,于是它在盘上活了一整轮。
     import contextlib
+    import re as _re
     import tools.opencheck as TO
-    原 = OC.检查册
+    原 = OC.尾注
     try:
-        OC.检查册 = 原 + (u"凭空来的一条",)
-        TO.检查册 = OC.检查册
+        OC.尾注 = _re.compile(u"(?!)")      # 什么都不剥,等于贴死句尾
         with contextlib.redirect_stdout(_io.StringIO()):   # 它那张表不该印在开机自检里
-            return bool(TO.真逮过())
+            return bool(TO.没误伤())
     finally:
-        OC.检查册 = 原
-        TO.检查册 = 原
+        OC.尾注 = 原
 
 
 def opencheck_green():
@@ -428,3 +441,39 @@ def opencheck_green():
                 os.remove(f)
                 return False
         return True
+
+
+# —— pattern/NOTES.md 那块目录树(不是规矩,单独跑) ——
+# 这个仓栽在「手抄的东西跟实际对不上」上不止四轮,每次都是人偶然撞见的。
+# 这一块自己漂了两处:技能目录的位置写错、`ph/` 整个包没提。所以给它配一道检查。
+
+def _临时库(目录, 块):
+    u"""照着 `<根>/pattern/NOTES.md` 搭一个只有目录树那一块的假仓。"""
+    d = tempfile.mkdtemp(prefix=u"notesdirs-")
+    for 名 in 目录:
+        os.makedirs(os.path.join(d, u"pattern", 名))
+    _io.open(os.path.join(d, u"pattern", u"NOTES.md"), u"w", encoding=u"utf-8").write(
+        u"# x\n\n## 目录\n\n```\n%s\n```\n" % 块)
+    return d
+
+
+def _跑(d):
+    try:
+        with contextlib.redirect_stderr(_io.StringIO()), \
+                contextlib.redirect_stdout(_io.StringIO()):
+            return ND.main([d])
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+def notesdirs_red():
+    u"""两头都要红:盘上多出来一个没列的目录 · 列表里写着一个盘上没有的目录。"""
+    少列 = _跑(_临时库([u"pk", u"ph"], u"pk/           库本身"))
+    多列 = _跑(_临时库([u"pk"], u"pk/           库本身\nph/           早就删掉了"))
+    return 少列 != 0 and 多列 != 0
+
+
+def notesdirs_green():
+    u"""列表跟盘上一一对上,过。"""
+    return _跑(_临时库([u"pk", u"ph"],
+                    u"pk/           库本身\nph/           取检索那一路")) == 0
