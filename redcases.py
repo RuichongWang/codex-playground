@@ -355,3 +355,43 @@ def doccards_green():
             return DC.main([d]) == 0
     finally:
         shutil.rmtree(d, ignore_errors=True)
+
+
+# —— 开卡那一刻的体检(不是规矩,单独跑) ——
+# 账上改过 14 次判据,12 次是判据自己写坏了。这几种能在开卡那一刻看出来。
+
+def opencheck_red():
+    u"""五种写坏的判据 + 两种写坏的查库记录,一个都不许漏。"""
+    from done import opencheck as OC
+    好 = {u"id": u"g1", u"问": u"跑得通吗?", u"过": u"是",
+         u"判者": {u"cmd": u"true", u"答是": u"exit0"}, u"凭什么答": u"退出码"}
+    坏 = [
+        {u"id": u"b1", u"问": u"找出一处环", u"过": u"是",
+         u"判者": {u"cmd": u"true"}, u"凭什么答": u"输出"},
+        {u"id": u"b2", u"问": u"退出码是 0 吗?", u"过": u"没找到",
+         u"判者": {u"cmd": u"true"}, u"凭什么答": u"输出"},
+        {u"id": u"b3", u"问": u"这次改得怎么样", u"过": u"是",
+         u"判者": {u"cmd": u"true"}, u"凭什么答": u"输出"},
+        {u"id": u"b4", u"问": u"找出一句假话", u"过": u"没找到",
+         u"判者": {u"读者": u"说明书审阅人"}, u"凭什么答": u"README.md 全篇"},
+        {u"id": u"b5", u"问": u"找出一处改动没跟上的", u"过": u"没找到",
+         u"判者": {u"读者": u"改动审阅人"},
+         u"凭什么答": u"库里那几条条目的原文;答「没找到」就写清比了哪几条"},
+    ]
+    for c in 坏:
+        if not OC.查判据([好, c]):
+            return False
+    return bool(OC.查查库({u"查了什么": u"搜过", u"自造的栏": 1, u"用上了": u"有"})) \
+        and bool(OC.查查库({u"查了什么": u"搜过"}))
+
+
+def opencheck_green():
+    u"""盘上现有的每一张卡都得放行 —— 收紧一道校验,风险落在没人写下来的老用法上。"""
+    import glob
+    import json as _j
+    from done import opencheck as OC
+    for f in glob.glob(os.path.join(u"cards", u"*.json")):
+        c = _j.loads(_io.open(f, encoding=u"utf-8").read())
+        if OC.查判据(c.get(u"accept") or []):
+            return False
+    return not OC.查查库({u"查了什么": u"搜过", u"用上了": u"没有,都不对路"})
