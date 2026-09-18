@@ -46,6 +46,20 @@ class Sandbox(object):
         self.write([dict(AUTO), dict(EYE)])
         return self
 
+    def commit_ledger_copy(self):
+        u"""把一份账提交进这个仓 —— 真仓就是这样,账进 git(`tools/ledgerkept.py`)。
+
+        不这么摆,判决摊出来的树里根本没有 `.done/`,于是「那儿那份是副本」这件事
+        一次都没被走过,而 R4 那一栏恰恰靠它成立。
+        """
+        d = os.path.join(self.repo, u".done")
+        if not os.path.isdir(d):
+            os.makedirs(d)
+        with open(os.path.join(d, u"ledger.jsonl"), u"wb") as f:
+            f.write(u'{"seq": 0, "kind": "t"}\n'.encode(u"utf-8"))
+        subprocess.check_call(u"git add -A && git commit -qm ledger",
+                              cwd=self.repo, shell=True)
+
     def write(self, accept, cid=u"C-t"):
         with open(self.cardfile, u"wb") as f:
             f.write(json.dumps({u"id": cid, u"题面": u"测试卡", u"accept": accept},
@@ -128,19 +142,32 @@ def r3_green():
 
 # ── R4 判的那只手写不到账 ────────────────────────────────────────────
 def r4_red():
+    u"""判据里的命令在临时副本里往账里写,真账必须纹丝不动。
+
+    **这儿从前还有半截**:拿一个「只读账句柄」去 append,看它抛不抛。那半截测的是
+    一段全仓没人构造的死代码 —— 它永远会红,而它红不红对真实那条路没有任何影响。删了。
+
+    **后来又补了一截。** R4 那一栏原先给的理由是「账不在那棵树上」,而账是进 git 的
+    (`tools/ledgerkept.py` 盯的就是这件事),所以判决摊出来的树里必然躺着一份 ——
+    那句话是假的,而当时没有任何东西在看着它。现在这条用例先要求那份副本**确实在**
+    (命令写死了先 `test -s` 再写),再验真账没动:拦住污染的不是「那儿没有账」,
+    是「那儿那份是副本」。哪天账不再进 git,这条当场红,那句话就得跟着改。
+    """
     with Sandbox() as s:
-        # 判据里的命令在临时副本里往 .done/ledger.jsonl 写,真账必须纹丝不动。
-        # **这儿从前还有半截**:拿一个「只读账句柄」去 append,看它抛不抛。
-        # 那半截测的是一段全仓没人构造的死代码 —— 它永远会红,而它红不红
-        # 对真实那条路没有任何影响。删了。
+        s.commit_ledger_copy()
+        原样 = open(os.path.join(s.repo, u".done", u"ledger.jsonl"), u"rb").read()
         a = dict(AUTO)
-        a[u"判者"] = {u"cmd": u"mkdir -p .done && echo x >> .done/ledger.jsonl",
+        a[u"判者"] = {u"cmd": u"test -s .done/ledger.jsonl && echo 污染 >> .done/ledger.jsonl",
                       u"答是": u"exit0"}
         s.write([a, dict(EYE)])
         _open(s)
         before = s.head()
-        _judge(s)
-        return L.verify(s.ledger)[0] and L.read(s.ledger)[-2][u"hash"] == before
+        行 = _judge(s)[u"body"][u"lines"]
+        看见副本 = [x for x in 行 if x[u"id"] == u"a1"][0][u"passed"]
+        真账没动 = (L.verify(s.ledger)[0] and L.read(s.ledger)[-2][u"hash"] == before)
+        本树没动 = (open(os.path.join(s.repo, u".done", u"ledger.jsonl"), u"rb").read()
+                    == 原样)
+        return bool(看见副本) and 真账没动 and 本树没动
 
 
 def r4_green():
