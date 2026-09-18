@@ -16,6 +16,7 @@ from done import judge as J
 from done import ledger as L
 from done import reflect as RF
 from done import rules as R
+from tools import doc_cards as DC
 from tools import ledgerkept as LK
 
 AUTO = {u"id": u"a1", u"问": u"跑得通吗?", u"过": u"是",
@@ -247,9 +248,10 @@ def reflect_green():
 
 
 # ── 记忆库的订正通道(不是规矩,不计入七条)──────────────────────────
-import importlib.util as _u
-_s = _u.spec_from_file_location(u"correct", u"tools/correct.py")
-CO = _u.module_from_spec(_s); _s.loader.exec_module(CO)
+# 以前这里是按相对路径 tools/correct.py 加载的 —— 那等于把「必红用例跑不跑得起来」
+# 绑死在「你人在仓库根目录」上,换个工作目录就是 FileNotFoundError。现在 tools 是个包,
+# 直接 import。
+from tools import correct as CO
 
 _库 = {u"I1": {u"kind": u"item", u"what": u"原来那句话"}}
 _好提案 = [{u"节点": u"I1", u"栏": u"what", u"改前": u"原来那句话", u"改后": u"原来那一句话",
@@ -315,5 +317,41 @@ def ledger_green():
     try:
         with contextlib.redirect_stdout(_io.StringIO()):
             return LK.main([d]) == 0
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+# —— 说明书里的判据范例要能真开卡(不是规矩,单独跑) ——
+# 第三次栽在同一个跟头上之后加的:设计文档教的写法,拿去开卡当场被拒。
+
+_范例 = (u"照着抄一张卡:\n\n```json\n"
+        u'{"id":"x","问":"跑得通吗?","过":"是","判者":%s,"凭什么答":"退出码"}\n'
+        u"```\n")
+
+
+def _临时说明书(判者):
+    d = tempfile.mkdtemp(prefix=u"doc-t-")
+    with _io.open(os.path.join(d, u"README.md"), u"w", encoding=u"utf-8") as f:
+        f.write(_范例 % 判者)
+    return d
+
+
+def doccards_red():
+    u"""说明书里写着老写法 `"判者":"读者"` —— 照抄开卡会被拒,得在这儿先红。"""
+    d = _临时说明书(u'"读者"')
+    try:
+        with contextlib.redirect_stderr(_io.StringIO()), \
+                contextlib.redirect_stdout(_io.StringIO()):
+            return DC.main([d]) != 0
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+def doccards_green():
+    u"""写明是哪一个读者,过。"""
+    d = _临时说明书(u'{"读者":"冷读者"}')
+    try:
+        with contextlib.redirect_stdout(_io.StringIO()):
+            return DC.main([d]) == 0
     finally:
         shutil.rmtree(d, ignore_errors=True)
