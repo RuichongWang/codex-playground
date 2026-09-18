@@ -1,0 +1,10 @@
+{
+ "judge": "说明书审阅人-3",
+ "answers": {
+  "h3": {
+   "答": "找到",
+   "引文": "{\"id\":\"C-2\",\"题面\":\"...\",\"引\":[\"coldread@1\"],\"accept\":[ ...本卡自己的... ]}",
+   "证据": "【说明书原文】docs/DESIGN.md 第 88 行,在「二 · 卡」的「2.4 判据包 —— 「维护」这件事的住处」那一节里,紧跟着「卡按 `pack@version` 引进来,和自己那几条并在一起。」之后的那个 json 围栏:\n\n{\"id\":\"C-2\",\"题面\":\"...\",\"引\":[\"coldread@1\"],\"accept\":[ ...本卡自己的... ]}\n\n它说的是:卡 C-2 引的判据包是 coldread 的第 1 版。这句现在是假的 —— 盘上 coldread 已经是第 5 版,C-2 引的也是第 5 版,而且照这个范例写一张卡去开,工具当场拒。\n\n【一】盘上的实际版本(在 3b5556c 的副本里实跑)\n$ python3 -c \"import json,io; print('packs/coldread.json version =', json.loads(io.open('packs/coldread.json',encoding='utf-8').read())['version']); print('cards/C-2.json 引 =', json.loads(io.open('cards/C-2.json',encoding='utf-8').read())['引'])\"\npacks/coldread.json version = 5\ncards/C-2.json 引 = ['coldread@5', 'reviewable@2']\n\n【二】照这个范例原样抄一张卡去开,被拒(在同一份仓库的可写副本里跑,没有动被审的那一份)\n$ cat /tmp/c_design.json\n{\"id\":\"C-design-2-4\",\"题面\":\"照 docs/DESIGN.md 2.4 的范例写一张卡\",\"引\":[\"coldread@1\"],\n \"accept\":[{\"id\":\"z1\",\"问\":\"make check 退出码是 0 吗?\",\"过\":\"是\",\n   \"判者\":{\"cmd\":\"make check\",\"答是\":\"exit0\"},\"凭什么答\":\"命令的退出码与输出\"}]}\n$ H=$(python3 -m done.cli head); python3 -m done.cli open /tmp/c_design.json --chain-head \"$H\" --by tester\n拒绝 [pack-version] coldread 引的是 v1,盘上是 v5 —— 包只能升版本\nexit=2\n\n对照:同一份副本里,把 coldread@1 换成盘上的 coldread@5,同一条命令就开得出来(#34 open 那一笔),所以拒的原因就是范例里那个版本号,不是别的。\n\n【三】为什么没有任何东西发现它\ntools/doc_cards.py 是专门查「说明书里的判据范例能不能真开卡」的,但它只认得出合法 JSON;这一条范例的 accept 值写成 `[ ...本卡自己的... ]`,json.loads 解不开,于是被跳过:\n$ python3 tools/doc_cards.py\n说明书里的判据范例 4 条,过不了校验的 0 条\n那 4 条是 README.md 的两条单条判据范例和 docs/DESIGN.md 2.1 的两条,这个带 `引` 的整卡范例不在里面。tools/readme_cmds.py 只看 README 里的命令,也不看它。\n\n【四】这个坑 README 自己已经点过名\nREADME.md「### 判据包」那一节写着:「**这里不写具体有哪几包、哪个版本** —— 去看 `packs/` 和卡文件本身。手抄一份包名和版本必漂,这件事实测过不止一次 —— **连上面这句警告自己都漂过**:它原来举了具体版本号当例子,而那个号后来又变了好几轮。」\nREADME 因此把版本号从正文里拿掉了,docs/DESIGN.md 2.4 那一份手抄的 `coldread@1` 留在原地,没跟着改。"
+  }
+ }
+}

@@ -29,8 +29,14 @@ from done.card import Refused, validate  # noqa: E402
 
 
 def 块里的对象(块):
-    u"""一个 json 围栏里可能并排放着几个对象(中间空一行)。逐个试,试不出就跳过。"""
-    出 = []
+    u"""一个 json 围栏里可能并排放着几个对象(中间空一行)。
+
+    解不开的照样要报出来 —— **「核过了」和「跳过了」在一行「0 条不过」上是同形的**。
+    真栽过一次:设计文档里有个带省略号的范例,里面手抄的版本号早就过期,
+    照它开卡会被拒;这个工具解不开那一块,于是打印出来的还是「0 条不过」。
+    所以返回两样:解开的对象,和解不开的片段的头一行。
+    """
+    出, 解不开 = [], []
     for 片 in re.split(u"\n\\s*\n", 块):
         片 = 片.strip()
         if not 片:
@@ -38,8 +44,8 @@ def 块里的对象(块):
         try:
             出.append(json.loads(片))
         except ValueError:
-            continue
-    return 出
+            解不开.append(片.split(u"\n")[0][:70])
+    return 出, 解不开
 
 
 def 是判据(o):
@@ -48,14 +54,15 @@ def 是判据(o):
 
 def main(argv=None):
     根 = (argv or sys.argv[1:] or [u"."])[0]
-    查过, 坏 = 0, []
+    查过, 坏, 解不开 = 0, [], []
     for 名 in 文件:
         p = os.path.join(根, 名)
         if not os.path.exists(p):
             continue
         s = io.open(p, encoding=u"utf-8").read()
         for 块 in 围栏.findall(s):
-            群 = 块里的对象(块)
+            群, 剩 = 块里的对象(块)
+            解不开.extend((名, x) for x in 剩)
             # 一张整卡
             卡 = [o for o in 群 if isinstance(o, dict) and isinstance(o.get(u"accept"), list)]
             # 散落的单条判据
@@ -84,6 +91,12 @@ def main(argv=None):
     for 名, 谁, e in 坏:
         sys.stderr.write(u"%s 里的范例过不了校验:%s —— %s\n" % (名, 谁, e))
     print(u"说明书里的判据范例 %d 条,过不了校验的 %d 条" % (查过, len(坏)))
+    if 解不开:
+        # 不判红:说明书里本来就有带省略号、带占位的示意块,那不是毛病。
+        # 但**这几块这个工具没看过**,得说出来,别让「0 条不过」读成「全都核过了」。
+        print(u"另有 %d 块 json 这个工具解不开、没核(带省略号或占位的示意块):" % len(解不开))
+        for 名, 头 in 解不开:
+            print(u"  %s: %s" % (名, 头))
     return 1 if 坏 else 0
 
 
