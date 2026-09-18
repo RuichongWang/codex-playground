@@ -25,6 +25,18 @@ def _cmd_answer(j, rc, out):
     return u"否" if (rc != 0) == (j.get(u"答是", u"exit0") == u"exit0") else u"是"
 
 
+def 答域(过):
+    u"""这一条的答案只能是这三个里的一个 —— **哪三个,由「过」这一栏定。**
+
+    找反例的问法(「过」=「没找到」)答的是找到 / 没找到;是非问答的是是 / 否;
+    两边都能答「答不了」。这里是全仓唯一定义它的地方,说明书别再手抄
+    (`python3 tools/answerdomain.py` 印的就是这儿)—— 抄过一次,
+    设计文档上「答案域三个:是 / 否 / 答不了」这句话在找反例那一档换进来之后
+    整整错了一段时间,而照它写出来的报告实跑当场被这个函数拒掉。
+    """
+    return (u"找到", u"没找到", u"答不了") if 过 == u"没找到" else (u"是", u"否", u"答不了")
+
+
 def _reader_line(c, rep):
     a = (rep or {}).get(c[u"id"])
     if not a:
@@ -32,7 +44,7 @@ def _reader_line(c, rep):
                       % (c[u"id"], c[u"判者"][u"读者"], c[u"问"], c[u"凭什么答"]))
     ans, q, e = a.get(u"答"), a.get(u"引文") or u"", a.get(u"证据") or u""
     找 = c[u"过"] == u"没找到"
-    域 = (u"找到", u"没找到", u"答不了") if 找 else (u"是", u"否", u"答不了")
+    域 = 答域(c[u"过"])
     if ans not in 域:
         raise Refused(u"answer-domain", u"%s 的答要是 %s,给的是 %s"
                       % (c[u"id"], u"/".join(域), ans))

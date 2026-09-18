@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 u"""说明书里印出来的命令,今天还立得住吗。
 
+**看的是三份,不是一份**:`README.md` · `CLAUDE.md` · `docs/DESIGN.md`。
+原来只看第一份。那时设计文档里手抄着一句「答案域三个:是 / 否 / 答不了」,
+而答案值早就多了一组,照它写出来的报告实跑当场被拒 —— 那句手抄被换成了一条
+指路的命令(`python3 tools/answerdomain.py`),而一条没人跑过的指路命令
+和一句手抄的值一样会死。**指到哪儿,就得看到哪儿。**
+
 两种命令各查一层,**两层都进退出码**:
 
   `python3 -m done.cli …`   参数名、子命令,工具认不认得出
@@ -108,20 +114,25 @@ def 查脚本(名单, 根=u"."):
     return 坏
 
 
+说明书 = (u"README.md", u"CLAUDE.md", os.path.join(u"docs", u"DESIGN.md"))
+
+
 def main():
-    text = io.open(u"README.md", encoding=u"utf-8").read()
-    cmds = 抽命令(text)
+    cmds, 名单 = [], []
+    for 名 in 说明书:
+        text = io.open(名, encoding=u"utf-8").read()
+        cmds += [c for c in 抽命令(text) if c not in cmds]
+        名单 += [x for x in 抽脚本(text) if x not in 名单]
     if not cmds:
-        print(u"README 里一条 done 命令都没有 —— 说明书该有例子")
+        print(u"说明书里一条 done 命令都没有 —— 该有例子")
         return 1
     坏1 = 查命令(cmds, tempfile.mkdtemp(prefix=u"readme-"))
-    名单 = 抽脚本(text)
     坏2 = 查脚本(名单)
     for c, e in 坏1:
         sys.stderr.write(u"说明书这条命令工具不认:\n  %s\n  → %s\n" % (c, e))
     for c, e in 坏2:
         sys.stderr.write(u"说明书教人跑 python3 %s,当脚本跑起不来:\n  → %s\n" % (c, e))
-    print(u"README 里 %d 条 done 命令,认不出的 %d 条;%d 个脚本命令,起不来的 %d 个"
+    print(u"三份说明书里 %d 条 done 命令,认不出的 %d 条;%d 个脚本命令,起不来的 %d 个"
           % (len(cmds), len(坏1), len(名单), len(坏2)))
     return 1 if (坏1 or 坏2) else 0
 
