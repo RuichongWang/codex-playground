@@ -1,0 +1,11 @@
+{
+ "judge": "代码审阅人",
+ "answers": {
+  "h4": {
+   "答": "没找到",
+   "引文": "redcases.py 里三组用例(七条规矩 / 订正通道 / 存账)之间确实零共用内部函数",
+   "证据": "逐个打开了范围内全部 17 个文件(done/ 7 个、tools/ 8 个、加根目录 check.py 与 redcases.py),读的是工作树当前版本(分支 claude/codex-pattern-extraction-kxpwsd,含本轮刚加的 tools/ledgerkept.py)。每个文件的看法:先读开头自述,再用 ast 把顶层函数/类和它们之间的互相调用全列出来,看有没有两堆东西零共用内部函数、而自述只盖住其中一堆 —— 上一次 done/judge.py 被判「装着两件事」正是这个形状。结果:各文件职责如下。done/ledger.py 只有账:canon/_hash/read/head/verify/append 加一个写不了的只读句柄 ReadOnly,外加 Refused 这个 7 行异常类,append 自己就在用它。done/card.py 只有卡与判据:spec_hash/load/expand/validate/accept_of 是纯读 JSON 那一层,registered/open_card/amend/effective_verdicts 是落账那一层,两层经 accept_of 与 registered 串成一条链,不是两摊。done/judge.py 只有判:跑命令、开临时工作树、收读者报告、validate_verdict,七个函数最后都汇进 judge()。done/reflect.py 只有沉淀。done/rules.py 只有那张七条规矩的表加一个上限检查。done/cli.py 只有命令行:_reports 与 _print 都只被 main 调。done/__init__.py 三行版本号。tools/deps.py 只查循环依赖。tools/readme_cmds.py 只查说明书里的命令认不认得。tools/libcheck.py 只查某一批进库条目够不够、有没有只记事不猜。tools/lookupstat.py 只数开卡前查过库的有几张。tools/ledgerkept.py 只查账文件在不在 git 清单里。tools/loc.sh 只报行数,tools/diffsize.sh 只卡手册涨幅,tools/__init__.py 是空文件。check.py 只有一件事:把每一对红绿用例各跑一遍。redcases.py 只有红绿用例本身。两个够得上「搭伙」嫌疑的,逐字核过之后都不算:一、tools/correct.py 里「校/main 那道关卡」和「问一条/评审 那几次纯模型调用」看着像两摊,但它们共用「三问」这份实打实的领域数据和「拒」这个异常,自述十九行把两边都写到了,而且后者产出的正是前者要验的那份记录 —— 是一件事的两步,不是两件事。二、redcases.py 里三组用例(七条规矩 / 订正通道 / 存账)之间确实零共用内部函数,还各带一份重复的夹具(_红 抄了 _red,_临时仓 抄了 Sandbox 的一半),但它们同属一种东西 —— 这个仓规定「写不出会报错的例子的东西不许进」,于是全部会报错的例子集中在这一个册子里,由 check.py 一趟跑完,这是设计出来的关系,不是「都在这个项目里」而已。顺带记两处不构成搭伙的小东西:check.py 的自述只说「遍历规矩册」,但 main() 里四块有三块跑的是不在规矩册里的东西(沉淀 / 订正 / 存账),自述已经跟不上了;这三块是逐字复制的第四遍模板,再加一条就该抽成一张表。",
+   "搜了什么": "逐个读了 17 个文件并各用一句话定职责:done/ledger.py 账与只读句柄;done/card.py 卡与判据(读 JSON 那层 + 落账那层,经 accept_of/registered 串成一条链);done/judge.py 在临时工作树里判一个 commit;done/reflect.py 判完之后那一步沉淀;done/rules.py 七条规矩的表加上限;done/cli.py 命令行分发与打印;done/__init__.py 版本号;check.py 把每一对红绿用例各跑一遍;redcases.py 红绿用例本身;tools/correct.py 记忆库的订正通道(关卡 + 纯模型评审,共用「三问」);tools/deps.py 循环依赖;tools/readme_cmds.py 说明书里的命令认不认得;tools/libcheck.py 某一批进库条目够不够;tools/lookupstat.py 开卡前查过库的有几张;tools/ledgerkept.py 账在不在 git 里;tools/loc.sh 报行数;tools/diffsize.sh 卡手册涨幅;tools/__init__.py 空文件。办法是 ast 列出每个文件的顶层函数与彼此调用,专门找「两堆零共用内部函数、而自述只盖住一堆」这个形状(上次 judge.py 就是这么被逮的)。最像的两个 —— tools/correct.py 和 redcases.py —— 逐字核过,理由写在证据里,都不算。"
+  }
+ }
+}
