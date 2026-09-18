@@ -176,15 +176,20 @@ def r5_green():
 
 # ── R6 改 accept 必须留疤 ────────────────────────────────────────────
 def r6_red():
+    u"""两样都要红:没写为什么就想改 · 旧那份逐条指纹缺席时装作「一条都没动」。"""
     with Sandbox() as s:
         _open(s)
         a = dict(AUTO)
         a[u"问"] = u"换了吗?"
         s.write([a, dict(EYE)])
-        return _red(lambda: C.amend(s.ledger, s.cardfile, u"", u"t", s.head()))
+        没为什么 = _red(lambda: C.amend(s.ledger, s.cardfile, u"", u"t", s.head()))
+    # 「说不出改的是哪一条」和「一条都没动」是两回事,账上必须长得不一样。
+    说不出 = u"说不出" in C.改了哪条(None, {u"a1": u"x"})
+    return 没为什么 and 说不出
 
 
 def r6_green():
+    u"""写了为什么就改得动;此前的判决全部作废;而且那一笔说得出动的是哪一条。"""
     with Sandbox() as s:
         _open(s)
         _judge(s)
@@ -194,7 +199,11 @@ def r6_green():
         a[u"问"] = u"换了吗?"
         s.write([a, dict(EYE)])
         C.amend(s.ledger, s.cardfile, u"原判据说不清", u"t", s.head())
-        return C.effective_verdicts(s.ledger, u"C-t") == []
+        疤 = [r for r in L.read(s.ledger) if r.get(u"kind") == u"amend"][-1][u"body"]
+        动 = 疤.get(u"改了哪条") or {}
+        return (C.effective_verdicts(s.ledger, u"C-t") == []
+                and 动.get(u"改") == [u"a1"]
+                and not 动.get(u"加") and not 动.get(u"删"))
 
 
 # ── R7 每条规矩必须有一条会红的用例 ──────────────────────────────────

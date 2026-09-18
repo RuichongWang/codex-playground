@@ -29,6 +29,17 @@ def spec_hash(accept):
     return hashlib.sha256(canon(accept)).hexdigest()
 
 
+def 逐条指纹(accept):
+    u"""每一条判据各自的指纹 —— **为了让改判据那一笔说得出改的是哪一条。**
+
+    从前只记整张卡的一个 spec_hash。设计文档上写着那一笔会记下「改哪条 · 为什么 · 谁批」,
+    后两样真有,第一样根本不存在,而且全仓只有说明书里那四个字。
+    事后翻账的人只知道「这张卡的判据变了」—— **「补了一条」和「把唯一那条硬的改松了」
+    在那一行上完全同形。**
+    """
+    return dict((c[u"id"], hashlib.sha256(canon(c)).hexdigest()[:16]) for c in accept)
+
+
 def load(path):
     return json.loads(io.open(path, encoding=u"utf-8").read())
 
@@ -100,18 +111,20 @@ def accept_of(card_file, packs=u"packs"):
     return a
 
 
-def registered(ledger_path, card_id):
-    u"""这张卡当前生效的 spec_hash:最后一条 open/amend 说了算。没开过返回 None。"""
+def 最后一笔(ledger_path, card_id):
+    u"""这张卡最后一条 open / amend 的 body —— 当前生效的那一份判据是它说了算。"""
     cur = None
     for r in read(ledger_path):
         b = r.get(u"body") or {}
-        if b.get(u"card") != card_id:
-            continue
-        if r.get(u"kind") == u"open":
-            cur = b.get(u"spec_hash")
-        elif r.get(u"kind") == u"amend":
-            cur = b.get(u"new_spec_hash")
+        if b.get(u"card") == card_id and r.get(u"kind") in (u"open", u"amend"):
+            cur = b
     return cur
+
+
+def registered(ledger_path, card_id):
+    u"""这张卡当前生效的 spec_hash。没开过返回 None。"""
+    b = 最后一笔(ledger_path, card_id)
+    return None if b is None else (b.get(u"new_spec_hash") or b.get(u"spec_hash"))
 
 
 def open_card(ledger_path, card_file, by, chain_head, packs=u"packs", 查库=None,
@@ -132,17 +145,32 @@ def open_card(ledger_path, card_file, by, chain_head, packs=u"packs", 查库=Non
     # 开卡之后再改就要留疤,而且这张卡之前的判决全部作废,代价差一个量级。
     拦(a, 查库)
     body = {u"card": card[u"id"], u"题面": card.get(u"题面", u""), u"引": card.get(u"引", []),
-            u"spec_hash": spec_hash(a), u"条数": len(a), u"by": by,
+            u"spec_hash": spec_hash(a), u"逐条": 逐条指纹(a), u"条数": len(a), u"by": by,
             u"查库": 查库 or {u"查了没有": u"没查"},
             u"开卡实况": 开卡实况(a, repo)}
     return append(ledger_path, u"open", body, chain_head)
+
+
+def 改了哪条(旧, 新):
+    u"""这一笔动的是哪几条:加了哪几条 · 删了哪几条 · 改了哪几条。
+
+    **旧那份缺席的时候要说出来,不许当成「什么都没改」。** 逐条指纹是后来才记的,
+    比它更早开的卡翻不出旧那一份 —— 那时候只能答「说不出」,而「说不出」和
+    「一条都没动」是两回事,在账上得长得不一样。
+    """
+    if not 旧:
+        return {u"说不出": u"这张卡开卡那会儿还没逐条记指纹,只知道整张变了"}
+    a, b = set(旧), set(新)
+    return {u"加": sorted(b - a), u"删": sorted(a - b),
+            u"改": sorted(k for k in a & b if 旧[k] != 新[k])}
 
 
 def amend(ledger_path, card_file, why, by, chain_head, packs=u"packs"):
     u"""改判据要留疤:落一行,且这张卡此前的 verdict 当场作废(R6)。"""
     card = load(card_file)
     a = accept_of(card_file, packs)
-    old = registered(ledger_path, card[u"id"])
+    上 = 最后一笔(ledger_path, card[u"id"])
+    old = None if 上 is None else (上.get(u"new_spec_hash") or 上.get(u"spec_hash"))
     if old is None:
         raise Refused(u"card-not-open", u"%s 还没开过" % card[u"id"])
     new = spec_hash(a)
@@ -151,6 +179,7 @@ def amend(ledger_path, card_file, why, by, chain_head, packs=u"packs"):
     if not (why or u"").strip():
         raise Refused(u"amend-why", u"改判据必须写为什么")
     body = {u"card": card[u"id"], u"old_spec_hash": old, u"new_spec_hash": new,
+            u"逐条": 逐条指纹(a), u"改了哪条": 改了哪条(上.get(u"逐条"), 逐条指纹(a)),
             u"why": why, u"by": by, u"作废": u"这张卡此前的 verdict 全部作废"}
     return append(ledger_path, u"amend", body, chain_head)
 
