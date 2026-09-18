@@ -40,7 +40,7 @@
   **说明书教的写法开不了卡**;技能卡里两个手抄的数字也漂了。
   三轮 · 四轮:又各找出一句假话(查库栏名那份手抄清单 · 笔记里的目录树)。
   **四次同一个形状,所以治法不是再改一遍字,是让它别再是手抄的**:
-  `tools/doc_cards.py` 盯范例 · `tools/readme_cmds.py` 盯命令 ·
+  `tools/doc_cards.py` 盯范例(判据 + 照它写的报告)· `tools/readme_cmds.py` 盯命令 ·
   `tools/notesdirs.py` 盯目录树 · `tools/lookupcols.py` 让 README 指路而不抄 ·
   `tools/saidtwice.py` 盯同一句话在仓里存了几份。
 

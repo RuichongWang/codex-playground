@@ -21,7 +21,7 @@ from done.rules import RULES, check_cap
     (u"沉淀", u"写不写二选一,不写也要说为什么", u"reflect"),
     (u"订正", u"改得动,但每处都要过一次纯模型评审", u"correct"),
     (u"存账", u"账要进 git —— 只在本机的账等于没有账", u"ledger"),
-    (u"范例", u"说明书里的判据范例要能真开卡", u"doccards"),
+    (u"范例", u"说明书里的判据和报告范例都要能真走一遍", u"doccards"),
     (u"开卡", u"写坏的判据在开卡那一刻就拦住", u"opencheck"),
     (u"目录", u"笔记里那块目录树要跟盘上对得上", u"notesdirs"),
     (u"命令", u"说明书里印的命令今天还立得住", u"readmecmds"),

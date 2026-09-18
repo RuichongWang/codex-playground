@@ -340,32 +340,45 @@ _范例 = (u"照着抄一张卡:\n\n```json\n"
         u"```\n")
 
 
-def _临时说明书(判者):
+# 一条找反例的判据,底下跟着一份照它写的报告范例 —— 真漂过的就是这两块之间。
+_报告范例 = (u"照着抄一张卡:\n\n```json\n"
+            u'{"id":"x1","问":"找出一处说明书没跟上的地方","过":"没找到",'
+            u'"判者":{"读者":"改动审阅人"},'
+            u'"凭什么答":"这次改动的原文;答「没找到」就写清你逐条核了哪几句"}\n'
+            u"```\n\n报告照这样写:\n\n```json\n"
+            u'{"judge":"改动审阅人","answers":{"x1":{"答":%s}}}\n'
+            u"```\n")
+
+
+def _临时说明书(文):
     d = tempfile.mkdtemp(prefix=u"doc-t-")
     with _io.open(os.path.join(d, u"README.md"), u"w", encoding=u"utf-8") as f:
-        f.write(_范例 % 判者)
+        f.write(文)
     return d
 
 
-def doccards_red():
-    u"""说明书里写着老写法 `"判者":"读者"` —— 照抄开卡会被拒,得在这儿先红。"""
-    d = _临时说明书(u'"读者"')
+def _跑一遍(文):
+    d = _临时说明书(文)
     try:
         with contextlib.redirect_stderr(_io.StringIO()), \
                 contextlib.redirect_stdout(_io.StringIO()):
-            return DC.main([d]) != 0
+            return DC.main([d])
     finally:
         shutil.rmtree(d, ignore_errors=True)
+
+
+def doccards_red():
+    u"""两样都要红:判据范例写着老写法 · 报告范例的答跟那条判据的「过」对不上。"""
+    判据红 = _跑一遍(_范例 % u'"读者"') != 0
+    报告红 = _跑一遍(_报告范例 % u'"否"') != 0
+    return 判据红 and 报告红
 
 
 def doccards_green():
-    u"""写明是哪一个读者,过。"""
-    d = _临时说明书(u'{"读者":"冷读者"}')
-    try:
-        with contextlib.redirect_stdout(_io.StringIO()):
-            return DC.main([d]) == 0
-    finally:
-        shutil.rmtree(d, ignore_errors=True)
+    u"""写明是哪一个读者,过;报告的答落在这条判据的答域里,也过。"""
+    判据绿 = _跑一遍(_范例 % u'{"读者":"冷读者"}') == 0
+    报告绿 = _跑一遍(_报告范例 % u'"找到","引文":"a","证据":"a"') == 0
+    return 判据绿 and 报告绿
 
 
 # —— 开卡那一刻的体检(不是规矩,单独跑) ——
