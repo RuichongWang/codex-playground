@@ -22,8 +22,13 @@ import json
 import os
 import sys
 
-from tools.puremodel import 评审 as 问一轮
-from tools.puremodel import 问不出来
+# 说明书教人跑的是 `python3 tools/correct.py …`,那时 sys.path[0] 是 `tools/`、
+# 仓库根不在,底下那行 `from tools.…` 会当场崩。tools/opencheck.py 和
+# tools/lookupstat.py 早就这么兜着了,这儿漏了一次,说明书那两行跟着成了假话。
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from tools.puremodel import 评审 as 问一轮  # noqa: E402
+from tools.puremodel import 问不出来  # noqa: E402
 
 DB = os.path.join(u"pattern", u"runs", u"r3", u"library.json")
 LOG = os.path.join(u"pattern", u"docs", u"corrections.jsonl")

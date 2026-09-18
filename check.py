@@ -24,6 +24,8 @@ from done.rules import RULES, check_cap
     (u"范例", u"说明书里的判据范例要能真开卡", u"doccards"),
     (u"开卡", u"写坏的判据在开卡那一刻就拦住", u"opencheck"),
     (u"目录", u"笔记里那块目录树要跟盘上对得上", u"notesdirs"),
+    (u"命令", u"说明书里印的命令今天还立得住", u"readmecmds"),
+    (u"接上", u"规矩表点名的执行器盘上真有", u"rulewired"),
 ]
 
 

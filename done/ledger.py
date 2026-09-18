@@ -87,19 +87,3 @@ def append(path, kind, body, chain_head):
     with open(path, u"ab") as f:
         f.write(canon(row) + b"\n")
     return row
-
-
-class ReadOnly(object):
-    u"""判决那只手拿到的句柄:读得到,写不了(R4 的进程内那一半)。"""
-
-    def __init__(self, path):
-        self._p = path
-
-    def read(self):
-        return read(self._p)
-
-    def head(self):
-        return head(self._p)
-
-    def append(self, *a, **k):
-        raise Refused(u"judge-cannot-append", u"判的那只手写不到账")

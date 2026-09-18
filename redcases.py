@@ -19,6 +19,8 @@ from done import rules as R
 from tools import doc_cards as DC
 from tools import ledgerkept as LK
 from tools import notesdirs as ND
+from tools import readme_cmds as RC
+from tools import rulewired as RW
 
 AUTO = {u"id": u"a1", u"问": u"跑得通吗?", u"过": u"是",
         u"判者": {u"cmd": u"true", u"答是": u"exit0"}, u"凭什么答": u"退出码"}
@@ -126,10 +128,10 @@ def r3_green():
 # ── R4 判的那只手写不到账 ────────────────────────────────────────────
 def r4_red():
     with Sandbox() as s:
-        L.append(s.ledger, u"t", {}, s.head())
-        if not _red(lambda: L.ReadOnly(s.ledger).append(u"t", {}, s.head())):
-            return False
-        # 第二半:auto 命令在 worktree 里写 .done/ledger.jsonl,真账必须纹丝不动
+        # 判据里的命令在临时副本里往 .done/ledger.jsonl 写,真账必须纹丝不动。
+        # **这儿从前还有半截**:拿一个「只读账句柄」去 append,看它抛不抛。
+        # 那半截测的是一段全仓没人构造的死代码 —— 它永远会红,而它红不红
+        # 对真实那条路没有任何影响。删了。
         a = dict(AUTO)
         a[u"判者"] = {u"cmd": u"mkdir -p .done && echo x >> .done/ledger.jsonl",
                       u"答是": u"exit0"}
@@ -369,7 +371,7 @@ def doccards_green():
 # 账上改判据的那些次里,绝大多数是判据自己写坏了。这几种能在开卡那一刻看出来。
 
 def opencheck_red():
-    u"""五种写坏的判据 + 两种写坏的查库记录,一个都不许漏;
+    u"""四种写坏的判据 + 两种写坏的查库记录,一个都不许漏;
     外加一条:把认问法那条正则贴死回句尾,自检那一步必须当场报误伤。
     """
     from done import opencheck as OC
@@ -382,8 +384,6 @@ def opencheck_red():
          u"判者": {u"cmd": u"true"}, u"凭什么答": u"输出"},
         {u"id": u"b3", u"问": u"这次改得怎么样", u"过": u"是",
          u"判者": {u"cmd": u"true"}, u"凭什么答": u"输出"},
-        {u"id": u"b4", u"问": u"找出一句假话", u"过": u"没找到",
-         u"判者": {u"读者": u"说明书审阅人"}, u"凭什么答": u"README.md 全篇"},
         {u"id": u"b5", u"问": u"找出一处改动没跟上的", u"过": u"没找到",
          u"判者": {u"读者": u"改动审阅人"},
          u"凭什么答": u"库里那几条条目的原文;答「没找到」就写清比了哪几条"},
@@ -483,3 +483,63 @@ def notesdirs_green():
     u"""列表跟盘上一一对上,过。"""
     return _跑(_临时库([u"pk", u"ph"],
                     u"pk/           库本身\nph/           取检索那一路")) == 0
+
+
+# —— 说明书里印的命令还立不立得住(不是规矩,单独跑) ——
+# 第二层(脚本那一层)是被打脸打出来的:`tools/correct.py` 顶上加了一行 `from tools.…`,
+# 说明书教人跑的 `python3 tools/correct.py …` 当场崩,而盘上没有任何东西发现 ——
+# 那时这道检查只收 `python3 -m done.cli` 开头的行。
+
+def _临时脚本(根, 名, 正文):
+    os.makedirs(os.path.join(根, u"tools"), exist_ok=True)
+    _io.open(os.path.join(根, u"tools", u"__init__.py"), u"w", encoding=u"utf-8").write(u"")
+    _io.open(os.path.join(根, u"tools", u"隔壁.py"), u"w", encoding=u"utf-8").write(u"x = 1\n")
+    _io.open(os.path.join(根, u"tools", 名), u"w", encoding=u"utf-8").write(正文)
+    return u"tools/" + 名
+
+
+def readmecmds_red():
+    u"""两层都要红:done 命令带了个不存在的参数 · 脚本命令当脚本跑起不来。"""
+    d = tempfile.mkdtemp(prefix=u"readmecmds-")
+    try:
+        # 这一句从仓库根 import 得进去,当脚本跑进不去 —— 正是漏过一次的那个形状
+        名 = _临时脚本(d, u"崩的.py", u"from tools.隔壁 import x\n")
+        脚本红 = RC.查脚本([名], d)
+        命令红 = RC.查命令([u"python3 -m done.cli open cards/demo.json --eye 1"],
+                       tempfile.mkdtemp(prefix=u"readmecmds-l-"))
+        return bool(脚本红) and bool(命令红)
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+def readmecmds_green():
+    u"""补上那行 sys.path 兜底之后,同一个脚本当脚本跑得起来;正经 done 命令也认得出。"""
+    d = tempfile.mkdtemp(prefix=u"readmecmds-")
+    try:
+        名 = _临时脚本(d, u"好的.py",
+                    u"import os, sys\n"
+                    u"sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))\n"
+                    u"from tools.隔壁 import x\n")
+        return (not RC.查脚本([名], d)
+                and not RC.查命令([u"python3 -m done.cli head"],
+                                tempfile.mkdtemp(prefix=u"readmecmds-l-")))
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+# —— 规矩表点名的执行器得真存在(不是规矩,单独跑) ——
+# R4 的执行器一度点着一段全仓没人构造的死代码。那一栏此前只是打印给人看的字,
+# 谁也没去解析它 —— 于是「执行器还活着」和「这个名字是编的」在开机那一屏上同形。
+
+def rulewired_red():
+    u"""两种编法都要红:模块根本不在 · 模块在但里面没这个名字。"""
+    没模块 = RW.查([{u"id": u"X", u"执行器": u"压根没有这个模块.随便"}])
+    没名字 = RW.查([{u"id": u"Y", u"执行器": u"ledger.压根没有这个函数"}])
+    return bool(没模块) and bool(没名字)
+
+
+def rulewired_green():
+    u"""盘上真有的那几个,解得开。"""
+    return not RW.查([{u"id": u"Z", u"执行器": u"ledger.verify"},
+                      {u"id": u"W", u"执行器": u"worktree.临时副本"},
+                      {u"id": u"V", u"执行器": u"check.main"}])

@@ -12,20 +12,12 @@ u"""纯模型问一条 —— 调外面那个命令行,**把工具全摘掉**,�
 没有任何东西会发现。`--tools ""` 是一张**空白的准入名单**:新加的工具进不来。
 它只会往紧了漂,不会往松了漂,于是没有东西需要看着它。
 
-**这句话是实测出来的,不是读文档读出来的**(`python3 tools/puremodel.py --自证`):
-往盘上放一行口令,叫它读那个文件、原样吐出来 ——
+**这句话是实测出来的,不是读文档读出来的** —— 那场对照实验在 `tools/toolsoff.py`,
+单独一个文件:它要联网,而且跟这儿零共用函数。
 
-    --tools ""    读不到(实测它还凭空编了一段文件内容出来)
-    什么都不加     一字不差读到了
-
-**后面那一次是对照,不是多余的。** 没有它,「工具真的摘干净了」和「这次它压根没打算读」
-在输出上完全同形。要联网,所以这一道不在 `make check` 里,是手动跑的。
 """
 import json
-import os
 import subprocess
-import sys
-import tempfile
 
 评审模型 = u"claude-haiku-4-5-20251001"
 # 空的准入名单 = 一个工具都不给。**别换回黑名单**,理由见上面。
@@ -68,43 +60,3 @@ def 评审(提案, 三问):
         v[u"序号"] = i
         逐条.append(v)
     return {u"评审者": u"纯模型调用 %s(工具全摘掉)" % 评审模型, u"逐条": 逐条}
-
-
-def 自证(timeout=300):
-    u"""当场验一次「工具真的摘干净了」。**一定要跑对照那一次** —— 见文件开头。"""
-    d = tempfile.mkdtemp()
-    口令 = u"ZUMBAQI-7731"
-    with open(os.path.join(d, u"secret.txt"), u"w") as f:
-        f.write(口令 + u"\n")
-    q = (u"用你的文件读取工具读 %s,把里面那一行原样输出。"
-         u"如果你没有读文件的工具,就只输出 NOFILE。" % os.path.join(d, u"secret.txt"))
-    def 读得到(flags):
-        r = subprocess.run([u"claude", u"-p", q, u"--model", 评审模型] + flags,
-                           capture_output=True, timeout=timeout, cwd=d)
-        return 口令 in r.stdout.decode(u"utf-8", u"replace")
-    摘了 = 读得到(list(关掉全部工具))
-    对照 = 读得到([])
-    print(u"摘掉工具那一次读到口令了吗:%s(要「否」)" % (u"是" if 摘了 else u"否"))
-    print(u"什么都不加那一次读到口令了吗:%s(要「是」——这是对照)" % (u"是" if 对照 else u"否"))
-    if 摘了:
-        sys.stderr.write(u"工具没摘干净:它照样读到了盘上的文件\n")
-        return 1
-    if not 对照:
-        sys.stderr.write(u"对照那一次也没读到 —— 这一整道自证今天什么都没证明,"
-                         u"先把对照修好(换个模型?网不通?)再看上面那一行\n")
-        return 1
-    print(u"过:摘掉工具读不到,不摘读得到。")
-    return 0
-
-
-def main(argv=None):
-    argv = argv if argv is not None else sys.argv[1:]
-    if argv and argv[0] == u"--自证":
-        return 自证()
-    sys.stderr.write(u"这个文件是给 tools/correct.py 用的。"
-                     u"想当场验一次工具摘没摘干净:python3 tools/puremodel.py --自证(要联网)\n")
-    return 2
-
-
-if __name__ == u"__main__":
-    sys.exit(main())
