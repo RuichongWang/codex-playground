@@ -9,6 +9,10 @@ u"""说明书里那些「一条验收条件长什么样」的 JSON 范例,拿真
 `tools/readme_cmds.py` 管的是说明书里的**命令**认不认得出,这一份管的是说明书里的
 **判据范例**能不能真的开卡。两份合起来,手抄的那两类东西才都有人看着。
 
+**开卡那道体检(`done/opencheck.py`)也要在这儿走一遍。** 第一版漏了这一步,
+结果就是:新加的一条开卡检查当场把说明书自己的范例判成不合格,而这个工具还是绿的 ——
+它只跑老的形状校验。一个没被接上的检查器和一个不存在的检查器,在那一刻是一样的。
+
 范例里允许留占位(`<某某>`),所以这里只校形状,不校内容能不能跑。
 """
 import io
@@ -20,6 +24,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from done.card import Refused, validate  # noqa: E402
+from done.opencheck import 查判据  # noqa: E402
 
 文件 = [u"README.md", u"CLAUDE.md",
         os.path.join(u"docs", u"DESIGN.md"),
@@ -73,6 +78,8 @@ def main(argv=None):
                     validate(c[u"accept"])
                 except Refused as e:
                     坏.append((名, c.get(u"id") or u"(没写 id)", e))
+                坏.extend((名, c.get(u"id") or u"(没写 id)", x)
+                          for x in 查判据(c[u"accept"]))
             if 散:
                 查过 += len(散)
                 # 「一张卡至少要有一条命令来答」是对**整张卡**的要求,不是对单条范例的。
@@ -88,6 +95,8 @@ def main(argv=None):
                     validate(组)
                 except Refused as e:
                     坏.append((名, u"/".join(str(o.get(u"id")) for o in 散), e))
+                坏.extend((名, 谁, x) for 谁, x in
+                          ((o.get(u"id"), x) for o in 散 for x in 查判据([o])))
     for 名, 谁, e in 坏:
         sys.stderr.write(u"%s 里的范例过不了校验:%s —— %s\n" % (名, 谁, e))
     print(u"说明书里的判据范例 %d 条,过不了校验的 %d 条" % (查过, len(坏)))

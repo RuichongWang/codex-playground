@@ -22,6 +22,7 @@ u"""开卡那一刻的额外体检:不是「这条判据合不合法」,是「�
 还有一种形状(答案永远是同一个,第 10 · 12 · 13 次)机械拦不了,**只能落成读数** ——
 见 `开卡实况`,它记不拦。
 """
+import os
 import re
 
 from done.ledger import Refused
@@ -49,7 +50,9 @@ def 查判据(accept):
     坏 = []
     for c in accept:
         cid, 问, 过 = c.get(u"id"), c.get(u"问") or u"", c.get(u"过")
-        判者 = c.get(u"判者") or {}
+        判者 = c.get(u"判者")
+        # 老卡里 判者 是个裸字符串。那一档由 card.validate 拒,这儿只管别崩。
+        判者 = 判者 if isinstance(判者, dict) else {}
         凭 = c.get(u"凭什么答") or u""
         if 找反例.match(问):
             if 过 != u"没找到":
@@ -100,26 +103,49 @@ def 拦(accept, 查库=None):
     return True
 
 
-def 开卡实况(accept, timeout=120):
+def 开卡实况(accept, repo=u".", timeout=120):
     u"""开卡这一刻,把每条命令判据先跑一遍,记下它现在是什么颜色。
 
     **这一条记,不拦。** 它对的是账上第 10 · 12 · 13 次改判据 —— 那三次的毛病都是
     「这条判据的答案永远是同一个」,而恒绿的判据和不存在的判据在判决那一刻一模一样。
     这种毛病机械拦不住(体检卡就该一开卡全绿),但它能变成一个读数:
     开卡时是什么颜色、判决时是什么颜色,两边都记下来,常数就看得见了。
+
+    **命令跑在一个 detached worktree 里,不在你的工作目录里** —— 跟判那一步同一个规矩。
+    第一版没这么做,当场把真账写坏了:`make check` 里有一条故意的用例,内容正是
+    「往 .done/ledger.jsonl 里追加一行垃圾」,它本来该在 worktree 里跑,
+    结果被这一步在真仓库根目录上跑了三遍。**判据里的命令是别人写的字,不是你的**。
+    起不了 worktree(比如还没有任何提交)就整段跳过,只记一句为什么。
     """
+    import shutil
     import subprocess
+    import tempfile
+    cmds = [c for c in accept if (c.get(u"判者") or {}).get(u"cmd")
+            if isinstance(c.get(u"判者"), dict)]
+    if not cmds:
+        return []
+    tmp = tempfile.mkdtemp(prefix=u"done-open-")
+    wt = os.path.join(tmp, u"t")
+    p = subprocess.run(u"git worktree add --detach %s HEAD" % wt, shell=True, cwd=repo,
+                       stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    if p.returncode != 0:
+        shutil.rmtree(tmp, ignore_errors=True)
+        return [{u"跑不了": u"起不了 worktree:%s"
+                 % p.stdout.decode(u"utf-8", u"replace").strip()[:200]}]
     出 = []
-    for c in accept:
-        cmd = (c.get(u"判者") or {}).get(u"cmd")
-        if not cmd:
-            continue
-        try:
-            p = subprocess.run(cmd, shell=True, timeout=timeout,
-                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            码 = p.returncode
-        except Exception as e:
-            码 = u"跑不起来:%s" % e
-        出.append({u"id": c.get(u"id"), u"cmd": cmd, u"exit": 码,
-                   u"开卡就绿": 码 == 0})
+    try:
+        for c in cmds:
+            cmd = c[u"判者"][u"cmd"]
+            try:
+                r = subprocess.run(cmd, shell=True, cwd=wt, timeout=timeout,
+                                   stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                码 = r.returncode
+            except Exception as e:
+                码 = u"跑不起来:%s" % e
+            出.append({u"id": c.get(u"id"), u"cmd": cmd, u"exit": 码,
+                       u"开卡就绿": 码 == 0})
+    finally:
+        subprocess.run(u"git worktree remove --force %s" % wt, shell=True, cwd=repo,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        shutil.rmtree(tmp, ignore_errors=True)
     return 出

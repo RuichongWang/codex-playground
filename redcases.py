@@ -386,7 +386,14 @@ def opencheck_red():
 
 
 def opencheck_green():
-    u"""盘上现有的每一张卡都得放行 —— 收紧一道校验,风险落在没人写下来的老用法上。"""
+    u"""两件事:盘上现有的每一张卡都得放行;开卡时跑命令不许碰到工作目录。
+
+    第一半对的是「收紧一道校验,风险落在没人写下来的老用法上」。
+    第二半对的是一次真事故:开卡那一步第一版把判据里的命令跑在了**真的工作目录**里,
+    而 `make check` 里有一条故意的用例内容正是「往账里追加一行垃圾」——
+    于是跑一次开机自检就把真账写坏一行,连着三次没人发现。
+    **判据里的命令是别人写的字**,得跟判那一步一样关进 worktree。
+    """
     import glob
     import json as _j
     from done import opencheck as OC
@@ -394,4 +401,18 @@ def opencheck_green():
         c = _j.loads(_io.open(f, encoding=u"utf-8").read())
         if OC.查判据(c.get(u"accept") or []):
             return False
-    return not OC.查查库({u"查了什么": u"搜过", u"用上了": u"没有,都不对路"})
+    if OC.查查库({u"查了什么": u"搜过", u"用上了": u"没有,都不对路"}):
+        return False
+    with Sandbox() as s:
+        破坏 = dict(AUTO)
+        破坏[u"判者"] = {u"cmd": u"echo x > 我不该出现", u"答是": u"exit0"}
+        s.write([破坏, dict(EYE)])
+        C.open_card(s.ledger, s.cardfile, u"t", s.head(), repo=s.repo)
+        # 两处都要看:**出事那次脏的是当前工作目录**(开卡那一步没带 cwd),
+        # 只盯着临时仓看的话,这条用例在 bug 放回去之后照样是绿的 —— 试过,真是绿的。
+        for d in (os.getcwd(), s.repo):
+            f = os.path.join(d, u"我不该出现")
+            if os.path.exists(f):
+                os.remove(f)
+                return False
+        return True

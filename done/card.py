@@ -102,7 +102,8 @@ def registered(ledger_path, card_id):
     return cur
 
 
-def open_card(ledger_path, card_file, by, chain_head, packs=u"packs", 查库=None):
+def open_card(ledger_path, card_file, by, chain_head, packs=u"packs", 查库=None,
+              repo=u"."):
     u"""开卡。
 
     `查库` 是开工前那一步的记录:**这类活别处踩过什么坑**。
@@ -120,7 +121,7 @@ def open_card(ledger_path, card_file, by, chain_head, packs=u"packs", 查库=Non
     body = {u"card": card[u"id"], u"题面": card.get(u"题面", u""), u"引": card.get(u"引", []),
             u"spec_hash": spec_hash(a), u"条数": len(a), u"by": by,
             u"查库": 查库 or {u"查了没有": u"没查"},
-            u"开卡实况": 开卡实况(a)}
+            u"开卡实况": 开卡实况(a, repo)}
     return append(ledger_path, u"open", body, chain_head)
 
 
