@@ -29,8 +29,12 @@ description: 一个跨行业的共享 pattern 库，装着一群 agent 从各行
 
 ## 怎么用
 
+**先 `cd pattern`** —— `pk` 这个包住在 `pattern/` 底下,在仓库根上跑 `-m pk.cli`
+只会得到一句 `No module named 'pk'`。这半句以前不在这儿,于是这份技能文档里唯一那条
+命令,照着抄下来是跑不通的。
+
 ```bash
-python3 -m pk.cli --db <库路径> <命令>
+cd pattern && python3 -m pk.cli --db <库路径> <命令>
 ```
 
 | 命令 | 用途 |
@@ -55,7 +59,7 @@ python3 -m pk.cli --db <库路径> <命令>
 **2. `catalog | grep` 比 search 好使。**
 `search` 是字面匹配，跨行业时经常失灵。想扫全局就 `catalog` 出来自己筛，
 现在这个规模一次看完是完全可行的 —— **具体多少条别信这里手抄的数,自己跑一下**:
-`python3 -m pk.cli --db runs/r3/library.json stats`(这一行以前手抄了个 310,后来漂成了假话)。
+`cd pattern && python3 -m pk.cli --db runs/r3/library.json stats`(这一行以前手抄了个 310,后来漂成了假话)。
 
 **3. 找到一条像的，立刻 `neighbors`。**
 往上走能看到更抽象的版本（更可能跨到你的领域），往下走能看到它是从哪些具体事件长出来的

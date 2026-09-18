@@ -9,9 +9,11 @@ u"""`pattern/NOTES.md` 那块目录树,对着盘上实际的目录核一遍。
   多列了   —— 列表里写着的目录盘上没有(改名 / 删掉了,说明书没跟)
   少列了   —— 盘上有的顶层目录列表里没有(新加的包,说明书没跟)
 
-`<仓库根>/` 开头的那几行按仓库根解,其余按 `pattern/` 解。
+`<仓库根>/` 开头的那几行按仓库根解,其余按 `pattern/` 解;写了 `*` 的按通配解,**没写 `*` 的一律逐字比** —— 拿前缀去凑等于给自己开后门。
 带 `__` 开头的、隐藏的、以及 `.claude` 这类不是这个库自己的东西不算漏。
 """
+import fnmatch
+import glob
 import io
 import os
 import re
@@ -48,14 +50,21 @@ def main(argv=None):
         else:
             p = os.path.join(根, u"pattern", 名)
             自家.add(名.rstrip(u"/").split(u"/")[0])
-        if not os.path.isdir(p):
+        # 只有**真写了 `*`** 的那一条才按通配解。上一版是拿 `rstrip("*")` 当前缀比,
+        # 于是 `corpus/` 这条(没有星号)也成了前缀,`pattern/corpus4/` 新建出来
+        # 一声不吭地就过了 —— 而这块目录树里根本没有一条带星号,那条豁免从头到尾
+        # 只在放行本该逮住的东西。同时笔记里写着「少列一个它就红」,那句话因此是假的。
+        if u"*" in 名:
+            if not any(os.path.isdir(x) for x in glob.glob(p)):
+                坏.append(u"列着 %s,盘上一个都对不上" % 名)
+        elif not os.path.isdir(p):
             坏.append(u"列着 %s,盘上没有这个目录" % 名)
     盘上 = set(d for d in os.listdir(os.path.join(根, u"pattern"))
               if os.path.isdir(os.path.join(根, u"pattern", d))
               and not d.startswith(u".") and d not in 不算)
-    # `corpus*/` 这类通配写法算覆盖到:只要列表里有一条前缀盖得住它就不算漏。
+    通配 = [x for x in 自家 if u"*" in x]
     for d in sorted(盘上 - 自家):
-        if not any(x.rstrip(u"*") and d.startswith(x.rstrip(u"*")) for x in 自家):
+        if not any(fnmatch.fnmatch(d, x) for x in 通配):
             坏.append(u"盘上有 pattern/%s/,列表里没提 —— 说明书没跟上" % d)
     for b in 坏:
         sys.stderr.write(u"%s\n" % b)

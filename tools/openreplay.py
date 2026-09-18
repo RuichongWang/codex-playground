@@ -11,7 +11,9 @@ u"""把开卡体检的每一条检查,拿仓库的**全部历史**重放一遍,�
   每一版都取出来,去重之后逐条跑检查;
 - 账上每一条开卡记录的「查库」那一栏,跑查库那两条检查。
 
-`tools/opencheck.py --self` 拿这个数当闸门:命中 0 次的检查不许留着。
+**这个数当过一阵闸门(命中 0 次的不许留),那是错的,现在只印不拦** ——
+按那条闸门当场删掉的两条是真检查:「从没逮着过」只说明这类坏法还没发生过,
+而入口检查本来就是为还没发生的事设的。闸门在 `tools/opencheck.py` 的「有没有逮错过」那一边。
 
 用法:
     python3 tools/openreplay.py        打一张表:每条检查命中几次、头一次命中在哪
@@ -25,7 +27,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from done.opencheck import 查查库带名, 查判据带名  # noqa: E402
+from done.opencheck import 检查册, 查查库带名, 查判据带名  # noqa: E402
 
 判据路径 = re.compile(u"^(cards/.*\\.json|packs/.*\\.json)$")
 说明书 = (u"README.md", u"CLAUDE.md", u"docs/DESIGN.md",
@@ -119,12 +121,22 @@ def 数():
 
 
 def main(argv=None):
+    u"""名册上**每一条**都印一行,包括 0 次的那几条。
+
+    上一版只印命中过的那几条:于是一条命中 0 次的检查,和一条根本不在名册上的检查,
+    在这张表上逐字同形 —— 而这个数存在的全部理由就是让「它逮着过没有」看得见。
+    名册六条却只印出四行,说明书还写着「每条检查在历史里逮着过几次」。
+    """
     命中 = 数()
-    for 名 in sorted(命中):
-        次, 例 = 命中[名]
-        print(u"%-18s 命中 %d 次,例如 %s" % (名, 次, u" · ".join(例)))
-    if not 命中:
-        print(u"(一条都没命中)")
+    for 名 in 检查册:
+        次, 例 = 命中.get(名, (0, []))
+        print(u"%-18s 命中 %d 次%s"
+              % (名, 次, (u",例如 " + u" · ".join(例)) if 例 else u"(这类坏法还没发生过)"))
+    野 = [名 for 名 in 命中 if 名 not in 检查册]
+    if 野:
+        print(u"\n名册(done/opencheck.py 的 检查册)上没有,历史里却命中过:%s"
+              % u" · ".join(sorted(野)))
+        return 1
     return 0
 
 

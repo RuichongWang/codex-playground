@@ -6,26 +6,13 @@ u"""判:在 detached worktree 里判一个 commit,逐条出结果,不合成总�
 「判官照没照判据答」是机械可查的,人只剩「这条判据是不是在要求形成看法」一件事。
 """
 import hashlib
-import os
-import shutil
-import subprocess
-import tempfile
 
 from done.card import accept_of, load, registered, spec_hash
 from done.ledger import Refused, append, read
+from done.worktree import 临时副本, 起不来
+from done.worktree import 跑 as _sh
 
 禁合成 = (u"score", u"总分", u"percent", u"百分比", u"weight", u"加权")
-
-
-def _sh(cmd, cwd, timeout=900):
-    p = subprocess.Popen(cmd, cwd=cwd, shell=True, stdout=subprocess.PIPE,
-                         stderr=subprocess.STDOUT)
-    try:
-        out = p.communicate(timeout=timeout)[0]
-    except subprocess.TimeoutExpired:
-        p.kill()
-        return 124, u"TIMEOUT"
-    return p.returncode, out.decode(u"utf-8", u"replace")
 
 
 def _sha(s):
@@ -73,6 +60,25 @@ def _resolve(repo, at):
     return out.strip()
 
 
+def _判一轮(accept, reports, wt, lines):
+    u"""在已经摊好的临时副本里逐条判,结果追加进 lines。"""
+    for c in accept:
+        j = c[u"判者"]
+        if isinstance(j, dict) and j.get(u"cmd"):
+            rc, out = _sh(j[u"cmd"], wt)
+            ans = _cmd_answer(j, rc, out)
+            if c[u"过"] == u"没找到":   # 全量扫描类:退出码 0 = 没找到
+                ans = u"没找到" if ans == u"是" else u"找到"
+            ev = {u"exit": rc, u"out_sha": _sha(out), u"out_head": out[:200]}
+            who = u"cmd"
+        else:
+            ans = (reports or {}).get(c[u"id"], {}).get(u"答")
+            ev = _reader_line(c, reports)
+            who = j[u"读者"]
+        lines.append({u"id": c[u"id"], u"判者": who, u"答": ans,
+                      u"passed": ans == c[u"过"], u"evidence": ev})
+
+
 def validate_verdict(body):
     u"""落账之前的最后一道(R5):逐条带 evidence · 引文对得上 · 不许有合成出来的总分。"""
     for k in body:
@@ -116,32 +122,14 @@ def judge(ledger_path, card_file, repo, at, chain_head, reports=None, packs=u"pa
         raise Refused(u"reader-missing", u"还缺 %d 份判官报告:%s" % (len(缺), u" · ".join(
             u"%s(要「%s」答:%s)" % (c[u"id"], c[u"判者"][u"读者"], c[u"问"]) for c in 缺)))
     commit = _resolve(repo, at)
-    tmp = tempfile.mkdtemp(prefix=u"done-wt-")
-    wt = os.path.join(tmp, u"t")
-    rc, out = _sh(u"git worktree add --detach %s %s" % (wt, commit), repo)
-    if rc != 0:
-        shutil.rmtree(tmp, ignore_errors=True)
-        raise Refused(u"worktree-failed", out.strip()[:300])
     lines = []
     try:
-        for c in accept:
-            j = c[u"判者"]
-            if isinstance(j, dict) and j.get(u"cmd"):
-                rc, out = _sh(j[u"cmd"], wt)
-                ans = _cmd_answer(j, rc, out)
-                if c[u"过"] == u"没找到":   # 全量扫描类:退出码 0 = 没找到
-                    ans = u"没找到" if ans == u"是" else u"找到"
-                ev = {u"exit": rc, u"out_sha": _sha(out), u"out_head": out[:200]}
-                who = u"cmd"
-            else:
-                ans = (reports or {}).get(c[u"id"], {}).get(u"答")
-                ev = _reader_line(c, reports)
-                who = j[u"读者"]
-            lines.append({u"id": c[u"id"], u"判者": who, u"答": ans,
-                          u"passed": ans == c[u"过"], u"evidence": ev})
-    finally:
-        _sh(u"git worktree remove --force %s" % wt, repo)
-        shutil.rmtree(tmp, ignore_errors=True)
+        # `临时副本` 是个上下文管理器,**起不来是在 __enter__ 那一刻抛的,不是在调用那一刻** ——
+        # try 包在调用上等于没包。第一版就这么写错过。
+        with 临时副本(repo, commit) as wt:
+            _判一轮(accept, reports, wt, lines)
+    except 起不来 as e:
+        raise Refused(u"worktree-failed", u"%s" % e)
     body = {u"card": card[u"id"], u"commit": commit, u"spec_hash": sh, u"lines": lines,
             u"答不了": [l[u"id"] for l in lines if l[u"答"] == u"答不了"],
             u"passed": all(l[u"passed"] for l in lines)}

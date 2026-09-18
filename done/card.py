@@ -10,7 +10,8 @@ import json
 import os
 
 from done.ledger import Refused, append, canon, read
-from done.opencheck import 开卡实况, 拦
+from done.opencheck import 拦
+from done.openrun import 开卡实况
 
 # 「过」写成「没找到」的,是一条**找反例**的判据:答域换成 找到 / 没找到 / 答不了。
 # 为什么要分开:「有没有哪一条…」答「是」只要举一个反例,答「否」要穷举 ——
@@ -123,7 +124,8 @@ def open_card(ledger_path, card_file, by, chain_head, packs=u"packs", 查库=Non
     a = accept_of(card_file, packs)
     if registered(ledger_path, card[u"id"]) is not None:
         raise Refused(u"card-already-open", u"%s 已经开过了,要改走 amend" % card[u"id"])
-    # 账上改过 14 次判据,12 次是判据自己写坏了。能在这一刻看出来的那几种,在这儿拦住 ——
+    # 账上改判据的次数一直在长(`python3 -m done.cli log | grep amend` 现数,别在这儿抄),
+    # 其中绝大多数是判据自己写坏了。能在这一刻看出来的那几种,在这儿拦住 ——
     # 开卡之后再改就要留疤,而且这张卡之前的判决全部作废,代价差一个量级。
     拦(a, 查库)
     body = {u"card": card[u"id"], u"题面": card.get(u"题面", u""), u"引": card.get(u"引", []),

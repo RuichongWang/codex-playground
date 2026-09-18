@@ -13,7 +13,7 @@ u"""跑开卡体检:对盘上每一张真卡放行,对每一种它声称拦得�
 
 用法:
     python3 tools/opencheck.py --self      对盘上真卡 + 内置坏样卡各跑一遍
-    python3 tools/opencheck.py --栏名      印出开工前查库那一栏认哪几个栏名
+    python3 tools/opencheck.py --栏名      印出开工前查库那一栏承重的是哪两个栏名
     python3 tools/opencheck.py 某张卡.json  单查一张卡
 """
 import glob
@@ -24,7 +24,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from done.opencheck import 检查册, 查库栏, 查查库, 查判据, 查判据带名  # noqa: E402
+from done.opencheck import 承重栏, 检查册, 查查库, 查判据, 查判据带名  # noqa: E402
 from tools.openreplay import 抠判据, 数, 说明书  # noqa: E402
 
 好命令 = {u"id": u"g1", u"问": u"跑得通吗?", u"过": u"是",
@@ -57,9 +57,10 @@ from tools.openreplay import 抠判据, 数, 说明书  # noqa: E402
 ]
 
 坏查库 = [
-    (u"查库那一栏自造栏名",
-     {u"查了什么": u"搜了入口那几条", u"怎么用的": u"照它改了范围", u"用上了": u"有"},
-     u"不认得的栏名", u"账第 27 条那次:栏名只要不是数数的工具认的那几个,写了等于没写"),
+    (u"承重的那一栏名字写岔了一个字",
+     {u"查了啥": u"搜了入口那几条", u"怎么用的": u"照它改了范围", u"用上了": u"有"},
+     u"既没有「查了什么」也没有「查了没有」", u"数数的工具只读「查了什么」「查了没有」——写岔一个字,那个数静默归零,"
+     u"而「没查」和「查了但栏名写岔了」在那个数上完全同形"),
     (u"账第 27 条当时那张的原样:把「用上了」埋进了「捞到的」里面",
      {u"查了什么": u"搜了权限那几条", u"捞到的": [{u"怎么用": u"照它改了范围"}]},
      u"结构上永远是 0", u"开体检卡时真这么错过一次,账只能追加,那一笔改不回去"),
@@ -133,8 +134,10 @@ def 历史读数():
 def main(argv=None):
     argv = argv if argv is not None else sys.argv[1:]
     if argv and argv[0] == u"--栏名":
-        # 说明书别再手抄这份清单了 —— 抄一次漂一次,这个仓已经栽过四轮。
-        print(u"\n".join(查库栏))
+        # 说明书别再手抄这两个名字 —— 抄一次漂一次,这个仓已经栽过四轮。
+        # **这不是白名单。** 别的栏随便写,那是给人看的备注;下面这两个是承重的,
+        # 因为数数的工具(tools/lookupstat.py)只读它们,至少得有一个。
+        print(u"\n".join(承重栏))
         return 0
     if argv and argv[0] != u"--self":
         c = json.loads(io.open(argv[0], encoding=u"utf-8").read())

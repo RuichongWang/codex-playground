@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-u"""开卡那一刻的额外体检:不是「这条判据合不合法」,是「这条判据写坏了没有」。
+u"""开卡那一刻的额外体检:**只看判据自己的文字**,判它写坏了没有。
 
 `card.validate` 管的是硬形状(四栏齐不齐、判者认不认得出、有没有一条命令答)。
 这一份管的是**只看判据自己的文字就看得出来的那几种写坏**:
@@ -8,7 +8,7 @@ u"""开卡那一刻的额外体检:不是「这条判据合不合法」,是「�
   答域不明       两种问法都不是 —— 判的人不知道该答什么
   答没找到就写清什么  人来答的找反例判据,没交代怎么算搜过,「没找到」就是个免费答案
   名字和取材对不上   判者名字点了名要读什么,「凭什么答」里却没给他
-  查库栏名不认得    开工前查库那一栏栏名自造,数数的工具看不见
+  查库没有承重的那一栏  开工前查库那一栏少了「查了什么」「查了没有」——数数的工具只读这两个
   查库缺「用上了」   同上,于是「查到并真用上」那个数结构上永远是 0
 
 **为什么「前移到开卡」只对这几种成立**(库里 C103 那条:核验前移的前提是判定不需要读
@@ -32,7 +32,6 @@ u"""开卡那一刻的额外体检:不是「这条判据合不合法」,是「�
 所以闸门换成后者:`tools/opencheck.py --self` 要求**对现在盘上的每一张卡、每一个判据包、
 说明书里的每一条范例都放行**,一处误伤就红。重放那个数留着,但只当读数打印,不当闸。
 """
-import os
 import re
 
 from done.ledger import Refused
@@ -66,12 +65,20 @@ def _去尾注(问):
     (u"代码", (u"代码", u"文件", u"done/", u"tools/", u".py")),
 )
 
-查库栏 = (u"查了什么", u"捞到的", u"用上了", u"没查到的", u"查了没有")
+# 数数的工具(`tools/lookupstat.py`)**只读这两个栏名**,一个字之差它就当你根本没查。
+# 记录里别的栏随便写,那是给人看的备注。
+#
+# **上一版是个白名单**(认五个栏名,别的一律拒),理由写的是「数数的工具看不见这个栏名」——
+# 而那句话对白名单里另外三个栏名**一样成立**。于是它拦下账第 27 条那句「没捞到的」时,
+# 给的是一个不成立的理由,而那句其实是一句有意义的备注(「哪几条这次没重新查库」)。
+# 审阅人逐条核出来的。换成「承重的那一栏必须有」之后拒绝理由才是真的,
+# 而且照样拦得住真正的坏法:把「查了什么」写岔一个字,那个数就**静默归零**。
+承重栏 = (u"查了什么", u"查了没有")
 
 # 这儿有哪几条检查。`tools/opencheck.py --self` 照这张名册打印每条在历史里的读数,
 # 并要求每一条对**现在盘上**的卡 / 判据包 / 说明书范例都没有一处误伤。
 检查册 = (u"答域和问法对不上", u"答域不明", u"答没找到就写清什么", u"名字和取材对不上",
-          u"查库栏名不认得", u"查库缺「用上了」")
+          u"查库没有承重的那一栏", u"查库缺「用上了」")
 
 
 def 查判据带名(accept):
@@ -119,14 +126,16 @@ def 查判据(accept):
 
 
 def 查查库带名(q):
-    u"""开工前查库那一栏:栏名得是数数的工具认得的那几个。"""
+    u"""开工前查库那一栏:承重的那两个栏名至少得有一个,而且记了就得记用上没有。"""
     if not q:
         return
-    多出来 = [k for k in q if k not in 查库栏]
-    if 多出来:
-        yield (u"查库栏名不认得",
-               u"查库那一栏有数数的工具不认得的栏名:%s —— 它认的是 %s"
-               % (u"、".join(多出来), u"、".join(查库栏)))
+    if not any(k in q for k in 承重栏):
+        yield (u"查库没有承重的那一栏",
+               u"这条查库记录里既没有「查了什么」也没有「查了没有」——"
+               u"数数的工具(tools/lookupstat.py)只读这两个栏名,写岔一个字它就当你根本没查,"
+               u"而「没查」和「查了但栏名记岔了」在那个数上完全同形。"
+               u"别的栏随便写,那是备注;这两个里必须有一个。现在写的是:%s"
+               % u"、".join(sorted(q)))
     if q.get(u"查了什么") and u"用上了" not in q:
         yield (u"查库缺「用上了」",
                u"查库记了「查了什么」却没有「用上了」这一栏 —— "
@@ -144,51 +153,3 @@ def 拦(accept, 查库=None):
     if 坏:
         raise Refused(u"open-shape", u"这张卡的判据写坏了:\n  - " + u"\n  - ".join(坏))
     return True
-
-
-def 开卡实况(accept, repo=u".", timeout=120):
-    u"""开卡这一刻,把每条命令判据先跑一遍,记下它现在是什么颜色。
-
-    **这一条记,不拦。** 它对的是账上第 10 · 12 · 13 次改判据 —— 那三次的毛病都是
-    「这条判据的答案永远是同一个」,而恒绿的判据和不存在的判据在判决那一刻一模一样。
-    这种毛病机械拦不住(体检卡就该一开卡全绿),但它能变成一个读数:
-    开卡时是什么颜色、判决时是什么颜色,两边都记下来,常数就看得见了。
-
-    **命令跑在一个 detached worktree 里,不在你的工作目录里** —— 跟判那一步同一个规矩。
-    第一版没这么做,当场把真账写坏了:`make check` 里有一条故意的用例,内容正是
-    「往 .done/ledger.jsonl 里追加一行垃圾」,它本来该在 worktree 里跑,
-    结果被这一步在真仓库根目录上跑了三遍。**判据里的命令是别人写的字,不是你的**。
-    起不了 worktree(比如还没有任何提交)就整段跳过,只记一句为什么。
-    """
-    import shutil
-    import subprocess
-    import tempfile
-    cmds = [c for c in accept if (c.get(u"判者") or {}).get(u"cmd")
-            if isinstance(c.get(u"判者"), dict)]
-    if not cmds:
-        return []
-    tmp = tempfile.mkdtemp(prefix=u"done-open-")
-    wt = os.path.join(tmp, u"t")
-    p = subprocess.run(u"git worktree add --detach %s HEAD" % wt, shell=True, cwd=repo,
-                       stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    if p.returncode != 0:
-        shutil.rmtree(tmp, ignore_errors=True)
-        return [{u"跑不了": u"起不了 worktree:%s"
-                 % p.stdout.decode(u"utf-8", u"replace").strip()[:200]}]
-    出 = []
-    try:
-        for c in cmds:
-            cmd = c[u"判者"][u"cmd"]
-            try:
-                r = subprocess.run(cmd, shell=True, cwd=wt, timeout=timeout,
-                                   stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                码 = r.returncode
-            except Exception as e:
-                码 = u"跑不起来:%s" % e
-            出.append({u"id": c.get(u"id"), u"cmd": cmd, u"exit": 码,
-                       u"开卡就绿": 码 == 0})
-    finally:
-        subprocess.run(u"git worktree remove --force %s" % wt, shell=True, cwd=repo,
-                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        shutil.rmtree(tmp, ignore_errors=True)
-    return 出
