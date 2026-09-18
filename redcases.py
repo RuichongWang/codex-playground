@@ -3,6 +3,8 @@ u"""必红用例与绿对照。每条规矩一红一绿,缺一条这条规矩就
 
 约定:必红用例返回 True = 「它确实红了」;绿对照返回 True = 「正常那条路走通了」。
 """
+import contextlib
+import io as _io
 import json
 import os
 import shutil
@@ -14,6 +16,7 @@ from done import judge as J
 from done import ledger as L
 from done import reflect as RF
 from done import rules as R
+from tools import ledgerkept as LK
 
 AUTO = {u"id": u"a1", u"问": u"跑得通吗?", u"过": u"是",
         u"判者": {u"cmd": u"true", u"答是": u"exit0"}, u"凭什么答": u"退出码"}
@@ -277,3 +280,40 @@ def correct_red():
 def correct_green():
     u"""一份合格的提案 + 一份三问全合格的评审,过。"""
     return CO.校(_好提案, _好评审, _库)
+
+
+# —— 账要活得下来(不是规矩,单独跑) ——
+# 这条不占规矩位:它不决定一件活算不算完成,它决定「完成过什么」这件事明天还在不在。
+
+def _临时仓(挡掉账):
+    d = tempfile.mkdtemp()
+    subprocess.run([u"git", u"-C", d, u"init", u"-q"], check=True)
+    os.makedirs(os.path.join(d, u".done"))
+    with open(os.path.join(d, u".done", u"ledger.jsonl"), u"w", encoding=u"utf-8") as f:
+        f.write(u'{"kind":"open"}\n')
+    if 挡掉账:
+        with open(os.path.join(d, u".gitignore"), u"w", encoding=u"utf-8") as f:
+            f.write(u".done/\n")
+    else:
+        subprocess.run([u"git", u"-C", d, u"add", u".done/ledger.jsonl"], check=True)
+    return d
+
+
+def ledger_red():
+    u"""账被 .gitignore 挡在外面 —— 屏幕上一切正常,容器一回收就全没了。"""
+    d = _临时仓(挡掉账=True)
+    try:
+        with contextlib.redirect_stderr(_io.StringIO()):
+            return LK.main([d]) != 0
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+def ledger_green():
+    u"""账进了 git,过。"""
+    d = _临时仓(挡掉账=False)
+    try:
+        with contextlib.redirect_stdout(_io.StringIO()):
+            return LK.main([d]) == 0
+    finally:
+        shutil.rmtree(d, ignore_errors=True)

@@ -37,6 +37,11 @@ def main(argv=None):
     bad.extend((u"订正", u"%s 没过" % 名) for 名 in 坏2)
     print(u"%s 订正  改得动,但每处都要过一次纯模型评审        (不是规矩,不计数)"
           % (u"红" if 坏2 else u"绿"))
+    坏3 = [名 for 名, fn in ((u"必红", redcases.ledger_red), (u"绿对照", redcases.ledger_green))
+          if fn() is not True]
+    bad.extend((u"存账", u"%s 没过" % 名) for 名 in 坏3)
+    print(u"%s 存账  账要进 git —— 只在本机的账等于没有账      (不是规矩,不计数)"
+          % (u"红" if 坏3 else u"绿"))
     for rid, why in bad:
         sys.stderr.write(u"红 %s:%s\n" % (rid, why))
     print(u"\n规矩 %d 条(上限 %d),红 %d" % (len(RULES), 7, len(bad)))
