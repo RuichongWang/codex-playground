@@ -21,6 +21,7 @@ from tools import ledgerkept as LK
 from tools import notesdirs as ND
 from tools import readme_cmds as RC
 from tools import rulewired as RW
+from tools import saidtwice as ST
 
 AUTO = {u"id": u"a1", u"问": u"跑得通吗?", u"过": u"是",
         u"判者": {u"cmd": u"true", u"答是": u"exit0"}, u"凭什么答": u"退出码"}
@@ -543,3 +544,29 @@ def rulewired_green():
     return not RW.查([{u"id": u"Z", u"执行器": u"ledger.verify"},
                       {u"id": u"W", u"执行器": u"worktree.临时副本"},
                       {u"id": u"V", u"执行器": u"check.main"}])
+
+
+# —— 同一句话在仓里存了几份(不是规矩,单独跑) ——
+# 那句「一条判据 = 一个只能答「是 / 否 / 答不了」的问题」在仓里存了四份。
+# 答案值后来多了一组,一轮只改掉两份 —— 剩下两份原封不动,没有任何东西发现。
+# 必红用例用的就是那两份的形状。
+
+那句重话 = (u"每一条判据 = 一个只能答「是」/「否」/「答不了」的问题,"
+            u"带着「凭什么答」和「哪边算过」。唯一的区别是谁来答:一条命令,还是一个读者。")
+
+
+def saidtwice_red():
+    u"""两个方向都要红:冒出一处没认领的 · 认下的那一处在盘上找不到了。"""
+    没认领, _ = ST.查([(u"甲.md", 那句重话),
+                     (u"乙.md", u"前言。" + 那句重话 + u"后记。")], 名单=())
+    _, 丢了 = ST.查([(u"甲.md", u"这份讲的是甲。"), (u"乙.md", u"那份讲的是乙。")],
+                  名单=((那句重话, u"编的:盘上根本没有这一处"),))
+    return bool(没认领) and bool(丢了)
+
+
+def saidtwice_green():
+    u"""认下了就放行;两份讲的不是同一句话,就一处都不报。"""
+    认了 = ST.查([(u"甲.md", 那句重话), (u"乙.md", 那句重话)],
+                名单=((那句重话, u"这句确实得有两份"),))
+    干净 = ST.查([(u"甲.md", u"这份讲的是甲。"), (u"乙.md", u"那份讲的是乙。")], 名单=())
+    return 认了 == ([], []) and 干净 == ([], [])

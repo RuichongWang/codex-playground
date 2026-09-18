@@ -15,12 +15,14 @@ u"""跑开卡体检 —— **这个文件只判一件事:拦还是放。**
 **「从没逮着过」只说明这类坏法还没发生过**,而入口检查本来就是为还没发生的事设的。
 闸在上面第一条 —— **它有没有逮错过**。
 
-`--栏名` 也留在这儿,**它是这个文件唯一不进退出码的东西**(什么都不检查、永远返回 0),
-所以上面那句话说的是「判」不是「出口」。它的用处是让说明书有处可指,不必手抄那两个栏名。它认领在这儿,是因为它印的就是这道门自己放行的条件 —— 同一件事的两个面。
+**这儿曾经还住着一个 `--栏名`**,什么都不检查、永远返回 0,只把那两个承重栏名印出来
+给说明书指。当时给它写了一句豁免:「它印的就是这道门自己放行的条件,同一件事的两个面。」
+审阅人把两个方向都量了:删掉它,闸一行不用改;把闸搬走,它也一行不用改 —— 只共用一个常量。
+而同一天加的 `tools/answerdomain.py` 形状一模一样,却是单独一个文件。
+**同一条标准,对一块执行、对另一块例外,那就不是标准。** 它搬去了 `tools/lookupcols.py`。
 
 用法:
     python3 tools/opencheck.py --self      对盘上真卡 + 内置坏样卡各跑一遍(闸)
-    python3 tools/opencheck.py --栏名      印出这道门认的那两个承重栏名(不检查,只印)
     python3 tools/opencheck.py 某张卡.json  单查一张卡
 """
 import glob
@@ -31,7 +33,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from done.opencheck import 承重栏, 查查库, 查判据, 查判据带名  # noqa: E402
+from done.opencheck import 查查库, 查判据, 查判据带名  # noqa: E402
 from tools.openreplay import 抠判据, 说明书  # noqa: E402
 
 好命令 = {u"id": u"g1", u"问": u"跑得通吗?", u"过": u"是",
@@ -123,12 +125,6 @@ def 样卡():
 
 def main(argv=None):
     argv = argv if argv is not None else sys.argv[1:]
-    if argv and argv[0] == u"--栏名":
-        # 说明书别再手抄这两个名字 —— 抄一次漂一次,这个仓已经栽过四轮。
-        # **这不是白名单。** 别的栏随便写,那是给人看的备注;下面这两个是承重的,
-        # 因为数数的工具(tools/lookupstat.py)只读它们,至少得有一个。
-        print(u"\n".join(承重栏))
-        return 0
     if argv and argv[0] != u"--self":
         c = json.loads(io.open(argv[0], encoding=u"utf-8").read())
         抱怨 = 查判据(c.get(u"accept") or [])

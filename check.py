@@ -26,6 +26,7 @@ from done.rules import RULES, check_cap
     (u"目录", u"笔记里那块目录树要跟盘上对得上", u"notesdirs"),
     (u"命令", u"说明书里印的命令今天还立得住", u"readmecmds"),
     (u"接上", u"规矩表点名的执行器盘上真有", u"rulewired"),
+    (u"重话", u"同一句话存了几份,每份都得有人认领", u"saidtwice"),
 ]
 
 
