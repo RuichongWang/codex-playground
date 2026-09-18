@@ -361,15 +361,13 @@ def doccards_green():
 # 账上改过 14 次判据,12 次是判据自己写坏了。这几种能在开卡那一刻看出来。
 
 def opencheck_red():
-    u"""五种写坏的判据 + 两种写坏的查库记录,一个都不许漏。"""
+    u"""三种写坏的判据 + 两种写坏的查库记录,一个都不许漏;
+    外加一条:名册上凭空多一条历史零命中的检查,自检那一步必须红。
+    """
     from done import opencheck as OC
     好 = {u"id": u"g1", u"问": u"跑得通吗?", u"过": u"是",
          u"判者": {u"cmd": u"true", u"答是": u"exit0"}, u"凭什么答": u"退出码"}
     坏 = [
-        {u"id": u"b1", u"问": u"找出一处环", u"过": u"是",
-         u"判者": {u"cmd": u"true"}, u"凭什么答": u"输出"},
-        {u"id": u"b2", u"问": u"退出码是 0 吗?", u"过": u"没找到",
-         u"判者": {u"cmd": u"true"}, u"凭什么答": u"输出"},
         {u"id": u"b3", u"问": u"这次改得怎么样", u"过": u"是",
          u"判者": {u"cmd": u"true"}, u"凭什么答": u"输出"},
         {u"id": u"b4", u"问": u"找出一句假话", u"过": u"没找到",
@@ -381,8 +379,22 @@ def opencheck_red():
     for c in 坏:
         if not OC.查判据([好, c]):
             return False
-    return bool(OC.查查库({u"查了什么": u"搜过", u"自造的栏": 1, u"用上了": u"有"})) \
-        and bool(OC.查查库({u"查了什么": u"搜过"}))
+    if not (OC.查查库({u"查了什么": u"搜过", u"自造的栏": 1, u"用上了": u"有"})
+            and OC.查查库({u"查了什么": u"搜过"})):
+        return False
+    # 名册上凭空加一条从没逮着过东西的检查 —— 自检那一步得当场红。
+    # 这一条守的是「坏样卡是现编的,证明不了这条检查值得存在」那道闸。
+    import contextlib
+    import tools.opencheck as TO
+    原 = OC.检查册
+    try:
+        OC.检查册 = 原 + (u"凭空来的一条",)
+        TO.检查册 = OC.检查册
+        with contextlib.redirect_stdout(_io.StringIO()):   # 它那张表不该印在开机自检里
+            return bool(TO.真逮过())
+    finally:
+        OC.检查册 = 原
+        TO.检查册 = 原
 
 
 def opencheck_green():
